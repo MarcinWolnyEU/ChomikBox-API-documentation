@@ -1,0 +1,114 @@
+{
+    "operation": "Download",
+    "case": "sequence-own-agreement-part0-of-2",
+    "timestamp": "2026-10-24T19:51:39Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 320,
+        "bodyBytesUncompressed": 548
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 19:51:39 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "370"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fb84741f87278c-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 370,
+        "bodyBytesDecoded": 470,
+        "bodySha256": null,
+        "elapsedMs": 156.5
+    },
+    "note": "Part 0 of 2 with the free own agreement for a.txt.",
+    "sequenceStamp": "832121",
+    "entryIds": [
+        "10832913465"
+    ]
+}

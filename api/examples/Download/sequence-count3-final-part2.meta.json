@@ -1,0 +1,127 @@
+{
+    "operation": "Download",
+    "case": "sequence-count3-final-part2",
+    "timestamp": "2026-10-24T20:04:38Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 294,
+        "bodyBytesUncompressed": 470
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 20:04:38 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "442"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fb9778cdb73009-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 442,
+        "bodyBytesDecoded": 568,
+        "bodySha256": null,
+        "elapsedMs": 145.9
+    },
+    "note": "count 3, final part 2: e.txt (folder Y) only. Does folder X (from parts 0 and 1) appear?",
+    "sequenceStamp": "638048",
+    "entryIds": [
+        "10832924408"
+    ],
+    "earlierPartEntryIds": [
+        "10832924402",
+        "10832924402"
+    ],
+    "folderX": 647,
+    "folderY": 648,
+    "filesInX": [
+        "10832924393",
+        "10832924402"
+    ],
+    "filesInY": [
+        "10832924408"
+    ]
+}

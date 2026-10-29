@@ -1,0 +1,120 @@
+{
+    "operation": "Download",
+    "case": "foreign-small-file-offers",
+    "timestamp": "2026-10-25T06:21:16Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 287,
+        "bodyBytesUncompressed": 467
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:21:15 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "678"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:21:15 GMT; path=/; HttpOnly"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4ff1ebcfa11f976-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 678,
+        "bodyBytesDecoded": 1195,
+        "bodySha256": null,
+        "elapsedMs": 361.5
+    },
+    "note": "Item 5 of 09 (read-only): a file owned by ANOTHER user (public-domain text, about 190 KB .txt) requested by numeric id WITHOUT any agreement, so the server lists the agreements it offers. Nothing was accepted, no URL was fetched. Other users' names and paths are redacted as {{OTHER_USER}}/{{OTHER_PATH}} (file extension kept).",
+    "foreignFile": true,
+    "agreementSent": false,
+    "urlFetched": false,
+    "bodyTransformed": true
+}

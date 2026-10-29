@@ -1,0 +1,120 @@
+{
+    "operation": "Download",
+    "case": "seq1c-c6-part0-e",
+    "timestamp": "2026-10-25T06:17:08Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 292,
+        "bodyBytesUncompressed": 470
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:17:08 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Transfer-Encoding",
+                "chunked"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m52"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "CF-RAY",
+                "a4ff18b389ffbd61-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 263,
+        "bodyBytesDecoded": 470,
+        "bodySha256": null,
+        "elapsedMs": 144.8
+    },
+    "note": "C6: part 0 of 2 with e.txt (folder Y).",
+    "sequenceStamp": "868668",
+    "entryIds": [
+        "10833170702"
+    ],
+    "earlierPartEntries": [],
+    "folderX": 655,
+    "folderY": 656,
+    "filesInX": [
+        "10833170692",
+        "10833170698"
+    ],
+    "filesInY": [
+        "10833170702"
+    ]
+}

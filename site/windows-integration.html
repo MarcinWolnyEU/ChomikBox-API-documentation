@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows integration · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="How ChomikBox 2.0.8.2 integrates with Windows: registry keys, the chomik:// scheme, Explorer verbs, music file associations, named pipe, data folders, autostart and browser plug-in.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html" aria-current="page">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>Windows integration</b> - registry, shell, IPC</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Windows integration</span></li>
+          </ol>
+        </nav>
+        <p class="lead">The MSI registers ChomikBox with the shell: a <code>chomik://</code> URL protocol, two Explorer context-menu verbs, music ProgIDs, shortcuts and an uninstall entry. The running app adds an autostart value and, if asked, takes over music file associations. Everything that reaches the app from outside ends up in one command parser, delivered over a named pipe or on the command line.</p>
+        <p>Facts on this page come from read-only queries of the cached MSI tables and the live registry key names, and from the behaviour of the client. <span class="ev ev-obs">Observed</span> unless marked.</p>
+        <nav class="toc" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#registry">Registry</a></li>
+            <li><a href="#url-scheme">The chomik:// scheme</a></li>
+            <li><a href="#verbs">Explorer verbs</a></li>
+            <li><a href="#associations">Music file associations</a></li>
+            <li><a href="#remote">Remote commands</a></li>
+            <li><a href="#data">Data folders</a></li>
+            <li><a href="#autostart">Autostart</a></li>
+            <li><a href="#browser">Browser integration</a></li>
+            <li><a href="#taskbar">Windows 7 taskbar</a></li>
+            <li><a href="#install">Installer footprint</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="registry">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Registry</b> - keys written and read</h2>
+      </header>
+      <div class="pane">
+        <p>The MSI installs per machine (<code>ALLUSERS=1</code>, every row under HKLM). Because the executables are 32-bit, the keys appear under <code>Wow6432Node</code> on 64-bit Windows where redirection applies. The one exception is the plug-in's start path (below): the updater writes it, and the plug-in reads it, in the 64-bit view. The app's own settings are <strong>not</strong> in the registry: it uses INI files, and <code>QSettings</code> touches the registry only for the Run value and file associations.</p>
+        <section class="table-wrap" aria-labelledby="tbl-reg-cap" tabindex="0">
+          <table>
+            <caption id="tbl-reg-cap">Registry keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Values</th><th scope="col">Written by</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="wrap"><code>HKLM\Software\[Wow6432Node\]ChomikBox</code></td><td><code>InstallPath</code> = <code>C:\Program Files (x86)\ChomikBox\</code>, <code>InstallVersion</code> = <code>2.0.8.2</code></td><td>MSI</td></tr>
+              <tr><td class="wrap"><code>HKLM\SOFTWARE\ChomikBox</code> in the <strong>64-bit view</strong>, <code>(default)</code></td><td><code>&lt;directory of the running updater&gt;\chomikbox.exe</code> (<code>REG_SZ</code>); read once at load by <code>npcbplugin.dll</code> with <code>KEY_WOW64_64KEY</code> for a cold start; <strong>absent</strong> after a plain MSI install, which writes only <code>Wow6432Node</code>. If it is missing the plug-in's cold start is a silent no-op</td><td><code>installer.exe</code> after an update</td></tr>
+              <tr><td class="wrap"><code>HKLM\Software\Classes\chomik</code></td><td><code>(default)</code> = <code>ChomikBox</code>, <code>URL Protocol</code> = empty; <code>DefaultIcon</code> = <code>"…\ChomikBox.exe"</code>; <code>shell\open\command</code> = <code>"…\ChomikBox.exe" "%1"</code></td><td>MSI; re-pointed by <code>installer.exe</code></td></tr>
+              <tr><td class="wrap"><code>HKLM\Software\Classes\ChomikBox.MusicFile.&lt;ext&gt;</code></td><td><code>DefaultIcon</code> = <code>ChomikBox.exe,1</code> (<code>,3</code> for playlists); <code>shell\open\command</code> = <code>"…" "%1"</code>; 21 extensions</td><td>MSI</td></tr>
+              <tr><td class="wrap"><code>HKLM\Software\Classes\SystemFileAssociations\.&lt;ext&gt;\shell\ChomikBox.Player</code></td><td><code>(default)</code> = <span lang="pl">«Dodaj do listy odtwarzania»</span>, <code>Icon</code>; <code>command</code> = <code>"…\ChomikBox.exe" -p"%1"</code>; 20 extensions</td><td>MSI</td></tr>
+              <tr><td class="wrap"><code>HKLM\Software\Classes\*\shell\ChomikBox.Upload</code>, <code>…\Directory\shell\ChomikBox.Upload</code></td><td><code>(default)</code> = <span lang="pl">«&amp;Zachomikuj»</span>, <code>Icon</code>; <code>command</code> = <code>"…\ChomikBox.exe" -u"%1"</code></td><td>MSI</td></tr>
+              <tr><td class="wrap"><code>HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{8E4185CC-4FF3-46B9-A4DB-5B850B71ABC4}</code></td><td><code>DisplayName</code> ChomikBox, <code>DisplayVersion</code> 2.0.8.2, <code>Publisher</code> Chomikuj.pl, <code>UninstallString</code> <code>MsiExec.exe /I{…}</code>, <code>HelpLink</code> <code>http://www.chomikuj.pl/ChomikBox</code>, <code>EstimatedSize</code> 56298</td><td>MSI</td></tr>
+              <tr><td class="wrap"><code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run</code></td><td><code>ChomikBox</code> = native path of <code>chomikbox.exe</code></td><td>the app (autostart)</td></tr>
+              <tr><td class="wrap"><code>ChomikBox.MusicFile.&lt;ext&gt;\…</code> (hive not resolved), <code>HKCU\…\Explorer\FileExts\.&lt;ext&gt;\UserChoice\Progid</code></td><td>default music player</td><td>the app, elevated if needed</td></tr>
+              <tr><td class="wrap"><code>HKLM\…\App Paths\Chrome.exe</code>, <code>firefox.exe</code>, <code>Safari.exe</code>; <code>HKCU\Software\Opera Software</code></td><td>read only: browser install paths</td><td>(read by the app)</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>On the inspected machine <code>InstallPath</code>, <code>InstallVersion</code> and the <code>chomik</code> class were present; the <code>(default)</code> value and the Run value were not.</p>
+      </div>
+    </section>
+
+    <section class="window" id="url-scheme">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>chomik://</b> - the URL protocol</h2>
+      </header>
+      <div class="pane">
+        <p><code>HKLM\Software\Classes\chomik</code> is a standard URL-protocol registration: a browser or any other program that opens a <code>chomik:</code> URL starts <code>"…\ChomikBox.exe" "%1"</code> with the whole URL as a single argument. If ChomikBox is already running, that new process forwards the URL over the <a href="#remote">named pipe</a> and exits.</p>
+        <p><code>Application::executeRemoteCommand</code> accepts <code>chomik://file:…</code>, <code>chomik://folder:…</code> and <code>chomik://files/…</code>. Web links on the chomikuj.pl domain that contain <code>ShowVideo.aspx?id=</code> or <code>Image.aspx</code> are converted to <code>chomik://files/…</code>; any other <code>http(s)</code> link becomes an external-link download, which opens the agreement window (<code>external-link-agreement</code>). <span class="ev ev-obs">Observed</span> The exact syntax after each prefix is not documented yet. <span class="ev ev-unk">Unknown</span></p>
+        <p>After an update, <code>installer.exe</code> rewrites <code>chomik\shell\open\command</code> and <code>chomik\DefaultIcon</code> to point at the new executable.</p>
+      </div>
+    </section>
+
+    <section class="window" id="verbs">
+      <header class="titlebar">
+        <img src="assets/img/uploader-logo.png" alt="" width="32" height="32">
+        <h2><b>Explorer verbs</b> - context menu</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-verbs-cap" tabindex="0">
+          <table>
+            <caption id="tbl-verbs-cap">Context-menu entries added by the MSI</caption>
+            <thead>
+              <tr><th scope="col">Menu text</th><th scope="col">Meaning</th><th scope="col">Applies to</th><th scope="col">Command</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span lang="pl">&amp;Zachomikuj</span></td><td>“Hamster it”: upload to the account</td><td>every file (<code>*</code>) and every folder (<code>Directory</code>)</td><td><code>"…\ChomikBox.exe" -u"%1"</code></td></tr>
+              <tr><td><span lang="pl">Dodaj do listy odtwarzania</span></td><td>Add to playlist</td><td>20 audio and playlist extensions</td><td><code>"…\ChomikBox.exe" -p"%1"</code></td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>Both entries have an <code>Icon</code> value. The playlist verb uses <code>SystemFileAssociations</code>, so it shows up whichever program owns the extension: <code>aac aiff au cda chpls flac kar m3u m4a mid midi miz mp1 mp2 mp3 ogg pls rmi wav wma</code>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="associations">
+      <header class="titlebar">
+        <img src="assets/img/player-logo.png" alt="" width="32" height="32">
+        <h2><b>File associations</b> - music player</h2>
+      </header>
+      <div class="pane">
+        <p>The MSI registers a ProgID <code>ChomikBox.MusicFile.&lt;ext&gt;</code> for each of 21 extensions but does <strong>not</strong> bind any extension to it. Binding happens only when the user makes ChomikBox the default player, or automatically when <code>[player] auto-set-music-player = true</code> (default false).</p>
+        <ul>
+          <li>The app writes the <code>UserChoice\Progid</code> value under <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.&lt;ext&gt;</code> with raw <code>RegCreateKeyExW</code> / <code>RegSetValueExW</code> calls, elevating through <code>BProcess::runAsAdministrator</code> or <code>runAsDesktopUser</code> when needed. <span class="ev ev-obs">Observed</span> The ProgID keys it touches go through <code>QSettings</code>, but whether under HKCU or HKLM is not resolved. <span class="ev ev-inf">Inferred</span></li>
+          <li>The result is remembered in <code>[player] default-player</code>. Dialogs: <q>%1 is now set as default music player on this computer.</q> and, when another program has taken over, <q>%1 is no longer default music player on your computer. Do you want to set %1 as default player again?</q></li>
+        </ul>
+        <h3>Three slightly different extension lists</h3>
+        <section class="table-wrap" aria-labelledby="tbl-ext-cap" tabindex="0">
+          <table>
+            <caption id="tbl-ext-cap">Audio extension lists</caption>
+            <thead>
+              <tr><th scope="col">List</th><th scope="col">Count</th><th scope="col">Difference</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>MSI ProgIDs <code>ChomikBox.MusicFile.&lt;ext&gt;</code></td><td class="num">21</td><td>full list: <code>aac aiff au cda chpls flac kar m3u m3u8 m4a mid midi miz mp1 mp2 mp3 ogg pls rmi wav wma</code></td></tr>
+              <tr><td>MSI <code>SystemFileAssociations</code> verb</td><td class="num">20</td><td>no <code>m3u8</code></td></tr>
+              <tr><td><code>installer.exe</code> icon refresh</td><td class="num">20</td><td>no <code>au</code></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="remote">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Remote commands</b> - named pipe and lock file</h2>
+      </header>
+      <div class="pane">
+        <p>Every external trigger reaches the same function in the running instance, <code>Application::executeRemoteCommand</code>. There are two routes. A newly started <code>chomikbox.exe</code> uses QtSingleApplication to find an existing instance and hand over its command line. The browser plug-in does the same by hand: it checks a mutex and writes to the pipe itself.</p>
+        <figure class="figure">
+          <section class="figure-scroll" aria-labelledby="dg-remote-cap" tabindex="0">
+            <svg class="dg dg-wide" viewBox="0 20 1000 425" role="img" aria-labelledby="dg-remote-title dg-remote-desc">
+              <title id="dg-remote-title">How commands reach the running ChomikBox</title>
+              <desc id="dg-remote-desc">Explorer verbs, chomik links and shortcuts start a new chomikbox.exe. If the single-instance lock is held, it writes its command line to the named pipe and exits; otherwise it becomes the instance. The browser plug-in's worker thread checks the ChomikBox2 mutex; if it exists it writes -d plus the URL to the same pipe, otherwise it cold-starts ChomikBox with ShellExecute. The running instance reads the pipe in Application::executeRemoteCommand.</desc>
+              <defs>
+                <marker id="ah-remote" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker>
+              </defs>
+              <!-- lane 1 sources -->
+              <rect class="chip" x="16" y="70" width="200" height="40" rx="5"/>
+              <text class="t-b" x="28" y="86">Explorer verb</text>
+              <text class="t-ms" x="28" y="102">-u"%1" · -p"%1"</text>
+              <rect class="chip" x="16" y="120" width="200" height="40" rx="5"/>
+              <text class="t-b" x="28" y="136">chomik:// link</text>
+              <text class="t-ms" x="28" y="152">"%1" = whole URL</text>
+              <rect class="chip" x="16" y="170" width="200" height="40" rx="5"/>
+              <text class="t-b" x="28" y="186">Shortcut, Run key</text>
+              <text class="t-s" x="28" y="202">or a second launch</text>
+              <rect class="chip-green" x="250" y="105" width="170" height="70" rx="6"/>
+              <text class="t-b" x="262" y="133">new chomikbox.exe</text>
+              <text class="t-s" x="262" y="152">QtSingleApplication</text>
+              <rect class="chip-dec" x="456" y="110" width="160" height="60" rx="6"/>
+              <text class="t-b" x="468" y="135">instance running?</text>
+              <text class="t-s" x="468" y="154">lock file held</text>
+              <!-- lane 2 -->
+              <rect class="chip" x="16" y="300" width="200" height="40" rx="5"/>
+              <text class="t-b" x="28" y="316">Browser plug-in</text>
+              <text class="t-s" x="28" y="332">npcbplugin.dll</text>
+              <rect class="chip-green" x="250" y="285" width="170" height="70" rx="6"/>
+              <text class="t-b" x="262" y="313">worker thread</text>
+              <text class="t-s" x="262" y="332">started by NPP_NewStream</text>
+              <rect class="chip-dec" x="456" y="290" width="160" height="60" rx="6"/>
+              <text class="t-b" x="468" y="315">mutex ChomikBox2</text>
+              <text class="t-s" x="468" y="334">already exists?</text>
+              <!-- pipe -->
+              <rect class="chip-srv" x="656" y="100" width="120" height="280" rx="8"/>
+              <text class="t-b" x="716" y="190" text-anchor="middle">named pipe</text>
+              <text class="t-ms" x="716" y="214" text-anchor="middle">\\.\pipe\</text>
+              <text class="t-ms" x="716" y="230" text-anchor="middle">qtsingleapp-</text>
+              <text class="t-ms" x="716" y="246" text-anchor="middle">Chomik-739b-</text>
+              <text class="t-ms" x="716" y="262" text-anchor="middle">&lt;session&gt;</text>
+              <text class="t-s" x="716" y="290" text-anchor="middle">QDataStream frame</text>
+              <!-- running instance -->
+              <rect class="frame" x="816" y="150" width="168" height="180" rx="8"/>
+              <rect class="frame-pane" x="819" y="178" width="162" height="149" rx="4"/>
+              <text class="head" x="828" y="169">running instance</text>
+              <text class="t-m" x="830" y="202">Application::</text>
+              <text class="t-m" x="830" y="219">executeRemoteCommand</text>
+              <text class="t-s" x="830" y="248">-u  -d  -p  --folders</text>
+              <text class="t-s" x="830" y="266">chomik://  http(s)://</text>
+              <text class="t-s" x="830" y="284">file:  file://</text>
+              <!-- shellexecute -->
+              <rect class="chip-dec" x="456" y="396" width="528" height="44" rx="6"/>
+              <text class="t-b" x="468" y="414">no: cold start with ShellExecute</text>
+              <text class="t-s" x="468" y="431">exe path from HKLM\Software\ChomikBox (default), argument -d&lt;url&gt;</text>
+
+              <path class="arrow" d="M216,90 H234 V125 H248" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M216,140 H248" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M216,190 H234 V155 H248" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M420,140 H454" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M616,140 H654" marker-end="url(#ah-remote)"/>
+              <text class="msg halo" x="635" y="131" text-anchor="middle">yes</text>
+              <path class="arrow" d="M536,110 V46 H900 V148" marker-end="url(#ah-remote)"/>
+              <text class="msg halo" x="718" y="38" text-anchor="middle">no: this process becomes the instance</text>
+              <path class="arrow" d="M216,320 H248" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M420,320 H454" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M616,320 H654" marker-end="url(#ah-remote)"/>
+              <text class="msg halo" x="635" y="311" text-anchor="middle">yes</text>
+              <path class="arrow" d="M536,350 V394" marker-end="url(#ah-remote)"/>
+              <path class="arrow" d="M776,240 H814" marker-end="url(#ah-remote)"/>
+            </svg>
+          </section>
+          <figcaption id="dg-remote-cap">Command delivery. The plug-in side is Observed; the QtSingleApplication side is the library's standard behaviour.</figcaption>
+        </figure>
+        <h3>The objects</h3>
+        <ul>
+          <li><strong>Lock file</strong> <code>%TEMP%\qtsingleapp-Chomik-739b-&lt;sessionId&gt;-lockfile</code>: 0 bytes, locked with <code>QtLockedFile</code> while ChomikBox runs. A leftover file from session 1 was present on the inspected machine. <code>configurator.exe</code> refuses to run while the lock is held.</li>
+          <li><strong>Named pipe</strong> <code>\\.\pipe\qtsingleapp-Chomik-739b-&lt;sessionId&gt;</code> (<code>QtLocalPeer</code>): exists only while the app runs. The name comes from <code>qtsingleapp-</code>, the first six letters of the app id <code>ChomikBox2</code>, its CRC-16 <code>739b</code> and the session id.</li>
+          <li><strong>Frame format</strong>: <code>QDataStream::writeBytes</code>, a 4-byte big-endian length followed by the bytes. The plug-in sends <code>-d</code> + URL + NUL.</li>
+          <li><strong>Mutexes</strong>: <code>ChomikBox2</code> is probed by the plug-in; <code>ChomikBoxMutex</code> is checked by 2.x to detect a running ChomikBox 1.x.</li>
+        </ul>
+        <p>The full list of switches is on <a href="components.html#cmdline">Components</a>. Who may connect to the pipe (its security descriptor) is not known. <span class="ev ev-unk">Unknown</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="data">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Data folders</b> - where files live</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-dirs-cap" tabindex="0">
+          <table>
+            <caption id="tbl-dirs-cap">Folders used by ChomikBox</caption>
+            <thead>
+              <tr><th scope="col">Folder</th><th scope="col">Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="wrap"><code>C:\Program Files (x86)\ChomikBox\</code></td><td>Program files, <code>base.ini</code>, skins, locale, plug-ins (<a href="components.html">layout</a>)</td></tr>
+              <tr><td class="wrap"><code>%LOCALAPPDATA%\ChomikBox\</code></td><td>User data: settings, queues, logs, playlist, caches (below)</td></tr>
+              <tr><td class="wrap"><code>%TEMP%\</code></td><td>Single-instance lock file; update staging in <code>&lt;tmp&gt;\chomikbox.tmp\</code></td></tr>
+              <tr><td class="wrap"><code>%APPDATA%\ChomikBox\</code></td><td>ChomikBox <strong>1.x</strong> data, read once by <code>chomikbox1conf.exe</code> (absent on the inspected machine)</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <h3>Resolving the data folder</h3>
+        <p><code>BaseApplication::__init</code> uses <code>base.ini [main] data-location</code> if set (it may contain <code>${app}</code> or <code>${cwd}</code>), then <code>--data-location &lt;dir&gt;</code>, and otherwise <code>QDesktopServices::storageLocation</code>, which Qt&nbsp;4 maps to <code>%LOCALAPPDATA%\&lt;title&gt;</code>. <code>cache-location</code> and <code>app-location</code> in <code>base.ini</code> are honoured too. If the folder cannot be written the app logs <q>data location is not writable</q>.</p>
+        <h3>Contents of <code>%LOCALAPPDATA%\ChomikBox\</code></h3>
+        <p>Names and sizes from the inspected machine; values were deliberately not copied.</p>
+        <ul>
+          <li><code>conf.ini</code>: 3.1&nbsp;KB, <code>QSettings</code> INI format, UTF-8. Sections present: <code>notifications</code>, <code>application</code>, <code>uploader</code>, <code>panel</code>, <code>folderwindow</code>, <code>animation</code>, <code>history</code>, <code>downloader</code>, <code>general-settings</code>, <code>player</code>, <code>login</code>, <code>data-&lt;hamsterId&gt;</code>, <code>repository</code>, <code>modules</code>, <code>proxy</code>, <code>proto-box</code>, <code>userinfo</code>, <code>network</code>, <code>debug</code>, <code>minimenu</code>, <code>tutorial</code>.</li>
+          <li><code>message.log</code>: 134&nbsp;MB, with rotated copies in <code>backup\message_NNNN.log</code>.</li>
+          <li><code>queue-upload-&lt;hamsterId&gt;.ini</code> and <code>queue-download-&lt;hamsterId&gt;.ini</code>, one pair per account. The download queue was 3.6&nbsp;MB.</li>
+          <li><code>playlist.m3u8</code>, an empty file named <code>paylist</code> (spelled that way on disk), <code>cache\player\cache.cfg</code>, <code>cache\thumbs\</code>, <code>backup\</code>.</li>
+        </ul>
+        <span class="code-label">Queue file layout (keys only)</span>
+        <pre><code><span class="c-sec">[global]</span>
+<span class="c-key">count</span>=…
+<span class="c-key">hamsterId</span>=…
+<span class="c-key">hamsterName</span>={{USERNAME}}
+
+<span class="c-sec">[0]</span>
+<span class="c-key">state</span>=…
+<span class="c-key">action</span>=…
+<span class="c-key">fileId</span>=…
+<span class="c-key">fileName</span>=…
+<span class="c-key">folderId</span>=…
+<span class="c-key">folderPath</span>=…
+<span class="c-key">size</span>=…
+<span class="c-key">localFolderName</span>=…
+<span class="c-key">localFileName</span>=…
+<span class="c-key">expire</span>=…
+<span class="c-key">bytesTransmited</span>=…
+<span class="c-key">extraKeys</span>=…
+<span class="c-key">userdata-__privateModificationDate</span>=…
+<span class="c-key">userdata-modificationDate</span>=…
+<span class="c-comment">; [1], [2], … one section per queued file</span></code></pre>
+        <div class="callout callout-caveat">
+          <img src="assets/img/msgbox-warning.png" alt="" width="64" height="64">
+          <p class="callout-title">Credentials on disk</p>
+          <p><code>conf.ini</code> stores <code>[userinfo] login</code>, <code>password-hash</code> (the MD5 that the API accepts as the password) and <code>password-len</code>, plus <code>[proxy] username</code> and <code>password</code>, all in plain text. See <a href="security.html#c-03">Security, C-03</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="window" id="autostart">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Autostart</b> - the Run value</h2>
+      </header>
+      <div class="pane">
+        <p>When autostart is on, the app writes <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run</code> value <code>ChomikBox</code> (the name is <code>QCoreApplication::applicationName</code>, from <code>base.ini [main] name</code>) holding the native path of <code>chomikbox.exe</code>; it removes the value when autostart is switched off. This is done through <code>QSettings</code> on that key.</p>
+        <p>The setting is <code>[application] autostart</code>, default <code>true</code> in the default config, and the tray menu item <span lang="pl">«Uruchom automatycznie po starcie systemu»</span> (Start automatically after system boot). On the inspected machine the user value was <code>false</code> and there was no Run value.</p>
+      </div>
+    </section>
+
+    <section class="window" id="browser">
+      <header class="titlebar">
+        <img src="assets/img/downloader-logo.png" alt="" width="32" height="32">
+        <h2><b>Browser integration</b> - Click Catcher</h2>
+      </header>
+      <div class="pane">
+        <p>Under <span lang="pl">«Integracja z przeglądarkami»</span> (Browser integration), <code>BrowserIntegrationManager</code> finds installed browsers through:</p>
+        <ul>
+          <li><code>HKCU\Software\Opera Software</code>, value <code>Last Install Path</code>;</li>
+          <li><code>HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\Chrome.exe</code> and <code>firefox.exe</code> (value <code>Path</code>) and <code>Safari.exe</code> (default value).</li>
+        </ul>
+        <p>Paths are stored in <code>[browser-integration] opera-browser-path</code>, <code>chrome-browser-path</code>, <code>firefox-browser-path</code> and <code>safari-browser-path</code>. If a browser cannot be found the user is asked to <q>Locate browser installation folder</q>. Installation runs <code>installer.exe --plugmode --install tsplugins/integration/ &lt;browser dir&gt;</code> into one of the sub-folders <code>/program/plugins</code>, <code>/plugins</code> or <code>/Plugins</code>, and success sets <code>[downloader] chrome-integrated</code> (or <code>opera-</code>, <code>firefox-</code>, <code>safari-integrated</code>) to <code>true</code>.</p>
+        <p>The plug-in itself is described on <a href="components.html#npcbplugin">Components</a>. Current browsers no longer load NPAPI plug-ins, so this path is obsolete. <span class="ev ev-inf">Inferred</span> The <code>chomik://</code> protocol and the Explorer verbs are independent of it. <code>[downloader] external-link-agreement = true</code> shows the agreement window for links that do not point to chomikuj.pl.</p>
+      </div>
+    </section>
+
+    <section class="window" id="taskbar">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Windows 7 taskbar</b></h2>
+      </header>
+      <div class="pane">
+        <p><code>chomikbox_win7.tsp</code> runs inside the main process. It sets the explicit AppUserModelID <code>fsfilesolutions.chomikbox</code>, adds previous / play-pause / next buttons to the taskbar thumbnail and shows transfer progress on the taskbar button through <code>ITaskbarList3</code>. Details: <a href="components.html#win7-tsp">Components</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="install">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Installer footprint</b> - shortcuts and actions</h2>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><strong>Shortcuts:</strong> Start menu <code>Chomikuj.pl\ChomikBox</code> and <span lang="pl"><code>Odinstaluj ChomikBox</code></span> (uninstall, <code>MsiExec /x{ProductCode}</code>), Desktop <code>ChomikBox</code>, Quick Launch <code>ChomikBox</code>, and <code>Odinstaluj ChomikBox.lnk</code> in the install folder.</li>
+          <li><strong>After install:</strong> <code>chomikbox1conf.exe</code> on a fresh install and on a major upgrade (<code>ExeCaKeyF01</code>, condition <code>not Installed</code>, synchronous, started without arguments, so it imports silently only when no 2.x <code>conf.ini</code> exists); it does not run on repair, minor updates or in-app updates <span class="ev ev-inf">Inferred</span>; optional launch from the finish page (<code>CaLaunchProductCheckBox</code>).</li>
+          <li><strong>After uninstall:</strong> <code>cmd /c start http://Chomikuj.pl/chomik/chomikbox/AppUninstalled</code> (<code>ExeCaKeyF03</code>, asynchronous).</li>
+          <li><strong>Runtime:</strong> MSVC90 CRT side-by-side merge modules.</li>
+          <li><strong>Identity:</strong> ProductCode <code>{8E4185CC-4FF3-46B9-A4DB-5B850B71ABC4}</code>, UpgradeCode <code>{76EE0600-FE66-4741-8BD7-EA1EBBCC0430}</code>, ProductLanguage 1045 (Polish).</li>
+        </ul>
+        <div class="callout callout-unknown">
+          <img src="assets/img/msgbox-question.png" alt="" width="64" height="64">
+          <p class="callout-title">Open points</p>
+          <ul>
+            <li>Whether a 2.x package with a different ProductCode was ever published, which would make the major-upgrade path of <code>ExeCaKeyF01</code> real (none is available for testing).</li>
+            <li>The registry hive of the ProgID writes made by the app.</li>
+            <li>The exact syntax of the <code>chomik://</code> forms, and the pipe's access control.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

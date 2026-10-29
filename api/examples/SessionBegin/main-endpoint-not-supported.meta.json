@@ -1,0 +1,102 @@
+{
+    "operation": "SessionBegin",
+    "case": "main-endpoint-not-supported",
+    "timestamp": "2026-10-24T15:27:01Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/SessionBegin"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 171,
+        "bodyBytesUncompressed": 250
+    },
+    "response": {
+        "status": 500,
+        "reason": "Internal Server Error",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:00 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "747"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa00c91bcd3009-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 747,
+        "bodyBytesDecoded": 747,
+        "bodySha256": null,
+        "elapsedMs": 527.7
+    },
+    "note": "SessionBegin (name, passHash, ver, client{name,version,os}) belongs to the separate session server http://session.box.chomikuj.pl/session, used only when session-enabled=true (default false). That host does not resolve in DNS (checked at capture time: false), so it was never called with credentials. Sent here WITHOUT parameters to the main service: a:ActionNotSupported, i.e. it is not part of IChomikBoxService."
+}

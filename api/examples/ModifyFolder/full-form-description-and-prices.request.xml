@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><ModifyFolder xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><folderId>649</folderId><name>modify-empty-full</name><password></password><hidden>0</hidden><adult>0</adult><freePoints>1</freePoints><freeTransfer>1</freeTransfer><publicUpload>0</publicUpload><description>apifollowup0921881757</description><view><gallery>0</gallery></view></ModifyFolder></s:Body></s:Envelope>

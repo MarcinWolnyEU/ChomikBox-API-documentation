@@ -1,0 +1,116 @@
+{
+    "operation": "Download",
+    "case": "playlist-copy-by-id",
+    "timestamp": "2026-10-25T06:17:40Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 292,
+        "bodyBytesUncompressed": 468
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:17:40 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "685"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:17:40 GMT; path=/; HttpOnly"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4ff1979d9aaf976-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 685,
+        "bodyBytesDecoded": 1230,
+        "bodySha256": null,
+        "elapsedMs": 207.7
+    },
+    "note": "Download (no agreement) of the copied playlist file by its numeric id: realId."
+}

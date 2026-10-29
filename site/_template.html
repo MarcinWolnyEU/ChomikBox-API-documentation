@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+  PAGE TEMPLATE - copy this file to create a new page.
+
+  1. Copy to site/<name>.html (or a sub-folder; then prefix asset paths with ../).
+  2. Set <title> (keep it under 70 characters), the meta description, the
+     breadcrumb and the h1 ("<b>First word</b> - rest", like the app's title bars).
+  3. Add the page to site/tools/nav.json, then run
+        node site/tools/sync-chrome.mjs
+     which fills the chrome:header / chrome:nav / chrome:footer blocks below on
+     every page. Never edit inside those markers by hand.
+  4. Content building blocks (all styled in assets/css/site.css):
+       section.window > header.titlebar (logo + h2) + div.pane    one "window" per section
+       span.ev.ev-obs | ev-inf | ev-unk | ev-live | ev-draft      evidence badges
+       div.callout(.callout-caveat|-unknown|-critical) > img + p  balloon callouts
+       section.table-wrap[aria-labelledby][tabindex=0] > table   scrollable table
+       figure.figure > section.figure-scroll > svg.dg             inline SVG diagram
+       dl.facts, dl.spec, ul.tiles, ul.features, ol.legend        lists
+  5. Check: node site/tools/check-links.mjs  and  npx -y html-validate@latest "site/**/*.html"
+  Secrets never appear on pages: use {{USERNAME}}, {{PASS_HASH}}, {{TOKEN}} etc.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Page template · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="Template for new pages of the ChomikBox 2.0.8.2 technical overview.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>Template</b> - page subtitle</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Template</span></li>
+          </ol>
+        </nav>
+        <p class="lead">One-paragraph summary of the page.</p>
+        <nav class="toc" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#first-section">First section</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="first-section">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Section</b> - what it covers</h2>
+      </header>
+      <div class="pane">
+        <p>Body text. Mark claims <span class="ev ev-obs">Observed</span>, <span class="ev ev-inf">Inferred</span> or <span class="ev ev-unk">Unknown</span>.</p>
+        <div class="callout">
+          <img src="assets/img/msgbox-information.png" alt="" width="64" height="64">
+          <p class="callout-title">Note</p>
+          <p>Callout text.</p>
+        </div>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

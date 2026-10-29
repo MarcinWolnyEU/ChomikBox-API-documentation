@@ -1,0 +1,106 @@
+{
+    "operation": "Auth",
+    "case": "success",
+    "timestamp": "2026-10-24T15:25:09Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Auth"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 249,
+        "bodyBytesUncompressed": 385
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:25:08 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Transfer-Encoding",
+                "chunked"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m52"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "CF-RAY",
+                "a4f9fe11c8b4278c-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 282,
+        "bodyBytesDecoded": 454,
+        "bodySha256": null,
+        "elapsedMs": 259.1
+    },
+    "note": "Successful login in the real client's wire form: gzip-compressed body (Content-Encoding: gzip; the .request.xml shows it uncompressed), s:encodingStyle on the Envelope, request children in http://chomikuj.pl/; result members in http://chomikuj.pl (prefix a:). passHash = lower-case hex MD5 of the password; ver=4; client{name,version}."
+}

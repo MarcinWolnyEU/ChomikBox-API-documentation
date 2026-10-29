@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><UploadToken xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><folderId>999999999</folderId><fileName>x.txt</fileName></UploadToken></s:Body></s:Envelope>

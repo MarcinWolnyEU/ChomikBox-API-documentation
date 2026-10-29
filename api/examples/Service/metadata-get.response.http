@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 15:25:02 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 1713
+Connection: keep-alive
+cache-control: private
+content-encoding: gzip
+vary: Accept-Encoding
+server: cloudflare
+x-aspnet-version: 4.0.30319
+x-powered-by: ASP.NET
+x-server: m51
+cf-cache-status: DYNAMIC
+CF-RAY: a4f9fde5cfc4278c-PRG
+
+[body: 6437 bytes, sha256=855bb50e73e6b2d1c6d6d69ee436c9dfcc5b390a49d50119f8f2eea677bcaefd; first bytes: "<HTML><HEAD><STYLE type=\"text/css\">#content{ FONT-SIZE: 0.7em; PADDING-BOTTOM: 2em; MARGIN-LEFT: 30px}BODY{MARGIN-TOP: 0px; MARGIN-LEFT: 0px; COLOR: #000000; FONT-FAMILY: Verdana; BACKGROUND-COLOR: white}P{MARGIN-TOP: 0px; MARGIN-BOTTOM: 12px; COLOR: #0000"]

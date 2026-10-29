@@ -1,0 +1,64 @@
+{
+    "operation": "UploadFile",
+    "case": "bare-chb-boundary",
+    "timestamp": "2026-10-24T15:26:26Z",
+    "request": {
+        "method": "POST",
+        "url": "http://s9575.chomikuj.pl:8084/file/",
+        "headers": [
+            [
+                "Content-Type",
+                "multipart/mixed; boundary=!CHB"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 1503,
+        "bodyBytesUncompressed": 1503
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "76"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Server",
+                "Microsoft-HTTPAPI/2.0"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:25 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-HTTPAPI/2.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 76,
+        "bodyBytesDecoded": 76,
+        "bodySha256": null,
+        "elapsedMs": 177.4
+    },
+    "note": "Variant with boundary \"!CHB\" (no stamp suffix) and client \"chomikbox-2.0.8.2\": also accepted and stored byte-exact (verified by downloading; the server parses parts positionally).",
+    "uploadedBytes": 1039,
+    "uploadedSha256": "abea551006a926a73e77f79525b35ea5387d84f565d72c21bf58333eec597e92"
+}

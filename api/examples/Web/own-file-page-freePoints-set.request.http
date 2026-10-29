@@ -1,0 +1,6 @@
+GET /{{USERNAME}}/_chomikbox_api_test_followup_20261025_061244/price-probe/probe,10833170446.txt HTTP/1.1
+Host: chomikuj.pl
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+

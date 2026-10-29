@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="Every executable, plug-in and resource pack shipped with ChomikBox 2.0.8.2: purpose, launch, inputs and outputs and interactions.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html" aria-current="page">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>Components</b> - executables, plug-ins, resources</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Components</span></li>
+          </ol>
+        </nav>
+        <p class="lead">One section per shipped file or file family: what it is for, how it gets started, what it reads and writes and what it talks to. Claims are labelled <span class="ev ev-obs">Observed</span>, <span class="ev ev-inf">Inferred</span> or <span class="ev ev-unk">Unknown</span>; the network side of <code>chomikbox.exe</code> is on the <a href="protocol.html">Protocol</a> page.</p>
+        <h3>Install folder</h3>
+        <pre><code>C:\Program Files (x86)\ChomikBox\
+├─ chomikbox.exe            main application (3.9 MB)
+├─ chomikbox1conf.exe       ChomikBox 1.x configuration importer
+├─ configurator.exe         offline settings editor
+├─ crashsender.exe          crash-report sender
+├─ installer.exe            updater and plug-in installer (requireAdministrator)
+├─ installeru.exe           same code, asInvoker manifest
+├─ base.ini                 brand bootstrap
+├─ Odinstaluj ChomikBox.lnk uninstall shortcut
+├─ files\anim\              21 mascot animation packages (*.anim)
+├─ gplugins\                GStreamer 0.10 plug-ins
+├─ imageformats\            (Qt image-format plug-ins; not analysed)
+├─ locale\                  en.qm, pl.qm, tutorial.tur, qt\qt.pl.qm
+├─ skins\app\               green.skin, green2.skin
+├─ skins\hint\              8 balloon skins (*.hintskin)
+└─ tsplugins\integration\   chomikbox_win7.tsp, npcbplugin.dll</code></pre>
+        <section class="table-wrap" aria-labelledby="tbl-comp-cap" tabindex="0">
+          <table>
+            <caption id="tbl-comp-cap">Component map</caption>
+            <thead>
+              <tr><th scope="col">Component</th><th scope="col">Kind</th><th scope="col">Role</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row"><a href="#chomikbox"><code>chomikbox.exe</code></a></th><td>Qt 4 GUI, single instance</td><td>The product: uploader, downloader, music player, panel, SOAP client, updater client, Breakpad crash handler, plug-in host</td></tr>
+              <tr><th scope="row"><a href="#chomikbox1conf"><code>chomikbox1conf.exe</code></a></th><td>Qt 4 GUI, one-shot</td><td>Imports ChomikBox 1.x settings, accounts, player cache and upload queue</td></tr>
+              <tr><th scope="row"><a href="#configurator"><code>configurator.exe</code></a></th><td>Qt 4 GUI, offline</td><td>Edits a few hidden settings while ChomikBox is not running</td></tr>
+              <tr><th scope="row"><a href="#crashsender"><code>crashsender.exe</code></a></th><td>Qt 4 app</td><td>Uploads a minidump, logs and configuration after a crash</td></tr>
+              <tr><th scope="row"><a href="#installer"><code>installer.exe</code>, <code>installeru.exe</code></a></th><td>Qt 4 GUI, “Updater 0.4.2”</td><td>Applies update packages; installs and removes the browser plug-in</td></tr>
+              <tr><th scope="row"><a href="#win7-tsp"><code>chomikbox_win7.tsp</code></a></th><td>DLL, loaded in-process</td><td>Windows 7 taskbar buttons and progress</td></tr>
+              <tr><th scope="row"><a href="#npcbplugin"><code>npcbplugin.dll</code></a></th><td>NPAPI browser plug-in</td><td>Click Catcher: forwards download URLs to ChomikBox</td></tr>
+              <tr><th scope="row"><a href="#skins">Skins, balloons, animations, tutorial</a></th><td>Qt binary resources (<code>qres</code>)</td><td>Look and feel, notification balloons, desktop hamster, first-run help</td></tr>
+              <tr><th scope="row"><a href="#locale"><code>locale\*.qm</code></a></th><td>Qt translations</td><td>Polish and English UI strings</td></tr>
+              <tr><th scope="row"><a href="#base-ini"><code>base.ini</code></a></th><td>INI</td><td>Brand and domain bootstrap</td></tr>
+              <tr><th scope="row"><a href="#msi"><code>ChomikBox.msi</code></a></th><td>Windows Installer package</td><td>Installs everything and registers shell integration</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="chomikbox">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>chomikbox.exe</b> - the application</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>Qt 4 GUI, 3.9&nbsp;MB, 32-bit, MSVC. image base <code>0x400000</code>, SHA-256 <code class="wrap">13A500DE0C270D289C30D772283FD332D4B427D196C80F0B166D8C53762A6386</code>.</dd>
+          <dt>Launched by</dt><dd>Start menu, Desktop and Quick Launch shortcuts; the <code>HKCU\…\Run</code> value; the MSI finish page; Explorer verbs and <code>chomik://</code> URLs; the updater after an update; the browser plug-in when ChomikBox is not running.</dd>
+          <dt>Reads</dt><dd><code>base.ini</code>, <code>conf.ini</code>, the queue files, skins, animation packages, translations, <code>tsplugins\integration\*.tsp</code>.</dd>
+          <dt>Writes</dt><dd><code>conf.ini</code>, <code>queue-upload-&lt;id&gt;.ini</code>, <code>queue-download-&lt;id&gt;.ini</code>, <code>playlist.m3u8</code>, <code>message.log</code> (rotated into <code>backup\</code>), the player cache and thumbnails, minidumps; registry: autostart Run value and music file associations.</dd>
+          <dt>Talks to</dt><dd><code>box.chomikuj.pl</code> (SOAP), file servers, the update repository; starts <code>installer.exe</code> and <code>crashsender.exe</code>; receives commands on the named pipe.</dd>
+        </dl>
+        <p>The main executable holds every user-facing module: the side panel, the <span lang="pl">Dodawanie</span> (upload), <span lang="pl">Pobieranie</span> (download) and <span lang="pl">Muzyka</span> (music) windows, the folder and file windows, settings, the desktop hamster, the tray icon and notification balloons. It also contains the SOAP client, the <code>UUpdater</code> update client, the <code>BrowserIntegrationManager</code> that installs the browser plug-in, and a Google Breakpad exception handler. Structure and layers are described on <a href="architecture.html">Architecture</a>.</p>
+        <p>It embeds a single Qt resource tree with four uncompressed files: <code>:/default/defconf.ini</code> (62&nbsp;841 bytes) and the brand overlays <code>defconf-lolabits.es.ini</code>, <code>defconf-chomikuj.pl.ini</code> and <code>defconf-minhateca.com.br.ini</code>. <span class="ev ev-obs">Observed</span></p>
+        <h3 id="cmdline">Command line and remote commands</h3>
+        <p>The same parser, <code>Application::executeRemoteCommand</code>, handles the process's own command line and commands that arrive over the named pipe from a second launch or the browser plug-in. A value may follow its switch directly, as in <code>-d&lt;url&gt;</code> or <code>-u"%1"</code>. <span class="ev ev-obs">Observed</span> in the client, the MSI registry rows and the plug-in.</p>
+        <section class="table-wrap" aria-labelledby="tbl-cmd-cap" tabindex="0">
+          <table>
+            <caption id="tbl-cmd-cap">Switches understood by chomikbox.exe</caption>
+            <thead>
+              <tr><th scope="col">Switch</th><th scope="col">Meaning</th><th scope="col">Sent by</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>-u"&lt;path&gt;"</code>, <code>--upload</code></td><td>Upload a file or folder</td><td>Explorer verb <span lang="pl">«Zachomikuj»</span></td></tr>
+              <tr><td><code>-d&lt;url&gt;</code>, <code>--download</code></td><td>Download a URL</td><td>browser plug-in</td></tr>
+              <tr><td><code>-p"&lt;path&gt;"</code></td><td>Add a file to the playlist</td><td>Explorer verb <span lang="pl">«Dodaj do listy odtwarzania»</span></td></tr>
+              <tr><td><code>--folders create|remove</code> with <code>--force</code>, <code>--folder-id</code>, <code>--folder</code> / <code>-f</code></td><td>Folder operations; exact semantics <span class="ev ev-inf">Inferred</span> from the names</td><td><span class="ev ev-unk">Unknown</span></td></tr>
+              <tr><td><code>--out-dir</code> / <code>-O</code></td><td>Parsed, purpose not analysed (silent download target, <span class="ev ev-inf">Inferred</span>)</td><td></td></tr>
+              <tr><td><code>--file-server &lt;host&gt;</code></td><td>Forces the host for <strong>all upload POSTs and resume checks</strong> instead of the server chosen by the service, and shows the uploader window. Accepted at start-up and as a remote command, so also over the named pipe (<a href="security.html#c-08">C-08</a>). <span class="ev ev-obs">Observed</span>; the link to the upload code <span class="ev ev-inf">Inferred</span></td><td></td></tr>
+              <tr><td><code>--install</code></td><td>Forces the first-run defaults even when <code>request-default-config</code> is already false (animation on, welcome popup); used by an installer start, <span class="ev ev-inf">Inferred</span></td><td></td></tr>
+              <tr><td><code>chomik://file:…</code>, <code>chomik://folder:…</code>, <code>chomik://files/…</code>, <code>http://</code>, <code>https://</code>, <code>file:</code>, <code>file://</code></td><td>URLs accepted as arguments. chomikuj.pl web links containing <code>ShowVideo.aspx?id=</code> or <code>Image.aspx</code> are turned into <code>chomik://files/…</code>; other web links become external-link downloads. The exact <code>chomik://</code> syntax is not documented yet.</td><td><code>chomik://</code> protocol handler (<code>"%1"</code>); other callers <span class="ev ev-unk">Unknown</span></td></tr>
+              <tr><td><code>--update=success</code>, <code>--update=failed</code></td><td>Result of an update; success sets <code>[repository] notify-update-success</code></td><td><code>installer.exe</code></td></tr>
+              <tr><td><code>--set-dist</code></td><td>String present next to the value <code>testing</code>; it is also an updater option that stores the update channel</td><td><span class="ev ev-unk">Unknown</span></td></tr>
+              <tr><td><code>--h4x0r</code>, <code>--chakier</code></td><td>Synonyms (<em>chakier</em> is a Polish spelling of <q>hacker</q>) for a developer mode that unlocks hidden Settings options: an otherwise hidden page and button, an extra settings page, no cap on the connection-count controls, and an unfiltered list. No network effect. <span class="ev ev-obs">Observed</span> gates; the purpose of each hidden widget <span class="ev ev-inf">Inferred</span> </td><td></td></tr>
+              <tr><td><code>--silent</code>, <code>--config</code>, <code>--base-config</code>, <code>--data-location</code>, <code>--standalone</code>, <code>--debug</code>/<code>--nodebug</code>, <code>--log</code>/<code>--nolog</code>, <code>--skin</code></td><td>Framework options shared with the other executables</td><td>user</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="chomikbox1conf">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>chomikbox1conf.exe</b> - 1.x importer</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>Qt 4 GUI, one-shot migration wizard (main class <code>ChomikBox1</code>). Imports only <code>QtCore4</code> and <code>QtGui4</code>, so it has no network classes.</dd>
+          <dt>Launched by</dt><dd>MSI custom action <code>ExeCaKeyF01</code>: <code>"[SystemFolder]Cmd.exe" /c "start /b chomikbox1conf.exe"</code>, condition <code>not Installed</code>, sequence 6603 (after <code>InstallFinalize</code>). The action runs on a fresh install and on a <strong>major upgrade</strong> (a package with a new ProductCode and the same UpgradeCode), because the condition does not test for an upgrade. It does not run on a repair, on a minor update that keeps the ProductCode, on uninstall or on in-app updates. <span class="ev ev-inf">Inferred</span> from the installer tables (not run)</dd>
+          <dt>Reads</dt><dd><code>%APPDATA%\ChomikBox\config.xml</code>, upload queues <code>filequeue.chq</code> / <code>filequeue_*.chq</code>, leftovers <code>CHR*.tmp</code>, resume data, the 1.x player cache.</dd>
+          <dt>Writes</dt><dd><code>conf.ini</code>, <code>queue-upload[-&lt;hamsterId&gt;].ini</code>, the key <code>player/chomikbox1-cache</code>.</dd>
+          <dt>Switches</dt><dd><code>--ask</code>, <code>--force</code> (see below), one positional argument that the import never uses, plus the framework options.</dd>
+        </dl>
+        <p>The wizard asks <q>Import settings from ChomikBox 1.x?</q> and offers three check boxes: settings, existing accounts and cache. Errors include <q>Configuration is NOT valid XML ChomikBox 1.x file</q>. <span class="ev ev-obs">Observed</span></p>
+        <p>The two switches were first read the wrong way round. The constructor sets <code>--force</code> at offset <code>+0xa8</code> and <code>--ask</code> at <code>+0xa9</code>, and <code>--force</code> never skips a confirmation. <span class="ev ev-obs">Observed</span> </p>
+        <section class="table-wrap" aria-labelledby="tbl-1conf-cap" tabindex="0">
+          <table>
+            <caption id="tbl-1conf-cap">When the importer asks (after a valid 1.x <code>config.xml</code> was read)</caption>
+            <thead><tr><th scope="col">2.x <code>conf.ini</code></th><th scope="col">Flag</th><th scope="col">Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td>exists</td><td>none</td><td>No dialog, nothing imported, the program quits</td></tr>
+              <tr><td>exists</td><td><code>--force</code></td><td>Asks <q>New settings already exists. Import settings from ChomikBox 1.x and overwrite new one?</q>; only Yes imports</td></tr>
+              <tr><td>missing</td><td>none</td><td>No dialog; imports at once with all three boxes (settings, accounts, cache) ticked</td></tr>
+              <tr><td>missing</td><td><code>--ask</code></td><td>Asks <q>Import settings from ChomikBox 1.x?</q> with the three boxes; only Yes imports</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>The MSI starts the program without arguments, so a fresh install imports silently when no <code>conf.ini</code> exists, and an upgrade over an existing <code>conf.ini</code> does nothing. <span class="ev ev-inf">Inferred</span> The resume record of a 1.x direct upload is a CryptoAPI-decrypted blob whose <em>lines</em> (at least seven) carry the local path, a size, the folder id, stamp, token, host and port; it is not a delimited record. The string <code>192.168.10.30</code> is never used, so it is not a contacted host. <span class="ev ev-obs">Observed</span></p>
+        <p>The 1.x <code>config.xml</code> keys it understands include <code>MaxUploadSpeed</code>, <code>Folder</code>, <code>Autologin</code>, <code>Remember</code>, <code>Volume</code>, <code>MaxPlayerCacheSize</code>, <code>DefaultFileAssocs</code>, <code>userinfo-%1</code>, <code>password-hash</code> and <code>password-len</code>. <span class="ev ev-obs">Observed</span></p>
+        <h3>Rebuilding 1.x upload URLs</h3>
+        <p>One function splits each 1.x queue line (at least seven fields), normalises <code>\</code> to <code>/</code> and fills this template:</p>
+        <pre><code>http://%1:%2/file/?token=%3&amp;stamp=%4&amp;folderId=%5&amp;fileName=%6
+       host port      token    stamp    folderId    fileName</code></pre>
+        <p>The result goes into the 2.x queue item's <code>directUrl</code>, so that unfinished 1.x uploads can resume in 2.x. <span class="ev ev-inf">Inferred</span> The importer itself cannot send the request; the request method and body are <span class="ev ev-unk">Unknown</span> here.</p>
+        <p>The string table also contains the private address <code>192.168.10.30</code>, apparently an internal test host. Its purpose is <span class="ev ev-unk">Unknown</span>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="configurator">
+      <header class="titlebar">
+        <img src="assets/img/settings-logo.png" alt="" width="32" height="32">
+        <h2><b>configurator.exe</b> - offline settings</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>Qt 4 GUI, window title “ChomikBox2 Configurator”.</dd>
+          <dt>Launched by</dt><dd>The user, by hand (<code>configurator.exe [--advanced]</code>). It is not in the Start menu.</dd>
+          <dt>Reads</dt><dd>Its own embedded <code>:/default/defconf.ini</code> and translations, plus <code>conf.ini</code>.</dd>
+          <dt>Writes</dt><dd><code>repository/dist</code>, <code>debug/level</code>, <code>appearance/hide-if-fullscreen</code>, <code>folderwindow/use-last-selected-folder</code> and the panel-at-start key.</dd>
+        </dl>
+        <p>Tabs: <em>Debug</em> (debug level), <em>Application settings</em> (show the panel at start: always, never or as last time; repository: stable, testing, unstable or <q>- official -</q>) and <em>User settings</em> (hide while a fullscreen application runs; use the last selected folder; a link that opens the configuration folder). <code>--advanced</code> sets a flag that probably reveals the Debug and Repository pages. <span class="ev ev-inf">Inferred</span></p>
+        <p>It refuses to start while ChomikBox runs: <q>ChomikBox is running. Configurator works only offline.</q> It decides this from the QtSingleApplication lock file in <code>%TEMP%</code>. <span class="ev ev-obs">Observed</span></p>
+        <div class="callout">
+          <img src="assets/img/msgbox-information.png" alt="" width="64" height="64">
+          <p class="callout-title">The documentation generator inside</p>
+          <p>The executable carries the full <strong>default config</strong>, 62&nbsp;840 bytes in 43 sections; each key is annotated with the places that read it and their application defaults. The same default config is built into <code>chomikbox.exe</code>. See <a href="configuration.html#annotated">Configuration</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="window" id="crashsender">
+      <header class="titlebar">
+        <img src="assets/img/msgbox-critical.png" alt="" width="32" height="32">
+        <h2><b>crashsender.exe</b> - crash reports</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>Qt 4 application, “Crash sender version: 0.4” (<code>--version</code>).</dd>
+          <dt>Launched by</dt><dd>The Breakpad callback in <code>chomikbox.exe</code>, through <code>ShellExecute</code> on <code>&lt;applicationDirPath&gt;/crashsender.exe</code>.</dd>
+          <dt>Inputs</dt><dd>The minidump and the paths of <code>message.log</code>, <code>conf.ini</code>, both queue files and the playlist, plus the account id and name.</dd>
+          <dt>Talks to</dt><dd><code>POST http://bts.box.chomikuj.pl:8088/crash</code>. It <strong>ignores the reply</strong>: only <code>QNetworkReply::error()</code> is used, the body, status code and headers are never read. There is no retry, and the process always quits after the first reply or error. In GUI mode a network error shows an <q>Error occured</q> box; with <code>--no-gui</code> it is only written to the debug output. <span class="ev ev-obs">Observed</span> </dd>
+        </dl>
+        <pre><code>crashsender.exe [--no-gui] chomikbox &lt;version&gt; &lt;arch&gt; &lt;minidump&gt; &lt;message.log&gt; &lt;conf.ini&gt;
+                &lt;uploadQueue.ini&gt; &lt;downloadQueue.ini&gt; &lt;playlist.txt&gt; &lt;chomikId&gt; &lt;chomikName&gt;
+crashsender.exe [--no-gui] chomikfile &lt;version&gt; &lt;arch&gt; &lt;minidump&gt; &lt;serverIds&gt; &lt;settings.xml&gt; &lt;message.log&gt;
+crashsender.exe --version</code></pre>
+        <p>The <code>&lt;arch&gt;</code> argument is the constant <code>win32</code>, which is also the platform default of the update repository. <span class="ev ev-obs">Observed</span> The second form belongs to a sibling product, <em>chomikfile</em>. In GUI mode and for project <code>chomikbox</code> the user is asked first: <q>Crash has been detected in application. … Do you want to send debugging information?</q> With <code>--no-gui</code>, or for <code>chomikfile</code>, the report is sent at once. <code>chomikbox.exe</code> passes <code>--no-gui</code> when an internal flag is set; what sets that flag is <span class="ev ev-unk">Unknown</span>.</p>
+        <figure class="figure">
+          <section class="figure-scroll" aria-labelledby="dg-crash-cap" tabindex="0">
+            <svg class="dg dg-mid" viewBox="0 0 1000 440" role="img" aria-labelledby="dg-crash-title dg-crash-desc">
+              <title id="dg-crash-title">Crash report sequence</title>
+              <desc id="dg-crash-desc">chomikbox.exe writes a minidump and starts crashsender.exe with the dump and log paths. In GUI mode crashsender asks the user whether to send debugging information. On yes it posts a multipart form to bts.box.chomikuj.pl port 8088, ignores the reply body and quits.</desc>
+              <defs>
+                <marker id="ah-crash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker>
+              </defs>
+              <rect class="chip-green" x="20" y="14" width="200" height="48" rx="6"/>
+              <text class="t-b" x="120" y="34" text-anchor="middle">chomikbox.exe</text>
+              <text class="t-s" x="120" y="52" text-anchor="middle">Breakpad handler</text>
+              <rect class="chip-green" x="300" y="14" width="200" height="48" rx="6"/>
+              <text class="t-b" x="400" y="34" text-anchor="middle">crashsender.exe</text>
+              <text class="t-s" x="400" y="52" text-anchor="middle">Crash sender 0.4</text>
+              <rect class="chip-green" x="560" y="14" width="160" height="48" rx="6"/>
+              <text class="t-b" x="640" y="34" text-anchor="middle">User</text>
+              <text class="t-s" x="640" y="52" text-anchor="middle">GUI mode only</text>
+              <rect class="chip-srv" x="780" y="14" width="200" height="48" rx="6"/>
+              <text class="t-b" x="880" y="34" text-anchor="middle">bts.box.chomikuj.pl</text>
+              <text class="t-s" x="880" y="52" text-anchor="middle">port 8088, /crash</text>
+              <line class="lifeline" x1="120" y1="62" x2="120" y2="430"/>
+              <line class="lifeline" x1="400" y1="62" x2="400" y2="430"/>
+              <line class="lifeline" x1="640" y1="62" x2="640" y2="430"/>
+              <line class="lifeline" x1="880" y1="62" x2="880" y2="430"/>
+
+              <path class="arrow" d="M120,90 H152 V108 H124" marker-end="url(#ah-crash)"/>
+              <text class="msg halo" x="162" y="104">write minidump &lt;id&gt;.dmp</text>
+
+              <text class="msg halo" x="130" y="130">ShellExecute crashsender.exe</text>
+              <text class="t-s halo" x="130" y="145">[--no-gui] chomikbox 2.0.8.2 &lt;arch&gt; …</text>
+              <path class="arrow" d="M120,154 H398" marker-end="url(#ah-crash)"/>
+
+              <text class="msg halo" x="410" y="180">“Application error”: send</text>
+              <text class="msg halo" x="410" y="196">debugging information?</text>
+              <path class="arrow" d="M400,206 H638" marker-end="url(#ah-crash)"/>
+              <path class="arrow-dash" d="M640,240 H402" marker-end="url(#ah-crash)"/>
+              <text class="msg halo" x="520" y="233" text-anchor="middle">Yes</text>
+              <rect class="note" x="656" y="186" width="200" height="44" rx="4"/>
+              <text class="t-s" x="666" y="204">skipped with --no-gui</text>
+              <text class="t-s" x="666" y="221">and for project chomikfile</text>
+
+              <text class="msg halo" x="410" y="284">POST /crash  multipart/form-data</text>
+              <text class="t-s halo" x="410" y="300">dump, message.log, conf.ini, queues, playlist, ids, checkSum</text>
+              <path class="arrow" d="M400,310 H878" marker-end="url(#ah-crash)"/>
+              <path class="arrow-dash" d="M880,350 H402" marker-end="url(#ah-crash)"/>
+              <text class="msg halo" x="760" y="343" text-anchor="middle">reply (body not parsed)</text>
+
+              <path class="arrow" d="M400,382 H432 V400 H404" marker-end="url(#ah-crash)"/>
+              <text class="msg halo" x="442" y="396">QTimer::singleShot(1, quit())</text>
+            </svg>
+          </section>
+          <figcaption id="dg-crash-cap">Crash report sequence. No report was sent during this project, so the sequence is not verified against the service.</figcaption>
+        </figure>
+        <h3>Request format</h3>
+        <p><code>QNetworkAccessManager::post()</code> with <code>Content-Type: multipart/form-data; boundary=&lt;B&gt;</code>. The boundary is the current time formatted as <code>CSddMMdyyhhmmsszzz</code>. No other custom headers are set. Text parts declare <code>quoted-printable</code> but carry raw UTF-8, and their <code>Content-Disposition</code> line ends in a stray <code>; </code>. <span class="ev ev-obs">Observed</span></p>
+        <pre><code>--&lt;B&gt;
+Content-Disposition: form-data; name="project";
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+chomikbox
+--&lt;B&gt;
+Content-Disposition: form-data; name="miniDumpFile"; filename="minidump-&lt;name&gt;.dmp"
+Content-Type: Application/Octet
+
+&lt;raw file bytes&gt;
+…
+--&lt;B&gt;--</code></pre>
+        <section class="table-wrap" aria-labelledby="tbl-crash-cap" tabindex="0">
+          <table>
+            <caption id="tbl-crash-cap">Form fields, in order (project chomikbox)</caption>
+            <thead>
+              <tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Content</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>project</code>, <code>version</code>, <code>arch</code></td><td>text</td><td><code>chomikbox</code>, <code>2.0.8.2</code>, architecture string (value not resolved)</td></tr>
+              <tr><td><code>miniDumpFile</code></td><td>file</td><td><code>minidump-&lt;dump base name, lower case&gt;.dmp</code></td></tr>
+              <tr><td><code>messageLogFile</code></td><td>file</td><td><code>message.log</code>, which can exceed 100&nbsp;MB (134&nbsp;MB on the inspected machine)</td></tr>
+              <tr><td><code>confIniFile</code></td><td>file</td><td><code>conf.ini</code>, including the stored password hash (see <a href="security.html#c-04">Security, C-04</a>)</td></tr>
+              <tr><td><code>uploadQueueIniFile</code>, <code>downloadQueueIniFile</code></td><td>file</td><td>the transfer queues (local paths and file names)</td></tr>
+              <tr><td><code>playlistFile</code></td><td>file</td><td><code>playlist.txt</code></td></tr>
+              <tr><td><code>chomikId</code>, <code>chomikName</code></td><td>text</td><td>account id and name</td></tr>
+              <tr><td><code>checkSum</code></td><td>text</td><td>lower-case hex MD5 of <code>&lt;project&gt;-&lt;version&gt;.&lt;arch&gt;</code>; no key, no HMAC <span class="ev ev-inf">Inferred</span> argument order</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>Missing files are skipped (<code>&lt;path&gt; not found!.</code> goes to the debug log). On a network error GUI mode shows <q>Network error: (&lt;code&gt;)</q>; the reply body is not parsed. <span class="ev ev-obs">Observed</span> On 2026-10-24 port 8088 accepted TCP connections but returned an empty reply to <code>HEAD</code>. Whether the collector still accepts reports is <span class="ev ev-unk">Unknown</span>.</p>
+        <p>The main application also scans for stale <code>*.dmp</code> files, probably to clean them up (<span class="ev ev-inf">Inferred</span>), and <code>[breakpad] disable-on-exit = true</code> removes the handler during shutdown.</p>
+      </div>
+    </section>
+
+    <section class="window" id="installer">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>installer.exe</b> - updater and plug-in installer</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>Qt 4 GUI “Updater 0.4.2”. <code>installer.exe</code> and <code>installeru.exe</code> have identical code (160&nbsp;256 bytes each); the 1&nbsp;122 differing bytes are the manifest (<code>requireAdministrator</code> vs <code>asInvoker</code>) and the PE header fields that follow from it.</dd>
+          <dt>Launched by</dt><dd><code>chomikbox.exe</code>: <code>UUpdater::doUpdate</code> through <code>BProcess::runAsAdministrator</code>, and <code>BrowserIntegrationManager</code> for <code>--plugmode</code>. The client never names either file for updates. It starts the staged file of the package entry marked <code>updater="exec"</code> whose <code>privileges</code> equal the client's compiled-in constant <code>admin</code>. <code>BProcess::runAsAdministrator</code> reads that file's embedded manifest and calls <code>ShellExecute</code> with the verb <code>runas</code> when it says <code>requireAdministrator</code>, otherwise <code>open</code>. So <code>installer.exe</code> is elevated, and <code>installeru.exe</code> (<code>asInvoker</code>) would not be. Which of them a repository nominates is data in <code>packages.xml</code>. <span class="ev ev-obs">Observed</span> mechanism, <span class="ev ev-unk">Unknown</span> repository content</dd>
+          <dt>Switches</dt><dd><code>--install</code>, <code>--uninstall</code>, <code>--plugmode</code>, <code>--set-dist &lt;dist&gt;</code>, <code>--version</code>.</dd>
+          <dt>Writes</dt><dd>Program files from the package, registry (below), browser plug-in folders, and <code>base.ini</code> (<code>title</code>, <code>domain</code>) only when the system clock is earlier than 2012-01-01, so in practice never.</dd>
+        </dl>
+        <h3>Update mode</h3>
+        <p>The updater reads <code>packages.xml</code> from the staging directory and processes each item: <q>Removing directory/file</q>, <q>Installing file</q> (copy or symlink) and <q>Executing command</q> (through <code>QProcess</code>). Guards such as <q>Forbidden file operation on %1</q> and <q>… skipped due to previous errors</q> apply, and <code>crashsender.exe</code> and <code>packages.xml</code> get special handling. It does not check the package before copying or running anything. Its only content check is a SHA-1 of the installed files against the <code>sha1</code> attributes of the new <code>packages.xml</code>, after the copy, and the result only decides whether the package gets an <code>installed</code> status: no error message, no rollback. The digest of the work list that the client passes as an argument is stored but, as far as observed, not used. Afterwards it restarts <code>chomikbox.exe --update=success</code> or <code>--update=failed</code>. <span class="ev ev-obs">Observed</span> <a href="security.html#c-07">C-07</a></p>
+        <p>On the client side <code>UUpdater</code> fetches from <code>http://bts.box.%1/repo/dists</code> (also <code>http://download.box.%1/updates</code>), follows redirects, parses <code>packages.xml</code>, unpacks gzip packages, compares the SHA-1 of every file (of the decompressed content for <code>.gz</code>) with the <code>sha1</code> attribute of <code>packages.xml</code> and stages everything in <code>&lt;tmp&gt;/chomikbox.tmp/</code>. A mismatch is reported as <q>Signature error</q>, but no signature or key exists: the hash comes from the same unauthenticated HTTP channel as the file, and <code>packages.xml</code> itself is not verified at all (<a href="security.html#c-07">C-07</a>). <span class="ev ev-obs">Observed</span> <code>packages.xml</code> attributes the client understands: <code>sha1</code>, <code>size</code>, <code>source</code>, <code>privileges</code>, <code>updater</code>, <code>restart</code>, <code>offline</code>, <code>gzSize</code>, <code>target</code>, <code>symlink</code>, <code>files-to-copy</code>, <code>do-update</code>, <code>priority</code>, <code>changes</code>, <code>changelog</code>, <code>originalFileName</code>, <code>optional</code>, <code>extra</code>. <code>admin</code> is not an attribute but the value the client compares <code>privileges</code> with. <span class="ev ev-obs">Observed</span></p>
+        <figure class="figure">
+          <section class="figure-scroll" aria-labelledby="dg-upd-cap" tabindex="0">
+            <svg class="dg dg-mid" viewBox="0 0 1000 450" role="img" aria-labelledby="dg-upd-title dg-upd-desc">
+              <title id="dg-upd-title">Update sequence</title>
+              <desc id="dg-upd-desc">chomikbox.exe fetches packages.xml from the repository, downloads the packages and compares their SHA-1 with packages.xml, stages them in a temporary folder and starts installer.exe as administrator. The installer copies files, runs commands and writes the registry, then restarts chomikbox.exe with the update result.</desc>
+              <defs>
+                <marker id="ah-upd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker>
+              </defs>
+              <rect class="chip-green" x="40" y="14" width="220" height="48" rx="6"/>
+              <text class="t-b" x="150" y="34" text-anchor="middle">chomikbox.exe</text>
+              <text class="t-s" x="150" y="52" text-anchor="middle">UUpdater</text>
+              <rect class="chip-off" x="390" y="14" width="220" height="48" rx="6"/>
+              <text class="t-b t-off" x="500" y="34" text-anchor="middle">bts.box.&lt;domain&gt;</text>
+              <text class="t-s" x="500" y="52" text-anchor="middle">update repository</text>
+              <rect class="chip-green" x="740" y="14" width="220" height="48" rx="6"/>
+              <text class="t-b" x="850" y="34" text-anchor="middle">installer.exe</text>
+              <text class="t-s" x="850" y="52" text-anchor="middle">Updater 0.4.2, elevated</text>
+              <line class="lifeline" x1="150" y1="62" x2="150" y2="440"/>
+              <line class="lifeline" x1="500" y1="62" x2="500" y2="406"/>
+              <line class="lifeline" x1="850" y1="62" x2="850" y2="440"/>
+
+              <text class="msg halo" x="160" y="100">fetch repo/dists … packages.xml</text>
+              <path class="arrow" d="M150,110 H498" marker-end="url(#ah-upd)"/>
+              <text class="msg halo" x="160" y="143">packages.xml (redirects followed)</text>
+              <path class="arrow-dash" d="M500,152 H152" marker-end="url(#ah-upd)"/>
+
+              <path class="arrow" d="M150,180 H182 V198 H154" marker-end="url(#ah-upd)"/>
+              <text class="msg halo" x="192" y="194">parse, download (gzip), compare SHA-1</text>
+              <path class="arrow" d="M150,222 H182 V240 H154" marker-end="url(#ah-upd)"/>
+              <text class="msg halo" x="192" y="236">stage in &lt;tmp&gt;\chomikbox.tmp\</text>
+
+              <text class="msg halo" x="160" y="272">BProcess::runAsAdministrator</text>
+              <text class="t-s halo" x="160" y="288">installer.exe --install …</text>
+              <path class="arrow" d="M150,298 H848" marker-end="url(#ah-upd)"/>
+
+              <path class="arrow" d="M850,326 H882 V344 H854" marker-end="url(#ah-upd)"/>
+              <text class="msg halo" x="838" y="333" text-anchor="end">remove / copy files, run commands</text>
+              <text class="msg halo" x="838" y="350" text-anchor="end">update registry (64-bit view)</text>
+
+              <text class="msg halo" x="160" y="386">start chomikbox.exe --update=success | failed</text>
+              <path class="arrow" d="M850,396 H152" marker-end="url(#ah-upd)"/>
+              <rect class="note" x="410" y="412" width="180" height="28" rx="4"/>
+              <text class="t-s" x="500" y="431" text-anchor="middle">404 / 403 on 2026-10-24</text>
+            </svg>
+          </section>
+          <figcaption id="dg-upd-cap">Update sequence; the exact installer arguments are <span class="ev ev-inf">Inferred</span>. The repository no longer answers, so no real <code>packages.xml</code> could be inspected.</figcaption>
+        </figure>
+        <h3>Plug-in mode</h3>
+        <p><code>installer.exe --plugmode --install tsplugins/integration/ &lt;browser dir&gt;</code> (or <code>--uninstall</code>) copies or removes <code>npcbplugin.dll</code> in a browser's plug-in folder. On failure it suggests closing the browser first or logging in with administrator rights. <span class="ev ev-obs">Observed</span></p>
+        <h3>Registry written by the updater</h3>
+        <ul>
+          <li><code>HKLM\SOFTWARE\ChomikBox</code> <code>(default)</code> = <code>&lt;directory of the running updater&gt;\chomikbox.exe</code>, written as <code>REG_SZ</code> in the <strong>64-bit registry view</strong> (<code>KEY_WOW64_64KEY</code>, not <code>Wow6432Node</code>). This is the value the browser plug-in reads for a cold start. The MSI is a 32-bit package and writes only the 32-bit view, so a plain MSI install has no such value; on the analysed machine the 64-bit key does not exist. <span class="ev ev-obs">Observed</span> </li>
+          <li><code>HKCR\chomik\shell\open\command</code>, <code>chomik\DefaultIcon</code> and <code>Software\Classes\ChomikBox.MusicFile.&lt;ext&gt;\DefaultIcon</code> are re-pointed to the new exe path. <span class="ev ev-obs">Observed</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="win7-tsp">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>chomikbox_win7.tsp</b> - taskbar plug-in</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>PE32 DLL with a custom extension; exports <code>tsbox_plugin_handle</code> and <code>tsbox_plugin_qt_build</code>. Classes: <code>ChomikboxWin7Integration</code>, <code>Plugin</code>, <code>SlotReceiver</code>.</dd>
+          <dt>Launched by</dt><dd>Loaded by <code>chomikbox.exe</code> from <code>tsplugins/integration/</code> with <code>QLibrary</code>, after a Qt build check (<q>Plugin unload failed!</q> on error).</dd>
+          <dt>IPC</dt><dd>None beyond in-process Qt signals and slots.</dd>
+        </dl>
+        <p>The plug-in sets the AppUserModelID <code>fsfilesolutions.chomikbox</code>, registers the <code>TaskbarButtonCreated</code> message, hooks the GUI thread with <code>SetWindowsHookEx</code> and uses <code>ITaskbarList3</code> to add a thumbnail toolbar (previous, play/pause, next) built from the Qt style's standard icons, plus a taskbar progress state. Its <code>SlotReceiver</code> listens to <code>uploaderStatusChanged</code>, <code>uploaderStartWork</code>, <code>uploaderFinishedWork</code>, <code>uploaderPaused</code> and the matching downloader signals, and calls the player slots <code>playPreviousSong()</code>, <code>togglePlay()</code> and <code>playNextSong()</code>. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="npcbplugin">
+      <header class="titlebar">
+        <img src="assets/img/downloader-logo.png" alt="" width="32" height="32">
+        <h2><b>npcbplugin.dll</b> - Click Catcher</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>NPAPI plug-in (<code>NP_GetEntryPoints</code>, <code>NP_Initialize</code>, <code>NP_Shutdown</code>). Version resource: “ChomikBox Click Catcher Plug-In for Netscape, Opera, Mozilla, Chrome”, FileVersion 0.0.9, internal name <code>npcbgeckoplugin.dll</code>.</dd>
+          <dt>Launched by</dt><dd>Loaded by browsers from their plug-in folder after <code>installer.exe --plugmode --install</code>.</dd>
+          <dt>Talks to</dt><dd>The running <code>chomikbox.exe</code> over the named pipe, or starts it with <code>ShellExecute</code>.</dd>
+        </dl>
+        <p>The plug-in claims the MIME types of downloadable files. When a browser would download one, it hands the stream to the plug-in, which copies the stream URL and starts a worker thread. <span class="ev ev-inf">Inferred</span> from <code>NPP_NewStream</code>. The 31 distinct MIME types (32 entries, <code>audio/x-mpeg</code> twice):</p>
+        <p class="muted"><code>application/x-msdownload</code> <code>application/x-compressed</code> <code>application/zip</code> <code>application/octet-stream</code> <code>application/x-zip-compressed</code> <code>application/arj</code> <code>application/rar</code> <code>application/x-tar</code> <code>audio/mpeg</code> <code>audio/x-mpeg</code> <code>audio/mp3</code> <code>video/msvideo</code> <code>video/x-msvideo</code> <code>video/mpeg</code> <code>video/x-mpeg</code> <code>video/quicktime</code> <code>application/x-rar-compressed</code> <code>application/x-msdos-program</code> <code>audio/x-ms-wma</code> <code>video/divx</code> <code>video/x-ms-wm</code> <code>video/x-ms-wmv</code> <code>video/x-ms-wmx</code> <code>application/x-7z-compressed</code> <code>application/msi</code> <code>application/exe</code> <code>application/x-exe</code> <code>application/dos-exe</code> <code>application/x-winexe</code> <code>application/msdos-windows</code> <code>application/metalink+xml</code></p>
+        <h3>How the URL reaches ChomikBox</h3>
+        <ol>
+          <li><code>ProcessIdToSessionId(GetCurrentProcessId())</code> gives the session id; the pipe name is <code>\\.\pipe\qtsingleapp-Chomik-739b-%d</code>.</li>
+          <li><code>CreateMutexA(NULL, TRUE, "ChomikBox2")</code>. If it already exists, ChomikBox is running: the plug-in opens the pipe, waiting up to 2000&nbsp;ms with <code>WaitNamedPipeA</code> if it is busy, and writes a <code>QDataStream</code> frame: a big-endian length of <code>strlen(url) + 3</code>, then <code>-d</code>, the URL and a NUL.</li>
+          <li>Otherwise it runs <code>ShellExecuteA(NULL, "open", &lt;path&gt;, "-d&lt;url&gt;", …)</code>, with the path read once at plug-in load from the default value of <code>HKLM\SOFTWARE\ChomikBox</code> in the <strong>64-bit registry view</strong> (the DLL is 32-bit but asks for <code>KEY_WOW64_64KEY</code>). If the key or its default value is missing, the path is empty. The <code>ShellExecuteA</code> result is not checked and this path shows no message box.</li>
+          <li>Failures show a message box titled <q>ChomikBox Browser Plug-In</q>.</li>
+        </ol>
+        <div class="callout callout-caveat">
+          <img src="assets/img/msgbox-warning.png" alt="" width="64" height="64">
+          <p class="callout-title">A dead path today</p>
+          <p>Chrome (version 45, 2015), Opera (37) and Firefox (52, 2017) removed NPAPI support, so current browsers never load this plug-in. <span class="ev ev-inf">Inferred</span> On a plain MSI install the cold start would also be a <strong>silent no-op</strong>: the 64-bit key does not exist (the MSI writes only <code>WOW6432Node</code>), the path is empty and <code>ShellExecuteA</code> fails unnoticed. <span class="ev ev-obs">Observed</span> registry state, <span class="ev ev-inf">Inferred</span> result (nothing was executed). <code>chomik://</code> links and the Explorer verbs remain working ways into the app.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="window" id="skins">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Skins</b> - <code>skins\app\*.skin</code></h2>
+      </header>
+      <div class="pane">
+        <p>All of <code>.skin</code>, <code>.hintskin</code>, <code>.anim</code> and <code>.tur</code> are Qt&nbsp;4 external resource files produced by <code>rcc -binary</code>: the magic bytes <code>qres</code>, version 1, big-endian offsets to the tree, data and names, 14-byte tree entries and optional zlib blobs. They are registered at run time with <code>QResource::registerResource()</code>. Files of the same name inside one archive are locale variants, chosen by <code>QLocale::Language</code> (90 = Polish, 31 = English, 96 = Russian, and so on). <span class="ev ev-obs">Observed</span></p>
+        <ul>
+          <li><code>green2.skin</code> (2.1&nbsp;MB, 473 files, <q>Zielony Chomik</q>, Green Hamster) is the default; <code>green.skin</code> (1.0&nbsp;MB, 319 files) is the default for Russian.</li>
+          <li>Contents: 9-slice window art (<code>dialog.png</code>, <code>window.png</code>, <code>frame.png</code>), a Qt style sheet per window, tray animation frames, per-state button images (<code>.hover</code>, <code>.pressed</code>, <code>.on</code>, <code>.disabled</code>), images with captions baked in per language (<code>lang90</code> and so on), <code>descr.ini</code> and <code>chomikbox.ico</code>.</li>
+        </ul>
+        <ul class="figure-row">
+          <li><figure><img src="assets/img/feature-upload.png" alt="Hamster in profile looking up, holding a document toward an orange up-arrow" width="60" height="96"><figcaption>the Upload tile (illustration)</figcaption></figure></li>
+        </ul>
+        <p class="muted">The panel's <span lang="pl">Dodawanie</span> (Upload) tile is stored in <code>green2.skin</code> as four state images (normal, hover, pressed, on = module open) plus a caption-less variant whose text the application draws; the Polish captions are baked into the other images. The picture above is an illustration, not the skin's artwork.</p>
+      </div>
+    </section>
+
+    <section class="window" id="hintskins">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Balloon skins</b> - <code>skins\hint\*.hintskin</code></h2>
+      </header>
+      <div class="pane">
+        <p>Eight notification-balloon skins of ten files each: a Qt Designer form (<code>notificationhintwidget.ui</code>), a style sheet, four bubble images whose tail points to a different corner, window and frame images and a close button. <code>simple</code> is the default, <code>green</code> the default for Russian. The other six carry the names of white-label brands that share this client: <code>Abelhassimple</code>, <code>Abresesamosimple</code>, <code>Lolabitssimple</code>, <code>Minhatecasimple</code>, <code>Toutboxsimple</code> and <code>Tuttoboxsimple</code>; the last two are byte-identical. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="anim">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Animations</b> - <code>files\anim\*.anim</code></h2>
+      </header>
+      <div class="pane">
+        <p>21 packages drive the desktop hamster (class <code>Animation</code>, config section <code>[animation]</code>): <code>pacidle</code>, <code>pacidle0</code>–<code>9</code>, <code>pacidlestart1</code>–<code>3</code>, <code>pacmainidle</code>, <code>paccharacter</code>, <code>pacdragfile</code>, <code>pacdropfile</code>, <code>pacmusic</code>, <code>pacscreenshot</code> and <code>pactyping</code>. Each holds an XML state machine and frame pairs: a 256×256 colour JPEG plus a greyscale alpha-mask JPEG, 2&nbsp;103 pairs in total. The XML lists conditions (<code>idle</code>, <code>file-over</code>, <code>file-drop</code>, <code>player-playing</code>, <code>screenshot</code>, <code>typing</code>, <code>mousePress</code>) and transitions (<code>&lt;way start stop enter exit prob priority&gt;</code>). <span class="ev ev-obs">Observed</span></p>
+        <ul class="figure-row">
+          <li><figure><img src="assets/img/anim-idle.png" alt="Hamster standing idle" width="73" height="100"><figcaption>idle</figcaption></figure></li>
+          <li><figure><img src="assets/img/anim-reading-newspaper.png" alt="Hamster in profile reading a newspaper" width="90" height="100"><figcaption>idle: reading the paper</figcaption></figure></li>
+          <li><figure><img src="assets/img/anim-drag-file.png" alt="Hamster looking up with one paw raised toward a hovering document" width="64" height="100"><figcaption>file dragged over</figcaption></figure></li>
+          <li><figure><img src="assets/img/anim-drop-file.png" alt="Hamster looking down at a small blue and white USB stick" width="75" height="100"><figcaption>file dropped</figcaption></figure></li>
+          <li><figure><img src="assets/img/feature-music.png" alt="Hamster in headphones swaying with half-closed eyes" width="73" height="100"><figcaption>music playing</figcaption></figure></li>
+          <li><figure><img src="assets/img/feature-screenshots.png" alt="Hamster pointing a camera at the viewer" width="77" height="100"><figcaption>screenshot</figcaption></figure></li>
+          <li><figure><img src="assets/img/anim-typing.png" alt="Hamster in profile writing on a notepad with a pencil" width="76" height="100"><figcaption>typing</figcaption></figure></li>
+        </ul>
+        <p class="muted">Illustrations of the animation states, drawn for this site; they are not frames from the packages (those are 256×256 colour JPEGs).</p>
+      </div>
+    </section>
+
+    <section class="window" id="tutorial">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Tutorial</b> - <code>locale\tutorial.tur</code></h2>
+      </header>
+      <div class="pane">
+        <p>A <code>qres</code> file with seven entries, all named <code>chomikbox</code>, one per locale: default (English), Polish, Italian, Spanish, Russian, Portuguese and Brazilian Portuguese. Each is zlib-compressed UTF-8 in a small wiki-like markup: <code>[[page-id|Title]]</code> headers (<code>welcome</code>, <code>help:add_files</code>, <code>help:play_music</code>, <code>help:downloader</code>, …), <code>{{go:&lt;page&gt;|label}}</code> and <code>{{skip|label}}</code> buttons, inline HTML, and a trailer <code>## vim: ft=tutorial</code>. The hamster speaks in the first person: <q>drag it … directly into my hands</q>. Controlled by <code>[tutorial] enabled</code>, <code>module-info-show</code> and <code>welcome-info-show</code>. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="locale">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Translations</b> - <code>locale\*.qm</code></h2>
+      </header>
+      <div class="pane">
+        <p>The source language of the UI strings is English. <code>pl.qm</code> has 656 messages, 618 of them translated; <code>en.qm</code> has 670 and overrides 102. Together they cover 42 contexts, one per Qt class. <code>locale\qt\qt.pl.qm</code> is Qt's own Polish catalogue for the standard dialogs. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="base-ini">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>base.ini</b> - brand bootstrap</h2>
+      </header>
+      <div class="pane">
+        <p>Four keys in <code>[main]</code>: <code>domain</code> (<code>chomikuj.pl</code>), <code>title</code> and <code>name</code> (both <code>ChomikBox</code>) and an integrity <code>key</code>. The domain picks the brand overlay and the server names; the title names the data folder; the name is <code>QCoreApplication::applicationName</code>, which is also the name of the Run value. The installer rewrites it only when the system clock is earlier than 2012-01-01, so in practice never. Details: <a href="configuration.html#base-ini">Configuration</a>. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="msi">
+      <header class="titlebar">
+        <img src="assets/img/app-icon.png" alt="" width="32" height="32">
+        <h2><b>ChomikBox.msi</b> - the installer package</h2>
+      </header>
+      <div class="pane">
+        <dl class="spec">
+          <dt>Kind</dt><dd>Windows Installer package built with MakeMSI on 2017-10-21, per-machine (<code>ALLUSERS=1</code>). Not on disk; a cached copy was read without modifying it.</dd>
+          <dt>Codes</dt><dd>ProductCode <code>{8E4185CC-4FF3-46B9-A4DB-5B850B71ABC4}</code>, UpgradeCode <code>{76EE0600-FE66-4741-8BD7-EA1EBBCC0430}</code>, ProductLanguage 1045 (Polish).</dd>
+          <dt>Custom actions</dt><dd><code>ExeCaKeyF01</code> (start <code>chomikbox1conf.exe</code> on a fresh install and on a major upgrade, <code>not Installed</code>), <code>CaLaunchProductCheckBox</code> (launch from the finish page), <code>ExeCaKeyF03</code> (open <code>http://Chomikuj.pl/chomik/chomikbox/AppUninstalled</code> on uninstall, asynchronous), MSVC90 CRT merge modules.</dd>
+          <dt>Shortcuts</dt><dd>Start menu <code>Chomikuj.pl\ChomikBox</code> and <span lang="pl"><code>Odinstaluj ChomikBox</code></span> (uninstall), Desktop, Quick Launch, and an uninstall link in the install folder.</dd>
+        </dl>
+        <p>Its registry rows (the <code>chomik://</code> protocol, music ProgIDs, Explorer verbs, uninstall entry) are listed on <a href="windows-integration.html#registry">Windows integration</a>.</p>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

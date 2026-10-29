@@ -1,0 +1,79 @@
+{
+    "operation": "FileDownload",
+    "case": "get-audio-stream",
+    "timestamp": "2026-10-24T15:33:28Z",
+    "request": {
+        "method": "GET",
+        "url": "{{SIGNED_URL}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Icy-MetaData",
+                "1"
+            ],
+            [
+                "Accept-Encoding",
+                " "
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Cache-Control",
+                "private"
+            ],
+            [
+                "Content-Type",
+                "audio/mpeg"
+            ],
+            [
+                "Server",
+                "Microsoft-IIS/10.0"
+            ],
+            [
+                "Access-Control-Allow-Origin",
+                "http://chomikuj.pl"
+            ],
+            [
+                "Content-Disposition",
+                "attachment; filename=\"silence.mp3\""
+            ],
+            [
+                "X-AspNet-Version",
+                "4.0.30319"
+            ],
+            [
+                "X-Powered-By",
+                "ASP.NET"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:33:26 GMT"
+            ],
+            [
+                "Content-Length",
+                "1248"
+            ]
+        ],
+        "contentType": "audio/mpeg",
+        "contentEncoding": null,
+        "server": "Microsoft-IIS/10.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 1248,
+        "bodyBytesDecoded": 1248,
+        "bodySha256": "c6a44168fc31e9ff52b94716ebe7fb29ed22562379f7bc299fc30044f0023602",
+        "elapsedMs": 108
+    },
+    "note": "GET of the player.audio url with the player's headers (Icy-MetaData: 1, empty Accept-Encoding). The player requires 2xx, Content-Length > 0 and no x-nofile header.",
+    "expectedSha256": "c6a44168fc31e9ff52b94716ebe7fb29ed22562379f7bc299fc30044f0023602"
+}

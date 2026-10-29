@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><BoxEvents xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><timestamp>0</timestamp><events><Event><name>settings.autostart</name><value>false</value></Event><Event><name>settings.defaultplayer</name><value>0</value></Event></events></BoxEvents></s:Body></s:Envelope>

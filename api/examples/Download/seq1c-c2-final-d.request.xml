@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><Download xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><sequence><stamp>997485</stamp><part>1</part><count>2</count></sequence><disposition>download</disposition><list><DownloadReqEntry><id>10833170698</id></DownloadReqEntry></list></Download></s:Body></s:Envelope>

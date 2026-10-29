@@ -1,0 +1,59 @@
+# Accepted Redocly warnings (recommended ruleset + api/redocly.yaml), recorded per
+# location so that any NEW warning is reported by `redocly lint`.
+# Re-generate with `redocly lint <both files> --generate-ignore-file` only after
+# reviewing every new entry; keep these reasons.
+#
+# operation-2xx-response (both documents, 12 operations): these URLs only ever
+# answer with redirects or errors, which is what the client sees or what the
+# probe showed. Adding a 2xx would describe something that never happened.
+#   - /session GET: probe on the main host, 302 to an error page (S-12)
+#   - /File.aspx HEAD: HEAD unsupported, 302 to /Error404.aspx (probe)
+#   - /chomik/chomikbox/LoginFromBox: 302 (and 307 from box.chomikuj.pl) by design
+#   - /box/LoginFromBox: dead generic-default path, 404 / 302 (probe)
+#   - /Create.aspx, /LostPassword.aspx: 301 to the current pages
+#   - /Image.aspx: 302 to a signed file URL
+#   - /MusicFile.aspx: 302 to /Error404.aspx (endpoint gone)
+#   - /repo/dists, /updates, /repo/beta/: dead update channel (404/403/404)
+#   - /services/ChomikBoxService.svc/{operation}: always a:DestinationUnreachable (500)
+#
+# no-illogical-composition-keywords (strict document, SoapRequestEnvelope/oneOf
+# and SoapResponseEnvelope/oneOf, 136 pairs each): the 17 envelopes of each
+# oneOf ARE mutually exclusive: each Body `required`s a different operation
+# element and admits nothing else (additionalProperties: false), so no instance
+# can match two branches (tools/validate.mjs (e) also checks that every example
+# matches exactly one branch). Redocly's heuristic only accepts exclusion
+# through differing property values or a discriminator, which a SOAP envelope
+# does not have (and XML payloads cannot use a discriminator property).
+# Note: Redocly prints at most 100 problems by default; use --max-problems to
+# see all of them.
+chomikbox.openapi.yaml:
+  operation-2xx-response:
+    - '#/paths/~1session/get/responses'
+    - '#/paths/~1File.aspx/head/responses'
+    - '#/paths/~1chomik~1chomikbox~1LoginFromBox/get/responses'
+    - '#/paths/~1box~1LoginFromBox/get/responses'
+    - '#/paths/~1Create.aspx/get/responses'
+    - '#/paths/~1LostPassword.aspx/get/responses'
+    - '#/paths/~1Image.aspx/get/responses'
+    - '#/paths/~1MusicFile.aspx/get/responses'
+    - '#/paths/~1repo~1dists/get/responses'
+    - '#/paths/~1updates/get/responses'
+    - '#/paths/~1repo~1beta~1/get/responses'
+    - '#/paths/~1services~1ChomikBoxService.svc~1{operation}/post/responses'
+  no-illogical-composition-keywords:
+    - '#/components/schemas/SoapRequestEnvelope/oneOf'
+    - '#/components/schemas/SoapResponseEnvelope/oneOf'
+chomikbox.per-operation.openapi.yaml:
+  operation-2xx-response:
+    - '#/paths/~1session/get/responses'
+    - '#/paths/~1File.aspx/head/responses'
+    - '#/paths/~1chomik~1chomikbox~1LoginFromBox/get/responses'
+    - '#/paths/~1box~1LoginFromBox/get/responses'
+    - '#/paths/~1Create.aspx/get/responses'
+    - '#/paths/~1LostPassword.aspx/get/responses'
+    - '#/paths/~1Image.aspx/get/responses'
+    - '#/paths/~1MusicFile.aspx/get/responses'
+    - '#/paths/~1repo~1dists/get/responses'
+    - '#/paths/~1updates/get/responses'
+    - '#/paths/~1repo~1beta~1/get/responses'
+    - '#/paths/~1services~1ChomikBoxService.svc~1{operation}/post/responses'

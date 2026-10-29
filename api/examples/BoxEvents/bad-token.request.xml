@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><BoxEvents xmlns="http://chomikuj.pl/"><token>NOT-A-REAL-TOKEN</token><timestamp>0</timestamp><events></events></BoxEvents></s:Body></s:Envelope>

@@ -1,0 +1,23 @@
+{
+  "name": "chomikbox-openapi-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build and validation tooling for the ChomikBox 2.0.8.2 OpenAPI 3.2.1 documents",
+  "type": "module",
+  "scripts": {
+    "sync": "node sync-examples.mjs",
+    "build-strict": "node build-strict.mjs",
+    "validate": "node validate.mjs",
+    "build-json": "node validate.mjs --json-only",
+    "all": "node build-strict.mjs && node validate.mjs",
+    "lint": "cd .. && npx -y @redocly/cli@latest lint chomikbox.openapi.yaml chomikbox.per-operation.openapi.yaml --max-problems 1000"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@hyperjump/json-schema": "^1.18.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "saxes": "^6.0.0",
+    "yaml": "^2.9.1"
+  }
+}

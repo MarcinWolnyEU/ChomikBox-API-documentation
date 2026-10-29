@@ -1,0 +1,123 @@
+{
+    "operation": "Download",
+    "case": "sequence-own-agreement-final-part1-of-2",
+    "timestamp": "2026-10-24T19:51:40Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 319,
+        "bodyBytesUncompressed": 548
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 19:51:39 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "1039"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 19:51:39 GMT; path=/; HttpOnly"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fb847a184e3009-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 1039,
+        "bodyBytesDecoded": 1948,
+        "bodySha256": null,
+        "elapsedMs": 165.4
+    },
+    "note": "Final part 1 of 2 with the free own agreement for b.txt: which entries come back with a signed url.",
+    "sequenceStamp": "832121",
+    "entryIds": [
+        "10832913467"
+    ],
+    "part0EntryIds": [
+        "10832913465"
+    ]
+}

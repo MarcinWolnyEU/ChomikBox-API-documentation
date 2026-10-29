@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocol · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="How ChomikBox 2.0.8.2 talks to chomikuj.pl: SOAP 1.1 over HTTP, SOAPAction dispatch, envelopes and namespaces, gzip, session lifecycle, status values, faults, retry and the upload, download and web endpoints.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html" aria-current="page">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>Protocol</b> - SOAP over HTTP, as it really works</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Protocol</span></li>
+          </ol>
+        </nav>
+        <figure class="float-art">
+          <img src="assets/img/protocol-soap.png" alt="A sad hamster with a tear on its cheek, looking down at four old, cracked, crumbling stone letters that spell SOAP" width="272" height="223">
+          <figcaption>SOAP is neither Simple, nor Object-oriented, nor an Access Protocol</figcaption>
+        </figure>
+        <p class="lead">ChomikBox speaks SOAP 1.1 to one WCF service over plain HTTP, with gzip-compressed request bodies and the session token inside every body. Uploads, downloads and music streaming are separate HTTP requests to file servers that the SOAP calls name.</p>
+        <p>This page combines two sources. The behaviour of <code>chomikbox.exe</code> says what the client sends and reads. The live verification of 2026-10-24 says what the service accepts and returns; 17 of the 18 SOAP operations and all file-server endpoints were exercised. Where the two disagree, a box like this one shows both, and live wins:</p>
+        <dl class="sv">
+          <dt><span class="ev ev-obs">Client</span></dt><dd>what the client does or expects</dd>
+          <dt><span class="ev ev-live">Live</span></dt><dd>what the production service actually did</dd>
+        </dl>
+        <p>Every operation has a generated page in the <a href="api/index.html">API reference</a> with its schema and all captured examples. The examples below are real captures from <code>api/examples/</code>, redacted (<code>{{TOKEN}}</code> and similar placeholders) and indented for reading.</p>
+        <nav class="toc clear" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#endpoint">Endpoint and dispatch</a></li>
+            <li><a href="#envelope">Envelope and namespaces</a></li>
+            <li><a href="#compression">Compression and headers</a></li>
+            <li><a href="#session">Session lifecycle</a></li>
+            <li><a href="#status">Status values</a></li>
+            <li><a href="#faults">Faults</a></li>
+            <li><a href="#retry">Retry, relogin and sequences</a></li>
+            <li><a href="#events">Settings, events, agreements and polling</a></li>
+            <li><a href="#http">Upload, download and web endpoints</a></li>
+            <li><a href="#differences">Client vs live, summarised</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="endpoint">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Endpoint</b> and SOAPAction dispatch</h2>
+      </header>
+      <div class="pane">
+        <pre><code>POST http://box.chomikuj.pl/services/ChomikBoxService.svc
+Content-Type: text/xml;charset=utf-8
+SOAPAction: http://chomikuj.pl/IChomikBoxService/&lt;Operation&gt;
+Content-Encoding: gzip</code></pre>
+        <p>The service is a WCF <code>basicHttpBinding</code>-style SOAP 1.1 endpoint behind Cloudflare, with several origin nodes. It dispatches on the <code>SOAPAction</code> header alone. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></p>
+        <section class="table-wrap" aria-labelledby="tbl-dispatch-cap" tabindex="0">
+          <table>
+            <caption id="tbl-dispatch-cap">How the endpoint reacts (live)</caption>
+            <thead><tr><th scope="col">Request</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr><td><code>SOAPAction</code> unquoted, as the client sends it, or quoted</td><td>Both work</td></tr>
+              <tr><td>No or unknown <code>SOAPAction</code></td><td>HTTP 500, <code>a:ActionNotSupported</code>; this is how the 17 existing operations were enumerated</td></tr>
+              <tr><td>A query string, e.g. <code>….svc?op=Auth</code></td><td>Ignored: the call works</td></tr>
+              <tr><td>An operation name as a path, e.g. <code>….svc/Auth</code></td><td>HTTP 500, <code>a:DestinationUnreachable</code>, naming an internal origin host (<a href="security.html#s-07">S-07</a>)</td></tr>
+              <tr><td><code>Content-Type: application/soap+xml</code> (SOAP 1.2)</td><td>HTTP 415</td></tr>
+              <tr><td><code>https://box.chomikuj.pl/…</code></td><td>Works too; the client never uses it (<a href="security.html#c-01">C-01</a>)</td></tr>
+              <tr><td><code>GET ….svc</code>, <code>?wsdl</code>, <code>?singleWsdl</code></td><td>The WCF "metadata publishing disabled" page: there is no WSDL</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <h3 id="openapi">Two OpenAPI documents, and why <code>?op=</code></h3>
+        <p>OpenAPI identifies operations by path and method, but the 17 main-service SOAP operations share one URL and one method (<code>SessionBegin</code> has its own host and path). A per-operation view gives each operation its own path key (<code>/Auth</code>, <code>/Folders</code>, …) under a path-level server <code>http://box.chomikuj.pl/services/ChomikBoxService.svc?op=</code>. Concatenated, the URL becomes <code>….svc?op=/Auth</code>, which reaches the operation because WCF ignores the query string; a real path suffix would fail, as shown above. The real client posts to the bare <code>.svc</code> URL; both are equivalent. <a class="src" href="../api/README.md">api/README.md</a></p>
+<!-- spec-docs -->
+<p>The project publishes two content-equivalent OpenAPI 3.2.1 documents, generated from the same source. <a href="../api/chomikbox.openapi.yaml"><code>api/chomikbox.openapi.yaml</code></a> is the strictly conformant canonical document: SOAP is a single <code>POST</code> on <code>/services/ChomikBoxService.svc</code> with a <code>SOAPAction</code> enum and <code>oneOf</code> request and response bodies. <a href="../api/chomikbox.per-operation.openapi.yaml"><code>api/chomikbox.per-operation.openapi.yaml</code></a> is a per-operation view with one path item per SOAP operation, routed through a <code>?op=</code> server URL; because a server URL may not contain a query, it declares that deviation in <code>x-oas-deviation</code>. The site's API reference is generated from <code>api/chomikbox.per-operation.openapi.json</code>.</p>
+<!-- /spec-docs -->
+        <span class="code-label">Service/rest-style-path: an operation name in the path (response, HTTP 500)</span>
+        <pre class="code-wrap"><code>&lt;s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"&gt;&lt;s:Body&gt;&lt;s:Fault&gt;
+  &lt;faultcode xmlns:a="http://schemas.microsoft.com/ws/2005/05/addressing/none"&gt;a:DestinationUnreachable&lt;/faultcode&gt;
+  &lt;faultstring xml:lang="en-US"&gt;The message with To 'http://vmain53.hwsl.local:8080/services/ChomikBoxService.svc/CheckEvents'
+    cannot be processed at the receiver, due to an AddressFilter mismatch at the EndpointDispatcher. …&lt;/faultstring&gt;
+&lt;/s:Fault&gt;&lt;/s:Body&gt;&lt;/s:Envelope&gt;</code></pre>
+        <p class="muted">Operation pages: <a href="api/soapEndpoint.html">POST ….svc (endpoint behaviour)</a>, <a href="api/soapRestStylePath.html">POST ….svc/{operation}</a>, <a href="api/getServiceMetadataPage.html">GET ….svc</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="envelope">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Envelope</b> and namespaces</h2>
+      </header>
+      <div class="pane">
+        <p>The client writes the envelope with <code>QXmlStreamWriter</code>: no indentation, no SOAP header, children unprefixed in the operation's namespace, <code>token</code> first. <span class="ev ev-obs">Observed</span></p>
+        <span class="code-label">CheckEvents/success-with-stats (request, indented)</span>
+        <pre class="code-wrap"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+            s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;
+  &lt;s:Body&gt;
+    &lt;CheckEvents xmlns="http://chomikuj.pl/"&gt;
+      &lt;token&gt;{{TOKEN}}&lt;/token&gt;
+      &lt;stats&gt;
+        &lt;isUploading&gt;0&lt;/isUploading&gt;
+        &lt;isPlaying&gt;0&lt;/isPlaying&gt;
+        &lt;isDownloading&gt;0&lt;/isDownloading&gt;
+        &lt;panelSelectedTab&gt;0&lt;/panelSelectedTab&gt;
+        &lt;animation&gt;0&lt;/animation&gt;
+      &lt;/stats&gt;
+    &lt;/CheckEvents&gt;
+  &lt;/s:Body&gt;
+&lt;/s:Envelope&gt;</code></pre>
+        <span class="code-label">Auth/success (response, indented)</span>
+        <pre class="code-wrap"><code>&lt;s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+  &lt;s:Body&gt;
+    &lt;AuthResponse xmlns="http://chomikuj.pl/"&gt;
+      &lt;AuthResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"&gt;
+        &lt;a:status&gt;Ok&lt;/a:status&gt;
+        &lt;a:errorMessage i:nil="true"/&gt;
+        &lt;a:hamsterId&gt;25798223&lt;/a:hamsterId&gt;
+        &lt;a:publisherId i:nil="true"/&gt;
+        &lt;a:name&gt;{{USERNAME}}&lt;/a:name&gt;
+        &lt;a:token&gt;{{TOKEN}}&lt;/a:token&gt;
+      &lt;/AuthResult&gt;
+    &lt;/AuthResponse&gt;
+  &lt;/s:Body&gt;
+&lt;/s:Envelope&gt;</code></pre>
+        <section class="table-wrap" aria-labelledby="tbl-ns-cap" tabindex="0">
+          <table>
+            <caption id="tbl-ns-cap">Namespaces on the wire</caption>
+            <thead><tr><th scope="col">Where</th><th scope="col">Namespace</th></tr></thead>
+            <tbody>
+              <tr><td>Request: operation element and all nested members</td><td><code>http://chomikuj.pl/</code>, with the trailing slash</td></tr>
+              <tr><td>Response wrapper <code>&lt;OpResponse&gt;</code>, <code>&lt;OpResult&gt;</code></td><td><code>http://chomikuj.pl/</code></td></tr>
+              <tr><td>Result members (<code>a:status</code>, <code>a:token</code>, …)</td><td><code>a:</code> = <code>http://chomikuj.pl</code>, <strong>without</strong> the trailing slash</td></tr>
+              <tr><td>Nested structures (<code>FolderInfo</code>, <code>FileEntry</code>, <code>settings</code>, …)</td><td>unprefixed, so <code>http://chomikuj.pl/</code></td></tr>
+              <tr><td><code>CheckEventsResult</code>, <code>AddFolderResult</code></td><td><code>a:</code> = <code>http://schemas.datacontract.org/2004/07/TeamSolutions.Chomik.DAO.ChomikBox</code>; <code>status</code>/<code>errorMessage</code> redeclare <code>http://chomikuj.pl</code>; <code>changes</code> children use <code>b:</code> = <code>…/TeamSolutions.Chomik.Library.DAO.ChomikBox</code></td></tr>
+              <tr><td><code>i:nil="true"</code></td><td><code>i:</code> = <code>http://www.w3.org/2001/XMLSchema-instance</code>; a null value. The client declares <code>xmlns:i</code> only if it sends a nil, which it never does</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <h3>Rules that matter for a client</h3>
+        <ul>
+          <li><strong>Order matters.</strong> WCF reads parameters forward only: an out-of-order parameter is silently dropped (treated as null or 0), not rejected (<a href="security.html#s-06">S-06</a>). The schemas list members in wire order. <span class="ev ev-live">Live</span></li>
+          <li><strong>The trailing slash matters.</strong> With the operation element in <code>http://chomikuj.pl</code> the parameters are not matched and the request faults (<code>a:InternalServiceFault</code>). Members in other namespaces are ignored. <span class="ev ev-live">Live</span></li>
+          <li>Booleans: the client writes <code>0</code>/<code>1</code>; <code>true</code>/<code>false</code> work equally. The <code>s:encodingStyle</code> attribute is optional. Omitted optional members and <code>i:nil</code> are both accepted.</li>
+          <li>The serializer has a <code>&lt;s:Header&gt;&lt;Token&gt;</code> branch, but nothing enables it: the client never sends a SOAP header. <span class="ev ev-obs">Observed</span></li>
+        </ul>
+        <dl class="sv">
+          <dt><span class="ev ev-obs">Client</span></dt><dd>The client's SAX parser compares lower-cased local names and ignores prefixes and namespaces, so it reads every result by name.</dd>
+          <dt><span class="ev ev-live">Live</span></dt><dd>Two results use the datacontract namespaces shown above, and a few members exist that the client never reads (<code>CheckEvents/new</code>, which was nil in every probe, including 15 after the follow-up actions). A namespace-aware client must follow the table, not the client's habit.</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="window" id="compression">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Compression</b> and headers</h2>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><strong>Requests.</strong> With <code>[network] soap-use-gzip = true</code>, set in the generic embedded <code>defconf.ini</code>, the body is gzip-compressed (zlib level -1, gzip wrapper) and sent with <code>Content-Encoding: gzip</code>; <code>Content-Type</code> stays <code>text/xml;charset=utf-8</code>. <code>SessionBegin</code> is always uncompressed. <span class="ev ev-obs">Observed</span> </li>
+          <li>The service accepts gzip bodies. <span class="ev ev-live">Live</span> The captured <code>Auth/success</code> request was 249 bytes on the wire and 385 bytes uncompressed; <code>Auth/success-uncompressed-request</code> shows the plain variant.</li>
+          <li><strong>Responses</strong> come back gzip-compressed when the request carries <code>Accept-Encoding: gzip</code>. Faults (HTTP 500) are never compressed. <span class="ev ev-live">Live</span></li>
+          <li>The application sets none of these headers itself, so the defaults of the bundled Qt&nbsp;4.8.5 apply: <code>User-Agent: Mozilla/5.0</code> (no product token), <code>Accept-Encoding: gzip</code> (replies are unzipped transparently), <code>Connection: Keep-Alive</code> and <code>Accept-Language: &lt;locale&gt;,en,*</code> built from the Windows locale (a Polish system gives <code>pl-PL,en,*</code>; the C locale gives <code>en,*</code>). <span class="ev ev-obs">Observed</span> for the Qt library, <span class="ev ev-inf">Inferred</span> for the ChomikBox requests; the captures reproduce them. The one exception is the audio stream GET, which sends <code>Accept-Encoding:</code> with a single space.</li>
+          <li>Responses carry <code>x-aspnet-version: 4.0.30319</code>, <code>x-powered-by: ASP.NET</code> and an <code>x-server</code> node name (<a href="security.html#s-07">S-07</a>). A typical SOAP round trip took 130–300&nbsp;ms. <span class="ev ev-live">Live</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="session">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Session lifecycle</b> - token, relogin, logout</h2>
+      </header>
+      <div class="pane">
+        <ol>
+          <li><strong>Auth.</strong> <code>name</code>, <code>passHash</code> (lower-case hex MD5 of the UTF-8 password, unsalted), <code>ver = 4</code> and <code>client{name = "chomikbox", version = "2.0.8.2"}</code>. The constants are compiled in. It is sent at start-up (auto-login), after the system resumes and as the relogin. <span class="ev ev-obs">Observed</span> (<a href="security.html#c-02">C-02</a>)</li>
+          <li><strong>Outcomes.</strong> <code>Ok</code> with <code>hamsterId</code>, <code>name</code> and <code>token</code>; <code>Forbidden</code> for an unknown user; <code>PermissionError</code> for a wrong password (<a href="security.html#s-01">S-01</a>). The service enforces neither <code>ver</code> nor <code>client</code> (<a href="security.html#s-11">S-11</a>). <span class="ev ev-live">Live</span></li>
+          <li><strong>Token.</strong> An opaque string, sent as the first child <code>&lt;token&gt;</code> of every later request except <code>SessionBegin</code>. There are no cookies, no HTTP authentication and no SOAP header (<a href="security.html#c-06">C-06</a>).</li>
+          <li><strong>After login</strong> the client sends <code>CheckEvents</code>, starts its poll timer (see <a href="#events">Settings, events and polling</a>: 300&nbsp;s idle, 60&nbsp;s while uploading, 15&nbsp;s while a folder view is open), requests <code>Folders(0, 0)</code>, sends <code>SessionBegin</code> only if enabled, and flushes queued <code>BoxEvents</code>.</li>
+          <li><strong>BadToken.</strong> Any operation answers <code>status = BadToken</code> for an unknown or logged-out token. The client then runs <code>Auth</code> again, at most once per message, replaces the token in queued messages and resends them; session-bound messages are dropped.</li>
+          <li><strong>Logout</strong> invalidates exactly its own token; afterwards that token gets <code>BadToken</code>. The client sends it on quit and when the system suspends.</li>
+        </ol>
+        <dl class="sv">
+          <dt><span class="ev ev-obs">Client</span></dt><dd>The client keeps one token and replaces it on relogin.</dd>
+          <dt><span class="ev ev-live">Live</span></dt><dd>Several tokens of one account are valid at once, a new <code>Auth</code> does not invalidate earlier ones, and no expiry was seen within about 45 minutes (<a href="security.html#s-10">S-10</a>). <code>t</code> is simply the <code>Auth</code> token; <code>LoginFromBox?t=…</code> turns it into a web session cookie. Whether it is accepted more than once was not measured.</dd>
+        </dl>
+        <span class="code-label">CheckEvents/bad-token (response, indented): note the datacontract namespace</span>
+        <pre class="code-wrap"><code>&lt;CheckEventsResult xmlns:a="http://schemas.datacontract.org/2004/07/TeamSolutions.Chomik.DAO.ChomikBox"
+                   xmlns:i="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;status xmlns="http://chomikuj.pl"&gt;BadToken&lt;/status&gt;
+  &lt;errorMessage i:nil="true" xmlns="http://chomikuj.pl"/&gt;
+  &lt;a:new i:nil="true"/&gt;
+  &lt;a:settings i:nil="true"/&gt;
+  &lt;a:accountBalance i:nil="true"/&gt;
+  &lt;a:changes i:nil="true" xmlns:b="http://schemas.datacontract.org/2004/07/TeamSolutions.Chomik.Library.DAO.ChomikBox"/&gt;
+&lt;/CheckEventsResult&gt;</code></pre>
+        <p class="muted">Sequence diagram: <a href="flows.html#session">Flows</a>. Operation pages: <a href="api/auth.html">Auth</a>, <a href="api/checkEvents.html">CheckEvents</a>, <a href="api/logout.html">Logout</a>, <a href="api/loginFromBox.html">LoginFromBox</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="status">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Status values</b> - every result starts with one</h2>
+      </header>
+      <div class="pane">
+        <p>Service-level outcomes, including errors, come with HTTP 200 and a <code>status</code> member, followed by <code>errorMessage</code>. The client treats only <code>Ok</code> as success. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></p>
+        <section class="table-wrap" aria-labelledby="tbl-status-cap" tabindex="0">
+          <table>
+            <caption id="tbl-status-cap">Status values</caption>
+            <thead><tr><th scope="col">status</th><th scope="col">Meaning</th><th scope="col">Client reaction</th></tr></thead>
+            <tbody>
+              <tr><td><code>Ok</code></td><td>Success</td><td>Handler for the operation runs</td></tr>
+              <tr><td><code>BadToken</code></td><td>Unknown, logged-out or invalid token</td><td>One relogin per message, then resend</td></tr>
+              <tr><td><code>Forbidden</code></td><td><code>Auth</code>: the user name does not exist</td><td>Credentials dialog</td></tr>
+              <tr><td><code>PermissionError</code></td><td><code>Auth</code>: wrong password for an existing user</td><td>Credentials dialog</td></tr>
+              <tr><td><code>Error</code></td><td>Generic failure. It usually carries a reason in <code>errorMessage</code>, but not always: <code>FolderFiles</code> with an unknown disposition returns <code>Error</code> with <code>errorMessage</code> nil</td><td>Logged; folder operations show a message and reload the tree</td></tr>
+              <tr><td><code>NotEmptyOrNotExistsFolder</code></td><td><code>RemoveFolder</code> with <code>force=false</code> on a folder with files, or an unknown id</td><td>Asks whether to remove with contents</td></tr>
+              <tr><td><code>WrongDisposition</code></td><td><code>FolderFiles</code> with <code>disposition=download</code></td><td>Error path; seen live only</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p><code>errorMessage</code> is nil for every other status, and for some <code>Error</code> results. Values seen live: <code>EmptyName</code>, <code>InvalidCharacters</code>, <code>NameExistsAtDestination</code> (AddFolder), <code>NameAlreadyExists</code> (RenameFolder), <code>FolderNotExists</code> (AddFolder), <code>FolderDoesntExists</code> (ModifyFolder), <code>InternalError</code> (RenameFolder on an unknown id), <code>MovingIntoChild</code> (MoveFolder) and <code>failed : requested file(s) not available</code> (Download). <span class="ev ev-live">Live</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="faults">
+      <header class="titlebar">
+        <img src="assets/img/msgbox-critical.png" alt="" width="32" height="32">
+        <h2><b>Faults</b> - HTTP 500</h2>
+      </header>
+      <div class="pane">
+        <p>A fault is the service's answer to one request it could not process: HTTP 500 with a SOAP fault (<code>xml:lang="en-US"</code>, never compressed). It is an unhandled exception for that request, not an outage; the service keeps serving other requests. <span class="ev ev-live">Live</span></p>
+        <section class="table-wrap" aria-labelledby="tbl-faults-cap" tabindex="0">
+          <table>
+            <caption id="tbl-faults-cap">Fault codes seen live</caption>
+            <thead><tr><th scope="col">faultcode</th><th scope="col">When</th></tr></thead>
+            <tbody>
+              <tr><td><code>a:InternalServiceFault</code></td><td>Generic, without detail: empty <code>Auth</code> body, operation element without the trailing slash, <code>Download</code> id <code>&lt;hamsterId&gt;/&lt;folderId&gt;</code>, <code>MoveFolder</code> into itself, which still moves the folder (<a href="security.html#s-03">S-03</a>)</td></tr>
+              <tr><td><code>a:DeserializationFailed</code></td><td>A value that cannot be parsed; the fault names the parameter and its CLR type (<a href="security.html#s-07">S-07</a>)</td></tr>
+              <tr><td><code>a:ActionNotSupported</code></td><td>Missing or unknown <code>SOAPAction</code>, including <code>SessionBegin</code> on the main service</td></tr>
+              <tr><td><code>a:DestinationUnreachable</code></td><td>Operation name appended to the URL path</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <span class="code-label">Service/deserialization-failed: Folders with hamsterId = "abc" (response)</span>
+        <pre class="code-wrap"><code>&lt;s:Fault&gt;
+  &lt;faultcode xmlns:a="http://schemas.microsoft.com/net/2005/12/windowscommunicationfoundation/dispatcher"&gt;a:DeserializationFailed&lt;/faultcode&gt;
+  &lt;faultstring xml:lang="en-US"&gt;The formatter threw an exception while trying to deserialize the message: There was an error
+    while trying to deserialize parameter http://chomikuj.pl/:hamsterId. The InnerException message was 'There was an error
+    deserializing the object of type System.Int32. The value 'abc' cannot be parsed as the type 'Int32'.'. …&lt;/faultstring&gt;
+&lt;/s:Fault&gt;</code></pre>
+        <p>Because deserialization happens before an operation runs, the live work could use these faults with a fake token to learn every parameter name, type and order without side effects. The client logs faults as network errors and retries or relogs as described next.</p>
+      </div>
+    </section>
+
+    <section class="window" id="retry">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Retry, relogin</b> and sequences</h2>
+      </header>
+      <div class="pane">
+        <p>Every message goes through the <code>NetModule</code> pool with client-side flags that are never sent. <span class="ev ev-obs">Observed</span> </p>
+        <section class="table-wrap" aria-labelledby="tbl-flags-cap" tabindex="0">
+          <table>
+            <caption id="tbl-flags-cap">Message flags and policy</caption>
+            <thead><tr><th scope="col">Flag or situation</th><th scope="col">Effect</th></tr></thead>
+            <tbody>
+              <tr><td><code>:loginRequired</code> (default true; false for <code>Auth</code>, <code>SessionBegin</code>)</td><td>The message may trigger a relogin</td></tr>
+              <tr><td><code>:sessionBound</code> (<code>CheckEvents</code>, <code>Folders</code>, <code>UploadToken</code>, <code>RefreshFileUrl</code>, resume check)</td><td>Dropped instead of resent when a relogin happens</td></tr>
+              <tr><td><code>:noRetransmit</code> (<code>Logout</code>, <code>CheckEvents</code>)</td><td>Never resent</td></tr>
+              <tr><td><code>:noRelog</code> (<code>BoxEvents</code>, resume check)</td><td>Never triggers a relogin</td></tr>
+              <tr><td>Status <code>BadToken</code></td><td>Relogin if <code>:relogCount</code> &lt; <code>message-relog-count</code> (1); message kept and resent with the new token</td></tr>
+              <tr><td>Timeout or network error</td><td>Resent once (<code>message-repeat-count</code> = 1), otherwise a relogin as above</td></tr>
+              <tr><td>Age</td><td>Every 5&nbsp;s the pool drops messages older than 15&nbsp;s (<code>Download</code>: 45&nbsp;s); the reply timeout is 20&nbsp;s, clamped to 5–120&nbsp;s</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <h3>Sequenced Download requests</h3>
+        <p>With <code>[network] sequence-soap = true</code> (default config), <code>Download</code> entries are cut into parts of up to 2000. Each part carries <code>sequence{stamp, part, count}</code> with a shared random stamp, and the client waits for all parts before it acts. <span class="ev ev-obs">Observed</span></p>
+        <span class="code-label">Download/chunked-sequence: first of two parts (request, then response)</span>
+        <pre class="code-wrap"><code>&lt;Download xmlns="http://chomikuj.pl/"&gt;
+  &lt;token&gt;{{TOKEN}}&lt;/token&gt;
+  &lt;sequence&gt;&lt;stamp&gt;1006&lt;/stamp&gt;&lt;part&gt;0&lt;/part&gt;&lt;count&gt;2&lt;/count&gt;&lt;/sequence&gt;
+  &lt;disposition&gt;download&lt;/disposition&gt;
+  &lt;list&gt;&lt;DownloadReqEntry&gt;&lt;id&gt;10832648145&lt;/id&gt;&lt;/DownloadReqEntry&gt;&lt;/list&gt;
+&lt;/Download&gt;
+
+&lt;DownloadResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;a:status&gt;Ok&lt;/a:status&gt;
+  &lt;a:errorMessage i:nil="true"/&gt;
+  &lt;a:list i:nil="true"/&gt;
+  &lt;a:accountBalance i:nil="true"/&gt;
+  &lt;a:messageSequence&gt;&lt;stamp&gt;1006&lt;/stamp&gt;&lt;part&gt;0&lt;/part&gt;&lt;count&gt;2&lt;/count&gt;&lt;/a:messageSequence&gt;
+&lt;/DownloadResult&gt;</code></pre>
+        <dl class="sv">
+          <dt><span class="ev ev-obs">Client</span></dt><dd>The client always sends the sequenced form when <code>sequence-soap</code> is on.</dd>
+          <dt><span class="ev ev-live">Live</span></dt><dd><code>sequence</code> is optional; the plain form works and then <code>messageSequence</code> is nil. A non-final part (part 0 of 2) is acknowledged with <code>Ok</code>, nil <code>list</code> and <code>accountBalance</code>, and only <code>messageSequence</code> echoed. The <strong>final part carries the data</strong>, including the entries of the earlier parts, but only under the conditions below. <code>SavePlaylist</code> also accepts an optional <code>sequence</code>.</dd>
+        </dl>
+        <p>The rules below fit all 26 sequenced exchanges of the follow-up (four sessions, tiny files of the test account). The behaviour is <span class="ev ev-live">Live</span>; the storage mechanism behind it is <span class="ev ev-inf">Inferred</span>. They are also finding <a href="security.html#s-13">S-13</a>.</p>
+        <ol>
+          <li>Entries of a non-final part are stored <strong>per session token</strong>, not per <code>stamp</code>, and by all origin nodes alike. A new part 0 replaces what was stored.</li>
+          <li>The store is <strong>not cleared by the final part</strong>: a later final part sent alone, with a new stamp, still returns the earlier part's entry as well as its own.</li>
+          <li>A final part returns the stored entries plus its own, grouped as usual. It is not a folder expansion: other files of the same folder are not listed.</li>
+          <li>A final part with nothing stored in the session answers <code>status = Error</code> with a nil <code>errorMessage</code> and a nil list. A second login has its own, empty store.</li>
+          <li>If the combined entries span <strong>two folders</strong>, the reply is <code>Ok</code> with an <strong>empty</strong> <code>&lt;a:list/&gt;</code>, even for the final part's own entry. A stale part from another folder empties a later final part in the same way.</li>
+          <li>The agreements that count are those of the <strong>final message</strong> only: with <code>own</code> on both parts both entries got a signed URL; with <code>own</code> on part 0 only, neither did. Whether a final-message agreement is applied per entry or per type to all entries was not separated (<span class="ev ev-unk">Unknown</span>).</li>
+          <li>A single-message request (<code>count = 1</code>) ignores stored parts. In three-part sequences the middle part is acknowledged like part 0.</li>
+        </ol>
+        <p>Consequence for clients: since the real client splits only above 2000 entries, normal requests are single messages. A request for more than 2000 files from more than one folder would come back empty, and two sequenced requests running at the same time in one session could mix their parts. <span class="ev ev-inf">Inferred</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="events">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Settings, events,</b> agreements and polling</h2>
+      </header>
+      <div class="pane">
+        <h3>CheckEvents polling</h3>
+        <p>The client keeps a list of requested poll periods, and the timer uses the <strong>shortest one currently requested</strong>. The base entry comes from <code>[proto-box] check-events-period</code> (default config <strong>300&nbsp;s</strong>, application default 15&nbsp;s); <code>check-events-uploading-period</code> (<strong>60&nbsp;s</strong>) is added while the uploader is busy; <code>check-events-folders-period</code> (<strong>15&nbsp;s</strong>) is added while a folder view exists. Adding a shorter period sends <code>CheckEvents</code> at once. <span class="ev ev-obs">Observed</span></p>
+        <p>Of a reply the client reads exactly three members, <code>accountBalance</code>, <code>settings</code> and <code>changes</code> (only <code>folderModifyTime</code>). <strong><code>new</code> is never read</strong>, and neither is any other member; a non-nil <code>new</code> would be parsed and ignored. <span class="ev ev-obs">Observed</span> Live, <code>new</code> was nil after every sandbox action (15 probes after uploads, <code>ModifyFolder</code> and <code>SavePlaylist</code>), so whether the service ever sends it is <span class="ev ev-unk">Unknown</span>. <span class="ev ev-live">Live</span></p>
+        <h3>Settings</h3>
+        <ul>
+          <li><strong><code>GetSettings</code> is never sent</strong> by the client: nothing in it invokes the operation. <span class="ev ev-obs">Observed</span> The operation is in the contract and works live; it is documented from the service side.</li>
+          <li><code>SetSettings</code> is sent with <code>downloadByBox</code> = <code>[downloader] enabled</code> at start-up and every time the downloader applies its configuration. The opposite direction runs through <code>CheckEvents</code>: <code>settings/downloadByBox</code> is written back to the same key. <code>settings</code> contains only <code>downloadByBox</code>, in the client and live. <span class="ev ev-obs">Observed</span> </li>
+        </ul>
+        <h3>BoxEvents</h3>
+        <p>A small fixed set of events, not usage statistics and not gated by any setting: <code>shutdown</code> (<code>poweroff</code>, <code>suspend</code> or <code>quit</code>), <code>detected.defaultplayer</code>, <code>settings.defaultplayer</code> and <code>settings.autostart</code> (<code>true</code>/<code>false</code>). <code>timestamp</code> is 0. While logged out the list waits in <code>[proto-box] box-events</code> and is flushed after the next <code>Auth</code>. <span class="ev ev-obs">Observed</span> Live, the service accepted <code>settings.autostart = false</code> and <code>settings.defaultplayer = 0</code> with <code>status = Ok</code>, the same reply as for an empty list; whether it stores them is <span class="ev ev-unk">Unknown</span>. <span class="ev ev-live">Live</span> (<a href="security.html#c-09">C-09</a>)</p>
+        <h3>Agreements and cost units</h3>
+        <p>The client knows a closed set of agreement names; any other name is type 0 and shows a <q>file removed or moved</q> text.</p>
+        <section class="table-wrap" aria-labelledby="tbl-agr-cap" tabindex="0">
+          <table>
+            <caption id="tbl-agr-cap">Agreement names (type numbers as in the client)</caption>
+            <thead><tr><th scope="col">Name</th><th scope="col">Meaning in the client</th><th scope="col">Seen live</th></tr></thead>
+            <tbody>
+              <tr><td><code>own</code> (1)</td><td>Your own file; free</td><td><span class="ev ev-live">Live</span> cost 0</td></tr>
+              <tr><td><code>small</code> (2)</td><td>A file under 1&nbsp;MB; free</td><td><span class="ev ev-live">Live</span> offered at cost 0 for every foreign file under 1&nbsp;MB</td></tr>
+              <tr><td><code>free</code> (3)</td><td>The owner pays the transfer</td><td>Not triggered</td></tr>
+              <tr><td><code>edu</code> (4)</td><td>Education files; free</td><td>Not triggered (the programme page now redirects to an error page)</td></tr>
+              <tr><td><code>access</code> (5)</td><td>Already paid for, free for a few days</td><td>Not triggered (needs a paid download)</td></tr>
+              <tr><td><code>transfer</code> (6)</td><td>Another user's file, paid from your transfer</td><td><span class="ev ev-live">Live</span> offered for a foreign file over 1&nbsp;MB, cost = size in kB, rounded down</td></tr>
+              <tr><td><code>points</code> (7)</td><td>Paid with points</td><td>Not triggered</td></tr>
+              <tr><td><code>hdd</code> (8), <code>queued</code> (9)</td><td>Added by the client itself (file already on disk, or already queued); never sent to the service</td><td>-</td></tr>
+              <tr><td><code>mixed</code> (10)</td><td>A UI state for a window that holds several types</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <ul>
+          <li><strong>Units.</strong> The <code>transfer</code> cost and the account's <code>transfer</code> balance are in <strong>kB</strong>: the client multiplies by 1024 for display, and live a 1,694,208-byte file was offered at cost 1654. <code>points</code> are plain points. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span> </li>
+          <li>Foreign files offered exactly one agreement each, in the same <code>FileEntry</code> shape as for own files, with <code>url</code> nil until an agreement is accepted. The folder-path id form also lists the files of <em>other</em> users' folders. Nothing was accepted for any foreign file. <span class="ev ev-live">Live</span></li>
+          <li><strong>Asking or accepting.</strong> An agreement with cost above 0 always opens the window. Free ones open it by default and are accepted silently only with <code>[downloader] show-value</code> 1 or 2 or for silent command-line downloads. <span class="ev ev-obs">Observed</span></li>
+        </ul>
+        <h3>ModifyFolder extras</h3>
+        <p>The client never sends <code>description</code>, <code>freePoints</code> or <code>freeTransfer</code>; its folder dialog has widgets for them but hides them. Live, the service <strong>accepts them and ignores them</strong>: any in-range value gives <code>Ok</code> and a new <code>modifyTime</code>, nothing is echoed or returned by <code>Folders</code>, and the download offer, public pages and balance stay unchanged. Values out of the 32-bit range or non-numeric fault with <code>a:DeserializationFailed</code> during deserialization. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span> (<a href="security.html#s-14">S-14</a>) If the client's read path is any guide, <code>freeTransfer</code> would be in kB and <code>freePoints</code> in points. <span class="ev ev-inf">Inferred</span></p>
+        <p class="muted">Operation pages: <a href="api/checkEvents.html">CheckEvents</a>, <a href="api/getSettings.html">GetSettings</a>, <a href="api/setSettings.html">SetSettings</a>, <a href="api/boxEvents.html">BoxEvents</a>, <a href="api/download.html">Download</a>, <a href="api/modifyFolder.html">ModifyFolder</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="http">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Upload, download</b> and web endpoints</h2>
+      </header>
+      <div class="pane">
+        <h3>Upload: <code>POST http://&lt;server&gt;/file/</code></h3>
+        <p><code>UploadToken(token, folderId, fileName)</code> returns <code>key</code>, <code>stamp</code>, <code>server</code> (<code>sNNNN.chomikuj.pl:8084</code>, different per ticket) and <code>locale</code>. The client builds <code>http://&lt;server&gt;/file/?key=…&amp;stamp=…&amp;folderId=…&amp;fileName=…</code>, then posts to the path alone. By default it uses a raw-socket HTTP/1.0 connection. <span class="ev ev-obs">Observed</span></p>
+        <span class="code-label">UploadFile/success-text (request, start of the body)</span>
+        <pre class="code-wrap"><code>POST /file/ HTTP/1.1
+Host: s9530.chomikuj.pl:8084
+Content-Type: multipart/mixed; boundary=!CHB{{STAMP}}
+
+--!CHB{{STAMP}}
+name="chomik_id"
+Content-Type: text/plain
+
+25798223
+--!CHB{{STAMP}}
+name="folder_id"
+Content-Type: text/plain
+
+614
+--!CHB{{STAMP}}
+name="key"
+Content-Type: text/plain
+
+{{UPLOAD_TOKEN}}
+…  time, client (ChomikBox-2.0.8.2), locale (PL) …
+--!CHB{{STAMP}}
+name="file"; filename="hello.txt"
+
+&lt;file bytes&gt;
+--!CHB{{STAMP}}--</code></pre>
+        <ul>
+          <li>Each part starts with a bare <code>name="…"</code> line; there is no <code>Content-Disposition</code>, and the file part has no <code>Content-Type</code> line. The server parses parts by position: adding a <code>Content-Type</code> to the file part puts a stray <code>\r\n</code> at the start of the stored file, and broken framing stores padded blocks. With the exact client framing, round trips were byte-identical (SHA-256). <span class="ev ev-live">Live</span></li>
+          <li>Thumbnail parts (<code>width</code>, <code>height</code>, <code>th_width</code>, <code>th_height</code>, <code>thumb</code>, <code>medthumb</code>) are optional; uploads with and without them were accepted. The bare boundary <code>!CHB</code> also works, and <code>client</code> is not validated.</li>
+        </ul>
+        <span class="code-label">Replies (UploadFile/success-text, UploadFile/invalid-key)</span>
+        <pre class="code-wrap"><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;resp res="1" fileid="10832648145"/&gt;
+
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;resp res="-42" errorMessage="Bad token"/&gt;</code></pre>
+        <dl class="sv">
+          <dt><span class="ev ev-obs">Client</span></dt><dd>The client reads <code>res</code>, <code>fileid</code>, <code>filename</code> and <code>folderid</code>, and warns on a folder mismatch.</dd>
+          <dt><span class="ev ev-live">Live</span></dt><dd>The server sends only <code>res</code> and <code>fileid</code> (or <code>errorMessage</code> on failure).</dd>
+        </dl>
+        <h3>Resume check: <code>GET http://&lt;server&gt;/resume/check/?key=&lt;key&gt;</code></h3>
+        <pre class="code-wrap"><code>&lt;resp res="-31"/&gt;                                            ResumeCheck/before-upload: nothing stored for this key
+&lt;resp file_size="1033" skipThumbnails="true" res="1"/&gt;       ResumeCheck/after-upload</code></pre>
+        <p>After an interruption the client posts the rest with <code>resume_from = file_size</code>; an error answer or a <code>file_size</code> larger than the local file makes it start again with a new <code>UploadToken</code>. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></p>
+        <h3>Download: <code>GET http://sNNNN.chomikuj.pl/File.aspx?e=…&amp;pv=…</code></h3>
+        <ul>
+          <li>The signed URL comes from <code>Download</code> or <code>RefreshFileUrl</code>. <code>GET</code> returns the bytes with <code>Content-Disposition: attachment</code>; <code>Range</code> gives 206; <code>HEAD</code> is not supported (302 to <code>/Error404.aspx</code>). The file servers run IIS 10 and are not behind Cloudflare. <span class="ev ev-live">Live</span></li>
+          <li>The same URL works again for a second <code>GET</code> (<a href="security.html#s-08">S-08</a>). When a link expires the client calls <code>RefreshFileUrl</code>. <code>expire</code> was always nil live, so what the service sends is <span class="ev ev-unk">Unknown</span>. The client parses it only from <code>RefreshFileUrl</code>, as the local-time string <code>yyyy-MM-dd HH:mm:ss</code> (a Unix time, an ISO <code>T</code> or a zone suffix is ignored), and ignores the <code>expire</code> of a <code>Download</code> entry. <span class="ev ev-obs">Observed</span> It only feeds the warning when the user pauses downloads: <code>[downloader] warn-before-expire</code> is in <strong>seconds</strong> (default config 60, application default 3600), and the comparison looks inverted (<code>now - expire</code>), so the warning probably fires too often. <span class="ev ev-inf">Inferred</span> </li>
+          <li><strong>Music:</strong> the player fetches a <code>player.audio</code> URL with <code>Icy-MetaData: 1</code> and <code>Accept-Encoding:</code> set to a single space, which disables Qt's gzip. It needs a 2xx, <code>Content-Length</code> greater than 0 and no <code>x-nofile</code> header. Live: 200 <code>audio/mpeg</code>, exact bytes, no ICY metadata.</li>
+        </ul>
+        <h3>Web pages</h3>
+        <section class="table-wrap" aria-labelledby="tbl-web-cap" tabindex="0">
+          <table>
+            <caption id="tbl-web-cap">Web URLs opened by the client (live: status and redirect only, nothing followed or bought)</caption>
+            <thead><tr><th scope="col">URL</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr><td class="wrap"><code>http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&amp;returnUrl=/</code></td><td>302 to <code>returnUrl</code>, sets <code>ChomikSession</code> (web session); invalid token: 302 to <code>/</code>, no session (<a href="security.html#c-06">C-06</a>)</td></tr>
+              <tr><td class="wrap"><code>http://box.chomikuj.pl/chomik/chomikbox/LoginFromBox?…</code></td><td>307 to the chomikuj.pl URL</td></tr>
+              <tr><td class="wrap"><code>http://chomikuj.pl/box/LoginFromBox?…</code>, <code>http://box.chomikuj.pl/box/LoginFromBox?…</code></td><td>404, or 302 to <code>/Error404.aspx</code>: the generic default path no longer works</td></tr>
+              <tr><td class="wrap"><code>http://www.chomikuj.pl/LostPassword.aspx</code>, <code>http://chomikuj.pl/Create.aspx</code></td><td>301 to the current pages</td></tr>
+              <tr><td class="wrap"><code>http://chomikuj.pl/Image.aspx?id=&lt;fileId&gt;</code></td><td>302 to a signed file URL, without a session (<a href="security.html#s-09">S-09</a>)</td></tr>
+              <tr><td class="wrap"><code>…/MusicFile.aspx?…</code>, <code>http://box.chomikuj.pl/session</code></td><td>302 to <code>/Error404.aspx</code>; never requested by 2.0.8.2, or dead</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <dl class="sv">
+          <dt><span class="ev ev-obs">Client</span></dt><dd>The generic default is <code>http://%1/box/LoginFromBox?t=%2&amp;returnUrl=/</code>, with <code>%1</code> the service host; the chomikuj.pl brand overlay replaces the path with <code>/chomik/chomikbox/</code>.</dd>
+          <dt><span class="ev ev-live">Live</span></dt><dd>Only the overlay path works, on <code>chomikuj.pl</code>; the service host redirects there.</dd>
+        </dl>
+        <p class="muted">Operation pages: <a href="api/uploadToken.html">UploadToken</a>, <a href="api/uploadFile.html">POST /file/</a>, <a href="api/resumeCheck.html">resume check</a>, <a href="api/downloadFile.html">GET /File.aspx</a>, <a href="api/loginFromBox.html">LoginFromBox</a>, <a href="api/sendCrashReport.html">crash reporter</a> (<a href="security.html#c-04">C-04</a>), <a href="api/getUpdateRepository.html">update repository</a> (<a href="security.html#c-07">C-07</a>).</p>
+      </div>
+    </section>
+
+    <section class="window" id="differences">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Client vs live</b> - summarised</h2>
+      </header>
+      <div class="pane">
+        <p>The live findings confirmed the client's picture of the transport, the envelope and the session. They corrected it in places where the client reads more than the server sends, or sends something the server ignores:</p>
+        <ul>
+          <li><code>ModifyFolder</code>: the client's <code>&lt;public&gt;</code> flag does not exist on the server; the parameter is <code>publicUpload</code>. <code>description</code>, <code>freePoints</code> and <code>freeTransfer</code> are accepted and ignored (<a href="security.html#s-14">S-14</a>).</li>
+          <li><code>AddFolder</code> returns only <code>folderId</code>; <code>RenameFolder</code>, <code>MoveFolder</code> and <code>RemoveFolder</code> return only <code>status</code>/<code>errorMessage</code>.</li>
+          <li><code>FolderFiles</code> items are <code>&lt;EntryInfo&gt;</code> with <code>id, name, type, size</code>, and <code>type</code> was only ever <code>file</code> (the client skips anything else); <code>CheckEvents</code> has an extra <code>new</code> that was never seen non-nil and that the client ignores.</li>
+          <li>The upload reply carries only <code>res</code> and <code>fileid</code>; the Download id form <code>&lt;hamsterId&gt;/&lt;folderId&gt;</code> makes the service fault; <code>SessionBegin</code> is not on the main service, and its host has no DNS record.</li>
+        </ul>
+        <p>The full register, as recorded in the OpenAPI document, is on the <a href="api/index.html#register">API reference</a>.</p>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

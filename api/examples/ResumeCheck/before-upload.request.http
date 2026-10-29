@@ -1,0 +1,6 @@
+GET /resume/check/?key={{UPLOAD_TOKEN}} HTTP/1.1
+Host: s9530.chomikuj.pl:8084
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+

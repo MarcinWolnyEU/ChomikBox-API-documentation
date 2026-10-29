@@ -1,0 +1,21 @@
+HTTP/1.1 200 OK
+Date: Sun, 25 Oct 2026 06:13:20 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+cache-control: no-cache
+pragma: no-cache
+expires: -1
+server: cloudflare
+set-cookie: guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:13:20 GMT; path=/; HttpOnly; SameSite=Lax
+set-cookie: rcid={{COOKIE}}; expires=Mon, 25-Oct-2027 05:13:20 GMT; path=/; SameSite=Lax
+set-cookie: guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:13:20 GMT; path=/; HttpOnly; SameSite=Lax
+set-cookie: rcid={{COOKIE}}; expires=Mon, 25-Oct-2027 05:13:20 GMT; path=/; SameSite=Lax
+set-cookie: __RequestVerificationToken_Lw__={{COOKIE}}; path=/; HttpOnly; SameSite=Lax
+set-cookie: ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax
+x-server: m52
+cf-cache-status: DYNAMIC
+Content-Encoding: gzip
+CF-RAY: a4ff1320ee2c3009-PRG
+
+[body omitted: 37014 bytes, sha256=0d281e56b7071f5269ee8dde6ef15e955d19d9847ea9c426374ccb9a1618a28f]

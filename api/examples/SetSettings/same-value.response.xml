@@ -1,0 +1,1 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><SetSettingsResponse xmlns="http://chomikuj.pl/"><SetSettingsResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:status>Ok</a:status><a:errorMessage i:nil="true"/></SetSettingsResult></SetSettingsResponse></s:Body></s:Envelope>

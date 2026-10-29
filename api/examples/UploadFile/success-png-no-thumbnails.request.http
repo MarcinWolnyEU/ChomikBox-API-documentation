@@ -1,0 +1,42 @@
+POST /file/ HTTP/1.1
+Host: s9580.chomikuj.pl:8084
+Content-Type: multipart/mixed; boundary=!CHB{{STAMP}}
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+
+--!CHB{{STAMP}}
+name="chomik_id"
+Content-Type: text/plain
+
+25798223
+--!CHB{{STAMP}}
+name="folder_id"
+Content-Type: text/plain
+
+614
+--!CHB{{STAMP}}
+name="key"
+Content-Type: text/plain
+
+{{UPLOAD_TOKEN}}
+--!CHB{{STAMP}}
+name="time"
+Content-Type: text/plain
+
+{{STAMP}}
+--!CHB{{STAMP}}
+name="client"
+Content-Type: text/plain
+
+ChomikBox-2.0.8.2
+--!CHB{{STAMP}}
+name="locale"
+Content-Type: text/plain
+
+PL
+--!CHB{{STAMP}}
+name="file"; filename="gradient.png"
+
+[binary 6363 bytes, sha256=ddcdf339ad3a1f1704d9542dd5a12e32c80fc8711935f896edc16bfc8801be98]
+--!CHB{{STAMP}}--

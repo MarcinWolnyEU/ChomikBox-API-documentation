@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="ChomikBox 2.0.8.2 configuration: config files and layering, the default config, network, upload and download keys, brand overlays and base.ini.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html" aria-current="page">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/settings-logo.png" alt="" width="32" height="32">
+        <h1><b>Configuration</b> - files, defaults and brands</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Configuration</span></li>
+          </ol>
+        </nav>
+        <p class="lead">ChomikBox keeps its settings in INI files. Values are resolved in layers. The <strong>application defaults</strong> are the values the application supplies when it reads a key. The <strong>default config</strong> (<code>defconf.ini</code>) is built into the application and overrides those application defaults. A small per-brand overlay and the user's own <code>conf.ini</code> sit on top.</p>
+        <p>All default config values below are <span class="ev ev-obs">Observed</span>, as are the values of the brand files. Meanings are translated from the Polish comments in the default config or taken from how the application uses the key.</p>
+        <nav class="toc" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#files">Config files</a></li>
+            <li><a href="#layering">How a value is resolved</a></li>
+            <li><a href="#annotated">Reading the default config</a></li>
+            <li><a href="#network">[network]</a></li>
+            <li><a href="#proto-box">[proto-box]</a></li>
+            <li><a href="#proto-webox">[proto-webox]: web links and hosts</a></li>
+            <li><a href="#uploader">[uploader]</a></li>
+            <li><a href="#downloader">[downloader]</a></li>
+            <li><a href="#repository">[repository]: updates</a></li>
+            <li><a href="#account">Login, accounts, proxy</a></li>
+            <li><a href="#other">Appearance, player, debug</a></li>
+            <li><a href="#brands">Brand overlays</a></li>
+            <li><a href="#base-ini">base.ini</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="files">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Config files</b> - where settings live</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-files-cap" tabindex="0">
+          <table>
+            <caption id="tbl-files-cap">Configuration and state files</caption>
+            <thead>
+              <tr><th scope="col">File</th><th scope="col">Where</th><th scope="col">Role</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>base.ini</code></td><td>install folder</td><td>Brand bootstrap: <code>domain</code>, <code>title</code>, <code>name</code>, integrity <code>key</code> (<a href="#base-ini">below</a>)</td></tr>
+              <tr><td><code>:/default/defconf.ini</code></td><td>embedded in <code>chomikbox.exe</code> and <code>configurator.exe</code></td><td>Default config: 62&nbsp;841 bytes, 43 sections, UTF-8</td></tr>
+              <tr><td><code>:/default/defconf-&lt;domain&gt;.ini</code></td><td>embedded in <code>chomikbox.exe</code></td><td>Brand overlay for <code>chomikuj.pl</code>, <code>minhateca.com.br</code> or <code>lolabits.es</code> (<a href="#brands">below</a>)</td></tr>
+              <tr><td><code>:/default/defconf.ini</code> (small)</td><td>embedded in <code>chomikbox1conf.exe</code></td><td>Tiny default set, e.g. <code>[appearance] default-skin = green2</code></td></tr>
+              <tr><td><code>conf.ini</code></td><td><code>%LOCALAPPDATA%\ChomikBox\</code></td><td>User settings, written with <code>QSettings</code> (INI, UTF-8); <code>--config &lt;file&gt;</code> selects another file</td></tr>
+              <tr><td><code>queue-upload-&lt;id&gt;.ini</code>, <code>queue-download-&lt;id&gt;.ini</code></td><td>same</td><td>Per-account transfer queues (<a href="windows-integration.html#data">layout</a>)</td></tr>
+              <tr><td><code>playlist.m3u8</code>, <code>cache\player\cache.cfg</code></td><td>same</td><td>Player state and cache index</td></tr>
+              <tr><td><code>:/skin/descr.ini</code>, <code>uploader/conf.ini</code></td><td>inside each <code>.skin</code></td><td>Skin title and description, default balloon skin; uploader skin settings</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="layering">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Layering</b> - how a value is resolved</h2>
+      </header>
+      <div class="pane">
+        <ol>
+          <li><strong>Application default.</strong> The value the application supplies when it reads a key (for example <code>15</code> for <code>[network] connection-timeout</code>). It is used only when no later layer defines the key.</li>
+          <li><strong>Default config</strong> from <code>:/default/defconf.ini</code>, built into the application. Its values overwrite the application defaults.</li>
+          <li><strong>Brand overlay</strong> from <code>:/default/defconf-&lt;domain&gt;.ini</code>, where <code>&lt;domain&gt;</code> is <code>base.ini [main] domain</code>.</li>
+          <li><strong>User value</strong> from <code>conf.ini</code>.</li>
+        </ol>
+        <p>The application builds <code>:/default/defconf-%1.ini</code> and falls back to <code>:/default/defconf.ini</code> <span class="ev ev-obs">Observed</span>. Since a brand file holds only seven keys, it must overlay the generic file rather than replace it; the exact merge order of 2 and 3 is <span class="ev ev-inf">Inferred</span>.</p>
+        <p>Application defaults and default config values often differ. Because the default config overwrites the application defaults, the effective value is usually the default config one:</p>
+        <section class="table-wrap" aria-labelledby="tbl-diff-cap" tabindex="0">
+          <table>
+            <caption id="tbl-diff-cap">Keys whose default config value differs from the application default</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Application default</th><th scope="col">Default config</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>[network] soap-use-gzip</code></td><td>false</td><td>true</td></tr>
+              <tr><td><code>[network] connection-timeout</code></td><td>15</td><td>20</td></tr>
+              <tr><td><code>[network] message-resent-timeout</code></td><td>10</td><td>15</td></tr>
+              <tr><td><code>[proto-box] check-events-period</code></td><td>15</td><td>300</td></tr>
+              <tr><td><code>[proto-box] stats-period</code></td><td>300</td><td>5 (clamped to 15)</td></tr>
+              <tr><td><code>[repository] dist</code></td><td><code>testing</code> / <code>stable</code></td><td>empty (official channel)</td></tr>
+              <tr><td><code>[repository] updater-period</code></td><td>0</td><td>1440</td></tr>
+              <tr><td><code>[uploader] reduce-jpeg</code></td><td>true</td><td>false</td></tr>
+              <tr><td><code>[uploader] list-item-url-clickable</code></td><td>true</td><td>false</td></tr>
+              <tr><td><code>[tutorial] enabled</code></td><td>true</td><td>false</td></tr>
+              <tr><td><code>[animation] margins</code></td><td><code>-128 0 0 -128</code></td><td><code>-128 -10 -40 -128</code></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="annotated">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Default config</b> - how to read it</h2>
+      </header>
+      <div class="pane">
+        <p>For each key the default config lists, as comments, where the application reads the key and with which application default, followed by the <code>key = value</code> line itself. Hand-written Polish remarks are mixed in. Lines starting <code>; !!! ambiguous value</code> mark keys that are read with different application defaults. Simplified example:</p>
+        <pre><code><span class="c-comment">; application default: 15 (int)</span>
+<span class="c-key">connection-timeout</span> = 20</code></pre>
+        <p>Sections in <code>$$…$$</code> are templates for names built at run time. <code>[$$app-&gt;protoBox()-&gt;currentHamsterDataSection()$$]</code> becomes <code>[data-&lt;hamsterId&gt;]</code> and holds per-account values such as <code>default-folder-id</code> and <code>playlist-folder-id</code> (both <code>-1</code> by default). <code>[$$_moduleName$$]</code> holds each module window's <code>geometry</code>, and <code>[$$currSect$$]</code> holds each saved account's <code>login</code>, <code>password-hash</code>, <code>password-len</code> and <code>password-remember</code>. <code>@DEFAULT@</code> means the value is computed by the application. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="network">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>[network]</b> - SOAP and transfer behaviour</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-network-cap" tabindex="0">
+          <table>
+            <caption id="tbl-network-cap">[network] keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Default</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>soap-use-gzip</code></td><td><code>true</code></td><td>Gzip-compress SOAP request bodies and send <code>Content-Encoding: gzip</code>; the service accepts this (<span class="ev ev-live">Live</span>). <code>SessionBegin</code> is always sent uncompressed.</td></tr>
+              <tr><td><code>soap-gzip-content-type</code></td><td><code>"text/xml;charset=utf-8"</code></td><td>Meant as the content type of compressed requests, but no code reads it; the value is hard-coded.</td></tr>
+              <tr><td><code>connection-timeout</code></td><td><code>20</code> s</td><td>Default network timeout; clamped to 5–60 s for files, 5–120 s for SOAP replies, 5–300 s in <code>netprotobox.cpp</code>.</td></tr>
+              <tr><td><code>delayed-login-interval</code></td><td><code>20</code> s</td><td>Delayed-login timer.</td></tr>
+              <tr><td><code>message-relog-count</code></td><td><code>1</code></td><td>Relogins allowed per message after <code>BadToken</code> or a failed resend.</td></tr>
+              <tr><td><code>message-repeat-count</code></td><td><code>1</code></td><td>Resends after a timeout or network error.</td></tr>
+              <tr><td><code>message-resent-timeout</code></td><td><code>15</code> s</td><td>Age after which a pending message is given up (range 0–3600).</td></tr>
+              <tr><td><code>message-download-resent-timeout</code></td><td><code>45</code> s</td><td>Same for <code>Download</code>, <q>because the main server needs time to process large DownloadRequests</q>.</td></tr>
+              <tr><td><code>message-validator-interval</code></td><td><code>5</code> s</td><td>How often the message pool is checked.</td></tr>
+              <tr><td><code>send-retry-count</code> / <code>send-retry-max</code> / <code>send-retry-break</code></td><td><code>5</code> / <code>17</code> / <code>20</code></td><td>Upload resume policy: 5 fast retries, up to 17 in total, skipping 20 between slow ones, after which the upload starts again from scratch.</td></tr>
+              <tr><td><code>upload-retry-delay</code>, <code>download-retry-delay</code></td><td><code>15</code> s</td><td>Delay before retrying paused transfers. The application reads <code>send-retry-delay</code> (clamped 1–300) instead, a name that does not appear as a key in the default config.</td></tr>
+              <tr><td><code>soap-debug</code></td><td><code>false</code></td><td>Extra SOAP logging.</td></tr>
+              <tr><td><code>directnetworkreply-so_sndbuf</code></td><td><code>32</code> KiB</td><td><code>SO_SNDBUF</code> of the direct upload connection.</td></tr>
+              <tr><td><code>directnetworkreply-write-buffer</code></td><td><code>8</code> KiB</td><td>Own send buffer of the direct upload connection (resized dynamically).</td></tr>
+              <tr><td><code>sequence-soap</code></td><td><code>true</code></td><td>Split large <code>Download</code> requests into a sequence of messages.</td></tr>
+              <tr><td><code>sequence-soap-download-request-chunk-size</code></td><td><code>2000</code></td><td>Maximum files per <code>Download</code> message.</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="proto-box">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>[proto-box]</b> - session and polling</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-pb-cap" tabindex="0">
+          <table>
+            <caption id="tbl-pb-cap">[proto-box] keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Default</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>check-events-period</code></td><td><code>300</code> s</td><td><code>CheckEvents</code> interval while idle (application default 15).</td></tr>
+              <tr><td><code>check-events-folders-period</code></td><td><code>15</code> s</td><td>Interval during folder operations.</td></tr>
+              <tr><td><code>check-events-uploading-period</code></td><td><code>60</code> s</td><td>Interval while uploads are active.</td></tr>
+              <tr><td><code>check-events-repeat-count</code></td><td><code>3</code></td><td>Consecutive failed <code>CheckEvents</code> polls tolerated; more than this forces a relogin.</td></tr>
+              <tr><td><code>stats-period</code></td><td><code>5</code></td><td>Net-pool (statistics) timer; the code clamps it to 15–900 s.</td></tr>
+              <tr><td><code>resume-login-delay</code></td><td><code>5</code></td><td>Delay before logging in again after the system resumes from suspend.</td></tr>
+              <tr><td><code>refresh-folders-period</code></td><td><code>300</code> s</td><td>Folder tree refresh when the server does not report changes.</td></tr>
+              <tr><td><code>direct-upload</code></td><td><code>true</code></td><td>Use a direct connection for uploads.</td></tr>
+              <tr><td><code>force-access-manager-if-proxy</code></td><td><code>true</code></td><td>Use <code>QNetworkAccessManager</code> for uploads when a proxy is set.</td></tr>
+              <tr><td><code>thumb-quality</code> / <code>big-thumb-quality</code></td><td><code>@DEFAULT@</code> / <code>82</code></td><td>JPEG quality of thumbnails sent with uploads.</td></tr>
+              <tr><td><code>box-events</code></td><td>empty</td><td><code>BoxEvents</code> queued while logged out (the fixed events <code>shutdown</code>, <code>detected.defaultplayer</code>, <code>settings.defaultplayer</code>, <code>settings.autostart</code>), stored as <code>name=value;</code> and sent after the next login. Not gated by <code>[guistats]</code>.</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="proto-webox">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>[proto-webox]</b> - web links and service hosts</h2>
+      </header>
+      <div class="pane">
+        <p>In the <code>web-box-*-url</code> keys, <code>%1</code> is the web address (<code>http://DOMAIN/</code>) derived from <code>web-box-service-url</code>. In that key itself <code>%1</code> is the bare domain and <code>%2</code> is the session token returned by <code>Auth</code>, so it opens the website already logged in. The values for chomikuj.pl come from the <a href="#brands">brand overlay</a>.</p>
+        <p>The client reads <code>%1</code> as the service host <code>box.chomikuj.pl</code>. Live, <code>http://box.chomikuj.pl/chomik/chomikbox/LoginFromBox</code> redirects to <code>http://chomikuj.pl/chomik/chomikbox/LoginFromBox</code>, which starts a web session, while both variants of the generic <code>/box/LoginFromBox</code> path fail. <span class="ev ev-live">Live</span> </p>
+        <section class="table-wrap" aria-labelledby="tbl-pw-cap" tabindex="0">
+          <table>
+            <caption id="tbl-pw-cap">[proto-webox] keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Default (generic file)</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>web-box-service-url</code></td><td class="wrap"><code>http://%1/box/LoginFromBox?t=%2&amp;returnUrl=/</code></td><td>Auto-login URL; the other <code>web-box-*</code> paths are appended to its site</td></tr>
+              <tr><td><code>web-box-home-url</code>, <code>web-box-user-url</code></td><td><code>%1</code>, <code>%1%2</code></td><td>Site home; the user's page (<code>%2</code> = user name)</td></tr>
+              <tr><td><code>web-box-info-url</code></td><td><code>%1Box</code></td><td>Link on the downloader's information tab</td></tr>
+              <tr><td><code>web-box-add-transfer-url</code>, <code>web-box-add-points-url</code></td><td><code>%1AddTransfer.aspx</code>, <code>%1AddPoint.aspx</code></td><td>Buying transfer or points</td></tr>
+              <tr><td><code>web-box-freedback-url</code> (sic)</td><td><code>%1BoxOpinion.aspx</code></td><td>Feedback page</td></tr>
+              <tr><td><code>webservice-main-prefix</code></td><td><code>box.</code></td><td>Prefix of the SOAP host (<code>box.&lt;domain&gt;</code>); not used when <code>webservice-main</code> redirects</td></tr>
+              <tr><td><code>webservice-main</code></td><td>empty</td><td>SOAP host override, used only when <code>webservice-redirect = true</code> (a development setting); the compiled default is the fixed IP <code>208.43.39.225</code></td></tr>
+              <tr><td><code>webservice-redirect</code>, <code>webservice-storage</code>, <code>webservice-storage-host</code></td><td><code>false</code>, empty, empty</td><td>File-server redirection; the code define for <code>webservice-redirect</code> is <code>true</code></td></tr>
+              <tr><td><code>webservice-session</code>, <code>session-enabled</code></td><td>empty, <code>false</code></td><td>Optional session / events / statistics server (<code>SessionBegin</code> to <code>session.box.&lt;domain&gt;</code>, a host with no DNS record today)</td></tr>
+              <tr><td><code>webservice-host</code></td><td>(commented out)</td><td>The application default is the private address <code>192.168.10.49</code></td></tr>
+              <tr><td><code>check-events-period</code>, <code>reconnect-delay</code></td><td><code>300</code>, <code>1</code></td><td>Settings of the web-protocol variant</td></tr>
+              <tr><td><code>force-generate-thumbnails</code></td><td><code>false</code></td><td>Force thumbnail generation on the client</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="uploader">
+      <header class="titlebar">
+        <img src="assets/img/uploader-logo.png" alt="" width="32" height="32">
+        <h2><b>[uploader]</b> - <span lang="pl">Dodawanie</span> (Upload)</h2>
+      </header>
+      <div class="pane">
+        <figure class="float-art float-art-narrow">
+          <img src="assets/img/feature-upload.png" alt="Hamster in profile looking up, holding a document toward an orange up-arrow" width="119" height="192">
+          <figcaption>Illustration for the <span lang="pl">Dodawanie</span> tab of the Settings window.</figcaption>
+        </figure>
+        <p>The Settings window's upload tab, as shown in the reference screenshot (<span lang="pl">«Ustawienia - dodawanie plików»</span>), maps onto these keys. The mapping follows the setting names and comments in the default config. <span class="ev ev-inf">Inferred</span></p>
+        <section class="table-wrap clear" aria-labelledby="tbl-up-cap" tabindex="0">
+          <table>
+            <caption id="tbl-up-cap">Upload settings</caption>
+            <thead>
+              <tr><th scope="col">Settings label (PL)</th><th scope="col">English</th><th scope="col">Key</th><th scope="col">Default</th></tr>
+            </thead>
+            <tbody>
+              <tr><td lang="pl">Zawsze pytaj o folder docelowy</td><td>Always ask for the destination folder</td><td><code>always-ask-for-folder</code></td><td><code>false</code></td></tr>
+              <tr><td lang="pl">Ogranicz prędkość wysyłania do</td><td>Limit upload speed to (KB/s)</td><td><code>limit-upload-enabled</code>, <code>limit-upload-value</code></td><td><code>false</code>, <code>32</code></td></tr>
+              <tr><td lang="pl">Liczba jednoczesnych wysyłań</td><td>Simultaneous uploads</td><td><code>available-slots</code> (max <code>max-available-slots</code>)</td><td><code>1</code> (max 20)</td></tr>
+              <tr><td lang="pl">Pomniejsz zdjęcia (JPG) do rozmiaru</td><td>Scale down JPEG photos to</td><td><code>reduce-jpeg</code>, <code>reduce-jpeg-size</code></td><td><code>false</code>, 1280×1024</td></tr>
+              <tr><td lang="pl">Ogranicz liczbę ostatnio załadowanych plików do</td><td>Keep at most N recently uploaded files in the list</td><td><code>uploaded-list-limit</code></td><td><code>100</code> (3–1000)</td></tr>
+              <tr><td lang="pl">Aktywne linki na elementach kolejki plików</td><td>Clickable links on queue items</td><td><code>list-item-url-clickable</code></td><td><code>false</code></td></tr>
+              <tr><td lang="pl">Format i jakość zrzutu ekranu</td><td>Screenshot format and quality</td><td><code>screenshot-format</code>, <code>screenshot-quality</code></td><td><code>JPG</code>, <code>good</code> (low, normal, good, hight, best)</td></tr>
+              <tr><td lang="pl">Konflikty nazw folderów</td><td>Folder name conflicts</td><td><code>folder-name-conflict</code></td><td><code>ask</code> (ask, rename, merge)</td></tr>
+              <tr><td lang="pl">Pokaż ustawienia zaawansowane</td><td>Show advanced settings</td><td><code>[application] advanced-settings</code></td><td><code>false</code></td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>Other keys: <code>connection-timeout = 40</code> (upload timeout), <code>global-pause = false</code>, <code>queue-remove-msgbox = true</code>, <code>queue-write-delay = 350</code> ms, <code>thumb-size</code> (falls back to <code>[appearance] thumb-size</code>, 160×120), and <code>geometry = 359×450</code>. The <code>[data-&lt;hamsterId&gt;] default-folder-id</code> key stores the default upload folder per account; the screenshot's <span lang="pl">«Domyślny folder»</span> (default folder) is probably that folder. <span class="ev ev-inf">Inferred</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="downloader">
+      <header class="titlebar">
+        <img src="assets/img/downloader-logo.png" alt="" width="32" height="32">
+        <h2><b>[downloader]</b> - <span lang="pl">Pobieranie</span> (Download)</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-down-cap" tabindex="0">
+          <table>
+            <caption id="tbl-down-cap">[downloader] keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Default</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>enabled</code></td><td><code>true</code></td><td>Download manager on</td></tr>
+              <tr><td><code>available-slots</code> / <code>max-available-slots</code></td><td><code>5</code> / <code>20</code></td><td>Parallel downloads</td></tr>
+              <tr><td><code>force-download</code>, <code>force-download-size</code>, <code>force-download-slots</code></td><td><code>true</code>, <code>1</code> MB, <code>5</code></td><td>Files fetched out of queue order get their own slots</td></tr>
+              <tr><td><code>connection-count</code> / <code>max-connection-count</code></td><td><code>1</code> / <code>1</code></td><td>Connections per file; a hard limit of 1 disables and hides the option</td></tr>
+              <tr><td><code>multiconnect-min-file-size</code></td><td><code>1024</code> kB</td><td>Files below this size are never split</td></tr>
+              <tr><td><code>limit-download-enabled</code>, <code>limit-download-value</code></td><td><code>false</code>, <code>512</code></td><td>Speed limit in KB/s (one call site falls back to 100)</td></tr>
+              <tr><td><code>download-still-timeout</code></td><td><code>30</code></td><td>Timeout for a stalled network, 5–120</td></tr>
+              <tr><td><code>download-suspend-retry-timeout</code></td><td><code>300000</code> ms</td><td>Retry for downloads suspended by a network timeout</td></tr>
+              <tr><td><code>warn-before-expire</code></td><td><code>60</code></td><td>In <strong>seconds</strong> (application default <code>3600</code>), so the default config value is one minute. Used only when the user pauses queued downloads: items whose <code>expire</code> is within this limit raise the question that the link is going to expire and be charged again. The comparison looks inverted (<code>now - expire</code>), so it probably warns more often than intended. <span class="ev ev-obs">Observed</span> <span class="ev ev-inf">Inferred</span> intent</td></tr>
+              <tr><td><code>read-delay</code></td><td><code>5</code></td><td>Delay that batches reads of downloaded bytes</td></tr>
+              <tr><td><code>external-link-agreement</code></td><td><code>true</code></td><td>Show the agreement window for non-chomikuj links</td></tr>
+              <tr><td><code>show-extensions</code>, <code>show-size</code>, <code>show-value</code></td><td>empty, <code>1</code>, <code>0</code></td><td>Display options of the download agreement window (extensions, size threshold, mode)</td></tr>
+              <tr><td><code>chrome-integrated</code>, <code>opera-integrated</code>, <code>firefox-integrated</code>, <code>safari-integrated</code></td><td><code>false</code></td><td>Set when the browser plug-in was installed</td></tr>
+              <tr><td><code>use-transfer-cost</code>, <code>use-point-cost</code></td><td><code>false</code>; <code>true</code> for chomikuj.pl</td><td>Whether the cost UI shows transfer and points for this brand; they control only the UI</td></tr>
+              <tr><td><code>queue-write-delay</code>, <code>global-pause</code></td><td><code>650</code> ms, <code>false</code></td><td>Queue file write batching; global pause</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="repository">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>[repository]</b> - updates</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-repo-cap" tabindex="0">
+          <table>
+            <caption id="tbl-repo-cap">[repository] keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Default</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>updater</code></td><td><code>true</code></td><td>Automatic update checks</td></tr>
+              <tr><td><code>updater-period</code></td><td><code>1440</code> min</td><td>Check interval; 0 = only at start-up (UI range 15 minutes to 7 days)</td></tr>
+              <tr><td><code>dist</code></td><td>empty</td><td>Channel: <code>stable</code>, <code>testing</code>, <code>unstable</code> or empty for official. Application defaults disagree: <code>testing</code> in the application, <code>stable</code> in the updater</td></tr>
+              <tr><td><code>arch</code></td><td><code>@DEFAULT@</code></td><td>Architecture string used by the updater and the update repository path; the compiled default is <code>win32</code></td></tr>
+              <tr><td><code>check-hash-for-exiting-files</code> (sic)</td><td><code>false</code></td><td>Force a SHA1 check of existing files on every update</td></tr>
+              <tr><td><code>notification-period</code></td><td><code>900000</code> ms</td><td>How long the new-version notice is shown (15 minutes)</td></tr>
+              <tr><td><code>update-window-dismiss-count</code></td><td><code>5</code></td><td>Dismissals before the update window stops appearing for that version</td></tr>
+              <tr><td><code>last-update-check</code>, <code>notify-update-success</code>, <code>do-update</code></td><td>empty</td><td>State carried across the restart during an update</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p><code>configurator.exe</code> is the only UI that edits <code>dist</code>. The update hosts no longer answer (<a href="components.html#installer">Components</a>).</p>
+        <p>The update check compares each downloaded file with the <code>sha1</code> attribute of <code>packages.xml</code>; both arrive over plain HTTP, so it detects corruption, not tampering (<a href="security.html#c-07">C-07</a>). The updater writes the plug-in's registry value in the 64-bit registry view and rewrites <code>base.ini</code> only on a clock before 2012. <span class="ev ev-obs">Observed</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="account">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Login, accounts</b> and proxy</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-acc-cap" tabindex="0">
+          <table>
+            <caption id="tbl-acc-cap">[login], [userinfo], [application] and [proxy] keys</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">Default</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>[login] auto-login</code></td><td><code>true</code></td><td>Log in with the last account at start-up (<q>use last active account</q>)</td></tr>
+              <tr><td><code>[login] login-max-length</code>, <code>password-max-length</code></td><td><code>50</code>, <code>255</code></td><td>Input limits of the login form</td></tr>
+              <tr><td><code>[userinfo] login</code>, <code>password-hash</code>, <code>password-len</code></td><td>empty, empty, <code>0</code></td><td>The active account: user name, password hash (stored when <q>remember me</q> is ticked) and password length</td></tr>
+              <tr><td>account sections: <code>login</code>, <code>password-hash</code>, <code>password-len</code>, <code>password-remember</code></td><td>…, <code>1</code></td><td>One section per saved account; the login form shows up to 10 (<code>max-visible</code>)</td></tr>
+              <tr><td><code>[application] autostart</code></td><td><code>true</code></td><td>Start with Windows (Run value)</td></tr>
+              <tr><td><code>[application] request-default-config</code></td><td><code>true</code></td><td><q>Whether to ask the default-settings question</q>. A <strong>local</strong> first-run flag that makes no network request: while true, the desktop-animation start shows a welcome popup and the first-run defaults reset the animation position and switch the animation on. It is set to <code>false</code> on the first panel activation. <code>--install</code> forces the same defaults. <span class="ev ev-obs">Observed</span> </td></tr>
+              <tr><td><code>[application] remote-command</code></td><td>empty</td><td>Queued list of commands (from the command line)</td></tr>
+              <tr><td><code>[application] default-shutdown-mode</code></td><td><code>0</code></td><td>Action after all transfers finish (close the app, shut down or suspend the system) <span class="ev ev-inf">Inferred</span> from the UI strings</td></tr>
+              <tr><td><code>[proxy] enabled</code>, <code>type</code>, <code>host</code>, <code>port</code></td><td><code>false</code>, <code>http</code>, empty, empty</td><td>Proxy, applied as the application-wide Qt proxy; <code>type</code> is <code>http</code> or <code>socks5</code></td></tr>
+              <tr><td><code>[proxy] username</code>, <code>password</code></td><td>empty</td><td>Proxy credentials, stored in plain text</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <div class="callout callout-caveat">
+          <img src="assets/img/msgbox-warning.png" alt="" width="64" height="64">
+          <p class="callout-title">What <code>password-hash</code> is</p>
+          <p>It is the same lower-case hex MD5 that the SOAP <code>Auth</code> call sends as <code>passHash</code>, and the service accepts it in place of the password. <code>conf.ini</code> is also attached to crash reports. Consequences: <a href="security.html#c-02">Security, C-02</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="window" id="other">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Appearance, player, debug</b> - selected keys</h2>
+      </header>
+      <div class="pane">
+        <h3>Skins and panel</h3>
+        <ul>
+          <li><code>[appearance] skin</code> is empty by default; <code>default-skin = green2</code>, <code>default-skin-ru = green</code>, <code>default-hintskin = simple</code>, <code>default-hintskin-ru = green</code>.</li>
+          <li><code>[appearance] hide-if-fullscreen = true</code> with <code>fullscreen-check-period = 200</code> ms; <code>baloontip-show = true</code>, <code>baloontip-timeout = 5</code> s; <code>jpeg-quality = 85</code>; <code>thumb-quality = 80</code>; <code>thumb-size = 160×120</code>.</li>
+          <li><code>[panel] panel-at-start = hide</code> (<code>show</code>, <code>hide</code> or <code>last</code>), <code>default-module = uploader</code>, <code>dockable = true</code>, <code>default-sticky = true</code>, <code>modules-always-visible = true</code>.</li>
+          <li><code>[animation] enable = true</code>, <code>opacity = 100</code>, <code>scale = 1.0</code>, <code>transparent = false</code>, <code>mirror-flip = false</code>.</li>
+        </ul>
+        <h3>Player (<span lang="pl">Muzyka</span>)</h3>
+        <ul>
+          <li>Media-key shortcuts <code>Media Play</code>, <code>Media Stop</code>, <code>Media Next</code>, <code>Media Previous</code> enabled; <code>Volume Up</code>, <code>Volume Down</code>, <code>Volume Mute</code> disabled; <code>global-shortcuts = true</code>.</li>
+          <li><code>auto-set-music-player = false</code>, <code>default-player</code> empty; <code>cache-directory</code> = cache location + <code>player/</code>; <code>max-cache-size</code> computed (application default 10&nbsp;GiB); <code>chomikbox1-cache</code> for the 1.x import; <code>connection-retry = 15</code> s; <code>maximum-volume = 0.7</code>.</li>
+        </ul>
+        <h3>Debug and miscellaneous</h3>
+        <ul>
+          <li><code>[debug] level = 6</code>, on a scale explained in the file as <q>0 - none, 1 - most important … 5 - a lot … 9 - garbage, dumps etc.</q>; <code>network-debug = false</code>; <code>upload-connection-test-period = 120</code>.</li>
+          <li><code>[breakpad] disable-on-exit = true</code>; <code>[guistats] enabled = false</code>. The <code>[guistats]</code> setting does not feed or gate <code>BoxEvents</code>.</li>
+          <li>Developer switches: <code>--h4x0r</code> / <code>--chakier</code> unlock hidden Settings options (no network effect), and <code>--file-server &lt;host&gt;</code> forces the upload and resume-check host, also when it arrives over the single-instance pipe. See <a href="components.html#chomikbox">Components</a> and <a href="security.html#c-08">C-08</a>. <span class="ev ev-obs">Observed</span></li>
+          <li><code>[notifications]</code> toggles: <code>global</code>, <code>file-uploaded</code>, <code>file-downloaded</code>, <code>add-music-file</code>, <code>add-music-files</code> (all <code>true</code>).</li>
+          <li><code>[tutorial] enabled = false</code>, <code>module-info-show = true</code>, <code>welcome-info-show = true</code>.</li>
+          <li><code>[future] remove-uploaded-file-in-menu = false</code>, labelled <q>physically deletes files that were uploaded</q>, and <code>upload-downloaded-file-in-menu = false</code>.</li>
+          <li><code>[linux] autostart-command-timeout = 5</code>: the code base apparently also targeted Linux. <span class="ev ev-inf">Inferred</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="brands">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Brand overlays</b> - one client, several services</h2>
+      </header>
+      <div class="pane">
+        <p><code>chomikbox.exe</code> embeds three brand files. <code>base.ini [main] domain</code> chooses one, and the overlay changes only web links and the two cost flags. Everything else, including the SOAP host pattern <code>box.&lt;domain&gt;</code>, follows from the domain. <span class="ev ev-obs">Observed</span> </p>
+        <section class="table-wrap" aria-labelledby="tbl-brand-cap" tabindex="0">
+          <table>
+            <caption id="tbl-brand-cap">Brand overlay values</caption>
+            <thead>
+              <tr><th scope="col">Key</th><th scope="col">generic <code>defconf.ini</code></th><th scope="col"><code>chomikuj.pl</code></th><th scope="col"><code>minhateca.com.br</code>, <code>lolabits.es</code></th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>web-box-info-url</code></td><td><code>%1Box</code></td><td><code>%1ChomikBox</code></td><td><code>%1Box</code></td></tr>
+              <tr><td><code>web-box-add-transfer-url</code></td><td><code>%1AddTransfer.aspx</code></td><td><code>%1DodatkowyTransfer.aspx</code></td><td><code>%1TransfertPlus.aspx</code></td></tr>
+              <tr><td><code>web-box-add-points-url</code></td><td><code>%1AddPoint.aspx</code></td><td><code>%1DodatkowePunkty.aspx</code></td><td><code>%1PontosAdicionais.aspx</code></td></tr>
+              <tr><td><code>web-box-freedback-url</code></td><td><code>%1BoxOpinion.aspx</code></td><td><code>%1ChomikBoxOpinia.aspx</code></td><td><code>%1opiniaocaixa.aspx</code></td></tr>
+              <tr><td><code>web-box-service-url</code></td><td class="wrap"><code>http://%1/box/LoginFromBox?t=%2&amp;returnUrl=/</code></td><td class="wrap" colspan="2"><code>http://%1/chomik/chomikbox/LoginFromBox?t=%2&amp;returnUrl=/</code> (all three brands)</td></tr>
+              <tr><td><code>[downloader] use-transfer-cost</code></td><td><code>false</code></td><td><code>true</code></td><td><code>false</code></td></tr>
+              <tr><td><code>[downloader] use-point-cost</code></td><td><code>false</code></td><td><code>true</code></td><td><code>false</code></td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>The lolabits.es file is identical to minhateca.com.br except that it has no byte-order mark. The balloon skins name further partners (Abelhas.pt, Toutbox, Tuttobox, Abra Sesamo) for which this build carries no overlay.</p>
+      </div>
+    </section>
+
+    <section class="window" id="base-ini">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>base.ini</b> - brand bootstrap</h2>
+      </header>
+      <div class="pane">
+        <pre><code><span class="c-sec">[main]</span>
+<span class="c-key">domain</span> = chomikuj.pl
+<span class="c-key">title</span>  = ChomikBox
+<span class="c-key">name</span>   = ChomikBox
+<span class="c-key">key</span>    = <span class="c-comment">&lt;32 hex characters&gt;</span></code></pre>
+        <dl class="facts">
+          <dt><code>domain</code></dt>
+          <dd>Selects <code>:/default/defconf-&lt;domain&gt;.ini</code> and the host names: <code>box.&lt;domain&gt;</code> (SOAP), <code>session.box.&lt;domain&gt;</code>, <code>bts.box.&lt;domain&gt;</code> and <code>download.box.&lt;domain&gt;</code> (updates), plus the balloon skin names.</dd>
+          <dt><code>title</code></dt>
+          <dd>Window title and the name of the data folder <code>%LOCALAPPDATA%\&lt;title&gt;</code>.</dd>
+          <dt><code>name</code></dt>
+          <dd><code>QCoreApplication::applicationName</code>, also the name of the autostart Run value.</dd>
+          <dt><code>key</code></dt>
+          <dd>An anti-tamper checksum over the <code>[main]</code> section, verified at start-up; it is not used anywhere in the network protocol. On a mismatch the client stops with <code>qFatal("HACKING! base.ini/main corrupted.")</code>. <span class="ev ev-obs">Observed</span> </dd>
+          <dt>optional</dt>
+          <dd><code>data-location</code> (may use <code>${app}</code> or <code>${cwd}</code>), <code>cache-location</code>, <code>app-location</code>.</dd>
+        </dl>
+        <p><code>installer.exe</code> rewrites <code>title</code> and <code>domain</code> only when the system clock is earlier than 2012-01-01, so on any current system it never does. <span class="ev ev-obs">Observed</span> </p>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

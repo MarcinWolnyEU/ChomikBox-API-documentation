@@ -1,0 +1,127 @@
+{
+    "operation": "Web",
+    "case": "own-file-page-freeTransfer-set",
+    "timestamp": "2026-10-25T06:13:00Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/{{USERNAME}}/_chomikbox_api_test_followup_20261025_061244/price-probe/probe,10833170446.txt",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:13:00 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Transfer-Encoding",
+                "chunked"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:13:00 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Mon, 25-Oct-2027 05:13:00 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:13:00 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Mon, 25-Oct-2027 05:13:00 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "__RequestVerificationToken_Lw__={{COOKIE}}; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m52"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "CF-RAY",
+                "a4ff12a50e413009-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "guid",
+            "rcid",
+            "__RequestVerificationToken_Lw__",
+            "ChomikSession"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 8008,
+        "bodyBytesDecoded": 37014,
+        "bodySha256": "2e0f4b015ef00bb6f02e7309ece5b628935e8503be1b250e068bf640535da01f",
+        "elapsedMs": 227.9
+    },
+    "note": "Anonymous GET of the public page of a tiny own file while only freeTransfer=1048576 is set on its sandbox folder. Body not stored; meta counts the HTML tokens that differ from the page before the change and classifies them (page noise only).",
+    "diffAgainstBaseline": {
+        "onlyBeforeTokenCount": 33,
+        "onlyAfterTokenCount": 33,
+        "classification": "page noise only: the same token count (33) differs between two fetches of the unchanged page. The differing tokens are the per-request __RequestVerificationToken inputs, a signed ChomikImage.aspx avatar URL and a rotating block of other files of the account (names of pre-existing files, elided by the recorder). No token mentions the field, its value, free transfer or points.",
+        "tokensElided": true
+    }
+}

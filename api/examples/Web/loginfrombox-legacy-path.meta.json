@@ -1,0 +1,121 @@
+{
+    "operation": "Web",
+    "case": "loginfrombox-legacy-path",
+    "timestamp": "2026-10-24T15:27:03Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/box/LoginFromBox?t={{TOKEN}}&returnUrl=/",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 404,
+        "reason": "Not Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:02 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Transfer-Encoding",
+                "chunked"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:02 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:02 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:02 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:02 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "__RequestVerificationToken_Lw__={{COOKIE}}; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "CF-RAY",
+                "a4fa00d75f91f976-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "guid",
+            "rcid",
+            "__RequestVerificationToken_Lw__",
+            "ChomikSession"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 4706,
+        "bodyBytesDecoded": 14936,
+        "bodySha256": "136ac374dddafc3c78bfc5a688eac646fcaaa150c6ec31e28dea71bbfc9fa457",
+        "elapsedMs": 187.7
+    },
+    "note": "Default web-box-service-url http://%1/box/LoginFromBox?t={{TOKEN}}&returnUrl=/ with %1=chomikuj.pl: HTTP 404 today."
+}

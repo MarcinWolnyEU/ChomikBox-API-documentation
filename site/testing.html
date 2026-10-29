@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP client &amp; tests · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="The PHP 8.3 client for the ChomikBox 2.0.8.2 protocol, its Offline, Contract and Live PHPUnit suites, the live-test safety model and how the OpenAPI document is validated.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html" aria-current="page">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>PHP client</b> and tests</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">PHP client &amp; tests</span></li>
+          </ol>
+        </nav>
+        <figure class="float-art float-art-medium">
+          <img src="assets/img/testing-hamster.png" alt="Hamster holding a clipboard of check marks and peering through a magnifying glass at a ladybug" width="224" height="279">
+          <figcaption>Made these PHP tests to prove you can implement your own custom Chomikuj.pl client in any programming language of choice</figcaption>
+        </figure>
+        <p class="lead">The project's third output is a PHP 8.3 library that speaks the ChomikBox protocol, both the SOAP service and the file-server HTTP calls. It comes with three PHPUnit suites: one tests the library on its own, one checks it against the OpenAPI document, and one runs it against the real service inside a sandbox.</p>
+        <p>Source: <a class="src" href="../php/README.md">php/README.md</a>.</p>
+        <nav class="toc clear" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#client">Client architecture</a></li>
+            <li><a href="#suites">Test suites</a></li>
+            <li><a href="#test-counts">Last results</a></li>
+            <li><a href="#running">Running the tests</a></li>
+            <li><a href="#safety">Safety model for live tests</a></li>
+            <li><a href="#coverage">Spec coverage</a></li>
+            <li><a href="#spec-validation">Validating the spec</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="client">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Client architecture</b> - <code>php/src/</code></h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-php-cap" tabindex="0">
+          <table>
+            <caption id="tbl-php-cap">Namespaces of the library (PSR-4, ChomikBox\)</caption>
+            <thead><tr><th scope="col">Part</th><th scope="col">Role</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>ChomikBoxClient</code></th><td>High-level client: one method per implemented SOAP operation (17), each returning a typed result, plus <code>webLoginUrl()</code> for LoginFromBox and <code>fetchFile()</code> for signed file URLs, with the player's header variant</td></tr>
+              <tr><th scope="row"><code>Soap\</code></th><td>Envelope builder (<code>Envelope</code>, <code>SoapStruct</code>, <code>SoapList</code>), <code>SoapClient</code> (headers, optional gzip body), response parsing (<code>SoapResponse</code>, <code>XmlNode</code>) and <code>SoapFault</code></td></tr>
+              <tr><th scope="row"><code>Http\</code></th><td><code>Transport</code> interface and the cURL implementation; tests swap in a fake transport</td></tr>
+              <tr><th scope="row"><code>Model\</code></th><td>Typed results: <code>AuthResult</code>, <code>FoldersResult</code>/<code>FolderInfo</code>, <code>DownloadResult</code>/<code>FileEntry</code>/<code>AgreementInfo</code>, <code>UploadTokenResult</code>, …</td></tr>
+              <tr><th scope="row"><code>Upload\</code></th><td><code>Uploader</code> (UploadToken, resume check, POST), <code>ChbMultipart</code> (the client's <code>!CHB</code> multipart format, byte for byte), <code>RespXml</code></td></tr>
+              <tr><th scope="row"><code>Spec\</code></th><td><code>OpenApiContract</code> and <code>XmlSchemaWalker</code>: load the per-operation spec (<code>api/chomikbox.per-operation.openapi.json</code>, else <code>api/chomikbox.openapi.json</code>; the strict document is loaded explicitly where needed) and validate XML and multipart bodies against an operation's schema. A PHP port of <code>api/tools/lib/xmlwalk.mjs</code></td></tr>
+              <tr><th scope="row"><code>Recorder\</code></th><td><code>Recorder</code> (writes captured exchanges as example files), <code>Redactor</code> (replaces secrets with placeholders, fails closed), <code>LeakScanner</code></td></tr>
+              <tr><th scope="row"><code>Credentials</code></th><td>Reads <code>../credentials/chomikuj-{username,password,email}.txt</code> at run time; values are never printed</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>By default the client reproduces the real client's wire form: gzip body, <code>s:encodingStyle</code>, booleans as <code>0</code>/<code>1</code>, upload boundary <code>!CHB&lt;stamp&gt;</code>. Options switch to plain SOAP, which the service also accepts. Non-<code>Ok</code> statuses are ordinary answers, not exceptions; real SOAP faults (HTTP 500) are thrown as <code>SoapFault</code>.</p>
+        <pre><code>$client = ChomikBoxClient::create();
+$auth   = $client-&gt;auth(Credentials::fromDirectory());   <span class="c-comment">// Forbidden = unknown user, PermissionError = wrong password</span>
+$tree   = $client-&gt;folders(0, 2);                        <span class="c-comment">// depth: 0 = all, 1 = node only, 2 = node + children</span>
+$folder = $client-&gt;addFolder(0, 'my-folder');            <span class="c-comment">// newFolderId = parent id</span>
+$up     = (new Uploader($client))-&gt;upload($folder-&gt;folderId, 'a.txt', "hello\n");
+$ask    = $client-&gt;download([new DownloadRequest($up-&gt;fileId())]);   <span class="c-comment">// lists agreements, url = null</span>
+$client-&gt;logout();</code></pre>
+        <p class="muted">Abridged from the usage example in <code>php/README.md</code>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="suites">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Test suites</b> - what each guarantees</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-suites-cap" tabindex="0">
+          <table>
+            <caption id="tbl-suites-cap">PHPUnit suites (php/phpunit.xml)</caption>
+            <thead><tr><th scope="col">Suite</th><th scope="col">Network</th><th scope="col">Guarantees</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Offline<br><code>tests/Offline</code></th><td>none</td><td>Envelope and serialisation details (nil, booleans, escaping, list items, namespaces); parameter names and order for every operation, which matters because WCF silently drops out-of-order parameters; the <code>!CHB</code> multipart layout and resume; redaction and leak scanning; parsing of every captured example under <code>api/examples/</code></td></tr>
+              <tr><th scope="row">Contract<br><code>tests/Contract</code></th><td>none; needs both spec documents under <code>../api/</code></td><td>(a) every request the client builds, in both wire modes and for several argument sets, validates against the operation's request schema, with SOAPAction, method, media type and URL as in the spec; (b) every spec example validates against its schema and the client parses every response example; (c) every operationId maps to a client method or a documented skip, and every SOAP operation has a Live test or a reason; (d) the spec's servers and paths equal the client's constants. <code>WalkerSelfTest</code> proves the walker rejects violations, so these tests cannot pass vacuously. <strong>Strict document</strong> (128 tests, <code>StrictDocumentTest</code>): every SOAPAction the client sends is in the <code>callSoapService</code> enum and its URL is the strict server and path; every client-built request matches exactly one <code>oneOf</code> branch, the one <code>x-soap-operations</code> names; every strict response example validates against the schema its entry names. <strong>Upload replay</strong> (16 tests, <code>UploadCaptureReplayTest</code>): the client reproduces all six captured upload bodies byte for byte, and mutated bodies (a <code>Content-Type</code> on the file part, LF instead of CRLF framing, swapped part order) are rejected.</td></tr>
+              <tr><th scope="row">Live<br><code>tests/Live</code></th><td>the real service, opt-in</td><td>Session and polling, settings read and identical write-back, <code>BadToken</code> from every operation, the folder lifecycle, upload and resume check, a download round trip with the own agreement, audio listing and streaming, a forged upload key, <code>BoxEvents</code> and a deserialization fault, and logout of one session. Every request and response is validated against the spec, and the account-tree fingerprint must be identical before and after.</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <!-- TEST-COUNTS: the only place on the site with test numbers; update from php/README.md. -->
+    <section class="window" id="test-counts">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Last results</b> - 2026-10-25</h2>
+      </header>
+      <div class="pane">
+        <section class="table-wrap" aria-labelledby="tbl-counts-cap" tabindex="0">
+          <table>
+            <caption id="tbl-counts-cap">Last run of each suite (php/README.md)</caption>
+            <thead><tr><th scope="col">Suite</th><th scope="col" class="num">Tests</th><th scope="col" class="num">Assertions</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Offline</th><td class="num">281</td><td class="num">4271</td><td>OK</td></tr>
+              <tr><th scope="row">Contract</th><td class="num">684</td><td class="num">2818</td><td>OK</td></tr>
+              <tr><th scope="row">Live</th><td class="num">15</td><td class="num">147</td><td>OK; every exchange spec-validated; account-tree fingerprint identical before and after</td></tr>
+              <tr><th scope="row"><code>tools/leak-check.php</code></th><td class="num">–</td><td class="num">–</td><td>0 findings</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>Conformance: no mismatch was found between the spec and the client or between the spec and the live service. All 267 XML and multipart examples in the spec were checked in PHP with the same result as the Node walker, and the one intentionally invalid example is rejected. Responses never captured as examples also conformed, among them the full 586-node account tree.</p>
+      </div>
+    </section>
+
+    <section class="window" id="running">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Running</b> the tests</h2>
+      </header>
+      <div class="pane">
+        <pre><code>cd V:\Improve\Chomikuj\php
+composer install
+vendor\bin\phpunit --testsuite Offline                          <span class="c-comment"># no network</span>
+vendor\bin\phpunit --testsuite Contract                         <span class="c-comment"># no network, needs ..\api\chomikbox*.openapi.json</span>
+$env:CHOMIK_LIVE = "1"; vendor\bin\phpunit --testsuite Live     <span class="c-comment"># real service, needs ..\credentials\*.txt</span>
+php tools\leak-check.php                                        <span class="c-comment"># redaction check of everything written</span></code></pre>
+        <ul>
+          <li>On a POSIX shell: <code>CHOMIK_LIVE=1 vendor/bin/phpunit --testsuite Live</code>. Without <code>CHOMIK_LIVE=1</code> the Live tests are skipped.</li>
+          <li><code>CHOMIK_SPEC_FILE</code> overrides the per-operation spec, <code>CHOMIK_STRICT_SPEC_FILE</code> the strict canonical document, and <code>CHOMIK_EXAMPLES_DIR</code> the examples directory.</li>
+          <li><code>php tools\capture.php</code> regenerates <code>api/examples/</code> against the live service in a throw-away sandbox; <code>tools\capture-audio.php</code> covers the MP3, <code>player.audio</code> and SavePlaylist cases.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="safety">
+      <header class="titlebar">
+        <img src="assets/img/msgbox-warning.png" alt="" width="32" height="32">
+        <h2><b>Safety model</b> for live tests</h2>
+      </header>
+      <div class="pane">
+        <p>The live account belongs to a real user, so live work follows strict rules:</p>
+        <ul>
+          <li><strong>Sandbox.</strong> The Live suite creates <code>_chomikbox_api_test_live_&lt;timestamp&gt;</code> at the account root, works only inside it and removes it with <code>force=true</code> in its last test. Pre-existing folders and files are never renamed, moved or deleted.</li>
+          <li><strong>Snapshot and diff.</strong> That last test compares a fingerprint, a SHA-256 over the id, name and parent of every folder, taken before and after the suite. The one successful <code>SavePlaylist</code> call, which necessarily writes outside the sandbox (<code>Playlisty/&lt;name&gt;</code>), was made once by <code>capture-audio.php</code> under full-tree snapshots: exactly two new folders appeared, both were removed, and the tree then equalled the pre-run snapshot. The Live suite tests only the <code>BadToken</code> path of <code>SavePlaylist</code>.</li>
+          <li><strong>No spending.</strong> Only the free <code>own</code> agreement is accepted, only for files the tests uploaded themselves; the account balance was unchanged. <code>SetSettings</code> writes back the value just read.</li>
+          <li><strong>Gentle traffic.</strong> Requests are sequential. Only tiny generated files are uploaded (text, a small PNG, a one-second silent MP3), and only those are downloaded. There was at most one deliberate wrong-password login.</li>
+          <li><strong>Leak check.</strong> Credentials are read only at run time. <code>Redactor</code> replaces secrets with placeholders (<code>{{USERNAME}}</code>, <code>{{PASS_HASH}}</code>, <code>{{TOKEN}}</code>, <code>{{UPLOAD_TOKEN}}</code>, <code>{{STAMP}}</code>, <code>{{SIGNED_URL}}</code>, <code>{{COOKIE}}</code>, <code>{{FOLDER_PASSWORD}}</code>, …) and refuses to write a file in which a known secret survived. <code>tools/leak-check.php</code> compares every file under <code>php/</code>, <code>api/</code> (both spec documents and the examples), <code>site/</code> and the scratch notes against the real credentials, checks captures for un-redacted values, and reports file, rule and line only.</li>
+        </ul>
+        <p>Two server behaviours briefly moved a sandbox folder to the account root during testing (<a href="security.html#s-03">S-03</a>, <a href="security.html#s-05">S-05</a>); it was moved back and deleted each time.</p>
+      </div>
+    </section>
+
+    <section class="window" id="coverage">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Spec coverage</b> - operationId to client</h2>
+      </header>
+      <div class="pane">
+        <p>The per-operation view of the spec has 36 operations (the strict document has the same content in 19, with the 17 SOAP operations and the endpoint behaviour folded into <code>callSoapService</code>). The client implements 17 SOAP operations and maps <code>loginFromBox</code> to <code>webLoginUrl()</code>, <code>downloadFile</code> to <code>fetchFile()</code>, and <code>uploadFile</code> and <code>resumeCheck</code> to the <code>Uploader</code>. The other 15 operationIds are documented skips in <code>tests/Support/SpecSupport.php</code>:</p>
+        <ul>
+          <li><a href="api/sessionBegin.html">SessionBegin</a>: its host has no DNS record, and credentials are never sent there (<a href="security.html#s-12">S-12</a>).</li>
+          <li>Probes and infrastructure: <a href="api/probeSessionPath.html">GET /session</a>, <a href="api/headFile.html">HEAD /File.aspx</a>, <a href="api/getServiceMetadataPage.html">GET ….svc</a>, <a href="api/soapEndpoint.html">endpoint behaviour</a>, <a href="api/soapRestStylePath.html">path-style URL</a>.</li>
+          <li>Pages opened in a browser: <a href="api/loginFromBoxLegacy.html">legacy LoginFromBox</a>, <a href="api/openRegistrationPage.html">registration</a>, <a href="api/openLostPasswordPage.html">lost password</a>, <a href="api/imageRedirect.html">Image.aspx</a>, <a href="api/musicFileLegacy.html">MusicFile.aspx</a>.</li>
+          <li>Unverified client components: the <a href="api/sendCrashReport.html">crash reporter</a> and the three updater URLs.</li>
+        </ul>
+        <p>The PHP walker does not check the three unverified <code>multipart/form-data</code> crash-report examples.</p>
+      </div>
+    </section>
+
+    <section class="window" id="spec-validation">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Validating the spec</b> - <code>api/tools</code> and Redocly</h2>
+      </header>
+      <div class="pane">
+        <p>There are two OpenAPI 3.2.1 documents. <a href="../api/chomikbox.per-operation.openapi.yaml"><code>api/chomikbox.per-operation.openapi.yaml</code></a> is the authoring source and per-operation view (one path item per SOAP operation, with the <code>?op=</code> server deviation declared in <code>x-oas-deviation</code>). <a href="../api/chomikbox.openapi.yaml"><code>api/chomikbox.openapi.yaml</code></a> is the strictly conformant canonical document, generated from it by <code>build-strict.mjs</code>: SOAP is one <code>POST</code> with a <code>SOAPAction</code> enum and <code>oneOf</code> bodies. The strict document is never edited by hand.</p>
+        <pre><code>cd V:\Improve\Chomikuj\api\tools
+npm install                      <span class="c-comment"># once: yaml, ajv, ajv-formats, saxes, @hyperjump/json-schema</span>
+node sync-examples.mjs --check   <span class="c-comment"># optional: captures vs the source</span>
+node build-strict.mjs            <span class="c-comment"># regenerate the canonical strict document from the per-operation source</span>
+node validate.mjs                <span class="c-comment"># checks (a)-(h) on each document, (i) across both; writes both .json files</span>
+
+cd V:\Improve\Chomikuj\api
+npx -y @redocly/cli@latest lint chomikbox.openapi.yaml chomikbox.per-operation.openapi.yaml --max-problems 1000
+
+cd V:\Improve\Chomikuj
+node site\tools\build-api.mjs    <span class="c-comment"># regenerate the site's API reference from the per-operation JSON</span></code></pre>
+        <section class="table-wrap" aria-labelledby="tbl-validate-cap" tabindex="0">
+          <table>
+            <caption id="tbl-validate-cap">Checks of api/tools/validate.mjs: (a)–(h) on each document, (i) across both (all pass)</caption>
+            <thead><tr><th scope="col">Check</th><th scope="col">What it verifies</th></tr></thead>
+            <tbody>
+              <tr><td>(a)</td><td>YAML to JSON, with integers kept exactly (int64 tick values exceed 2^53)</td></tr>
+              <tr><td>(b)</td><td>Validation against the official OAS 3.2 JSON Schemas, including every Schema and XML Object, with a self-test</td></tr>
+              <tr><td>(c)</td><td>Unique operationIds, descriptions, request and response examples, <code>x-verification</code> with a matching badge tag, existing <code>x-evidence</code> paths, well-formed <code>x-security-notes</code>. Per-operation view: the <code>SOAPAction</code> const equals <code>x-soap-action</code>. Strict document: the <code>SOAPAction</code> enum equals the <code>x-soap-operations</code> actions and the <code>oneOf</code> lists match</td></tr>
+              <tr><td>(d)</td><td>Every <code>serializedValue</code> is well-formed and byte-identical to its capture file</td></tr>
+              <tr><td>(e)</td><td>Every XML example is walked against its schema: names, namespaces, prefixes, order, required members, <code>i:nil</code>, attributes, lexical types; a <code>oneOf</code> must match exactly one branch; multipart bodies part by part, including the exact header lines</td></tr>
+              <tr><td>(f)</td><td>Every file under <code>api/examples/</code> is referenced</td></tr>
+              <tr><td>(g)</td><td>Leak scan for e-mail addresses and token-like strings</td></tr>
+              <tr><td>(h)</td><td>Server URLs carry no query or fragment: no exception in the strict document; in the per-operation view only the URL and paths declared in <code>x-oas-deviation</code></td></tr>
+              <tr><td>(i)</td><td>The strict file equals <code>build-strict(source)</code> byte for byte, with the same SOAP actions, identical shared schemas, SOAP examples, example files and non-SOAP operations</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>Redocly CLI lints both documents: valid, 0 errors and 0 open warnings. The accepted warnings are listed per location, with reasons, in <code>api/.redocly.lint-ignore.yaml</code>: operations without a 2xx response (redirect-only pages, probes, dead updater URLs) and Redocly's composition heuristic on the two exclusive <code>oneOf</code>s. Conventions are explained in <a class="src" href="../api/README.md">api/README.md</a>.</p>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

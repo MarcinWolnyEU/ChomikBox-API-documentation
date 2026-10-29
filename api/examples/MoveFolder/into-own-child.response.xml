@@ -1,0 +1,1 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><MoveFolderResponse xmlns="http://chomikuj.pl/"><MoveFolderResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:status>Error</a:status><a:errorMessage>MovingIntoChild</a:errorMessage></MoveFolderResult></MoveFolderResponse></s:Body></s:Envelope>

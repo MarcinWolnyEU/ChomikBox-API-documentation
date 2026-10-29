@@ -1,0 +1,102 @@
+{
+    "operation": "ModifyFolder",
+    "case": "free-points-empty",
+    "timestamp": "2026-10-25T06:11:01Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/ModifyFolder"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 238,
+        "bodyBytesUncompressed": 350
+    },
+    "response": {
+        "status": 500,
+        "reason": "Internal Server Error",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:11:01 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "752"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4ff0fba8d2c278c-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 752,
+        "bodyBytesDecoded": 752,
+        "bodySha256": null,
+        "elapsedMs": 149.7
+    },
+    "note": "freePoints = empty element on a sandbox folder holding one tiny own file. Balance checked right after."
+}

@@ -1,0 +1,11 @@
+POST /services/ChomikBoxService.svc HTTP/1.1
+Host: box.chomikuj.pl
+Content-Type: text/xml;charset=utf-8
+Content-Encoding: gzip
+Accept-Encoding: gzip
+User-Agent: Mozilla/5.0
+Accept-Language: en,*
+Connection: Keep-Alive
+
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><CheckEvents xmlns="http://chomikuj.pl/"><token>NOT-A-REAL-TOKEN</token></CheckEvents></s:Body></s:Envelope>

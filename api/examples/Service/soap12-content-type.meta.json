@@ -1,0 +1,98 @@
+{
+    "operation": "Service",
+    "case": "soap12-content-type",
+    "timestamp": "2026-10-24T15:25:05Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/CheckEvents"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ],
+            [
+                "Content-Type",
+                "application/soap+xml; charset=utf-8"
+            ]
+        ],
+        "bodyBytesOnWire": 194,
+        "bodyBytesUncompressed": 279
+    },
+    "response": {
+        "status": 415,
+        "reason": "Unsupported Media Type",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:25:05 GMT"
+            ],
+            [
+                "Content-Length",
+                "0"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4f9fdf98fa5278c-PRG"
+            ]
+        ],
+        "contentType": "",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 0,
+        "bodyBytesDecoded": 0,
+        "bodySha256": null,
+        "elapsedMs": 163.2
+    },
+    "note": "Content-Type application/soap+xml (SOAP 1.2) is rejected with HTTP 415; the binding is basicHttpBinding (SOAP 1.1, text/xml)."
+}

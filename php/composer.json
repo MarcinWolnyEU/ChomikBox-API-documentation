@@ -1,0 +1,34 @@
+{
+    "name": "chomikuj/chomikbox-client",
+    "description": "PHP client for the ChomikBox 2.0.8.2 SOAP/HTTP protocol (box.chomikuj.pl), built from live observation of the service.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-zlib": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "ChomikBox\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ChomikBox\\Tests\\": "tests/",
+            "ChomikBox\\Tools\\": "tools/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testsuite Offline",
+        "test-live": "phpunit --testsuite Live"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

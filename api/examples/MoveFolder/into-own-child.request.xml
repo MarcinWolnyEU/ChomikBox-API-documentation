@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><MoveFolder xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><folderId>615</folderId><newFolderId>617</newFolderId></MoveFolder></s:Body></s:Envelope>

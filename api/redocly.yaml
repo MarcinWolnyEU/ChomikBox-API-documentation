@@ -1,0 +1,29 @@
+# Redocly CLI configuration for both ChomikBox OpenAPI documents:
+#   chomikbox.openapi.yaml               canonical, strictly conformant (generated)
+#   chomikbox.per-operation.openapi.yaml per-operation view, authoring source
+# Starts from the built-in "recommended" ruleset and switches off only two
+# rules, each justified below. Every remaining warning that is accepted is
+# listed, per location, in .redocly.lint-ignore.yaml (with the reasons in its
+# header), so any NEW warning shows up in the lint output.
+#
+# Run from this directory:
+#   npx -y @redocly/cli@latest lint chomikbox.openapi.yaml chomikbox.per-operation.openapi.yaml
+
+extends:
+  - recommended
+
+rules:
+  # SOAP (WCF basicHttpBinding) never uses 4xx for application errors: every
+  # service-level failure (BadToken, Error, Forbidden, ...) is HTTP 200 with a
+  # <status> member, and protocol failures are HTTP 500 SOAP faults. Both are
+  # documented on every SOAP operation. The non-SOAP endpoints document only
+  # the status codes that were observed or that the client handles (upload and
+  # resume check declare 4XX for that reason); inventing others would
+  # contradict the evidence-only policy of this document.
+  operation-4xx-response: off
+
+  # Not a SOAP rule, but a style rule for designing new APIs. The real URLs end
+  # with a slash and are documented exactly as the client builds them:
+  # http://<server>/file/ and /resume/check/ (verified live) and http://bts.box.<domain>/repo/beta/.
+  # Dropping the slash would describe URLs the client never uses.
+  no-path-trailing-slash: off

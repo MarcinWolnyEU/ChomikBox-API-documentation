@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><Folders xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><hamsterId>25798223</hamsterId><folderId>614</folderId><depth>1</depth></Folders></s:Body></s:Envelope>

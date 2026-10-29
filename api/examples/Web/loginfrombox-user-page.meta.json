@@ -1,0 +1,106 @@
+{
+    "operation": "Web",
+    "case": "loginfrombox-user-page",
+    "timestamp": "2026-10-24T15:27:07Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/{{USERNAME}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:06 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "126"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "location",
+                "/{{USERNAME}}"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:06 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:06 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa00ef7df7bd61-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "ChomikSession"
+        ],
+        "location": "/{{USERNAME}}",
+        "bodyBytesOnWire": 126,
+        "bodyBytesDecoded": 126,
+        "bodySha256": "2121bf5154f8087976e87f741877eddec3e1aa9ef4b076725a1f1540b9319f07",
+        "elapsedMs": 174.8
+    },
+    "note": "web-box-user-url (%1%2 = service url + user name)."
+}

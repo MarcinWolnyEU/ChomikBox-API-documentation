@@ -1,0 +1,13 @@
+HTTP/1.1 307 Temporary Redirect
+Date: Sat, 24 Oct 2026 15:27:04 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 226
+Connection: keep-alive
+location: http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/
+server: cloudflare
+x-powered-by: ASP.NET
+x-server: m51
+cf-cache-status: DYNAMIC
+CF-RAY: a4fa00e35882278c-PRG
+
+[body: 226 bytes, sha256=619f279d9df7810519e69369fd34ced2b3de33b62b080abcc2e7aa666d7254ea; first bytes: "<head><title>Document Moved</title></head>\n<body><h1>Object Moved</h1>This document may be found <a HREF=\"http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&amp;returnUrl=/\">here</a></body>"]

@@ -1,0 +1,106 @@
+{
+    "operation": "Web",
+    "case": "loginfrombox-info",
+    "timestamp": "2026-10-24T15:27:08Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/Box",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:07 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "121"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "location",
+                "/Box"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:07 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:07 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa00f58c8bbd61-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "ChomikSession"
+        ],
+        "location": "/Box",
+        "bodyBytesOnWire": 121,
+        "bodyBytesDecoded": 121,
+        "bodySha256": "289de4bbd6edade79cb337d9a2d915034f2a54aaa10ac5c53932946f06c7d08b",
+        "elapsedMs": 389.4
+    },
+    "note": "web-box-info-url (%1Box)."
+}

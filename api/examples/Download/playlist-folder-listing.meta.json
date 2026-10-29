@@ -1,0 +1,121 @@
+{
+    "operation": "Download",
+    "case": "playlist-folder-listing",
+    "timestamp": "2026-10-24T15:33:32Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/Download"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 310,
+        "bodyBytesUncompressed": 501
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:33:31 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "679"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:33:31 GMT; path=/; HttpOnly"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa0a58cebf278c-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 679,
+        "bodyBytesDecoded": 1222,
+        "bodySha256": null,
+        "elapsedMs": 161.8
+    },
+    "note": "Download listing of the new playlist folder (folder path as id): shows what a playlist contains. Names of pre-existing folders on its path are replaced by {{EXISTING_FOLDER_NAME}}.",
+    "playlistFolderId": 626,
+    "playlistParentId": 625,
+    "parentIsRoot": false,
+    "parentPreExisting": false,
+    "addedFolderCount": 2
+}

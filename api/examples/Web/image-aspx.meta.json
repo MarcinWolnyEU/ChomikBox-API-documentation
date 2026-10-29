@@ -1,0 +1,93 @@
+{
+    "operation": "Web",
+    "case": "image-aspx",
+    "timestamp": "2026-10-24T15:27:14Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/Image.aspx?id=10832648173",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:13 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "313"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "location",
+                "http://s9580.chomikuj.pl/File.aspx?e={{SIGNED_E}}&pv={{SIGNED_PV}}"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:13 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:13 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m52"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa011b6a4bbd61-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid"
+        ],
+        "location": "http://s9580.chomikuj.pl/File.aspx?e={{SIGNED_E}}&pv={{SIGNED_PV}}",
+        "bodyBytesOnWire": 313,
+        "bodyBytesDecoded": 313,
+        "bodySha256": "5a1b8f4aedf5e701ae3865454ed51de3c47153c0cf96722a03e62caa9da5732d",
+        "elapsedMs": 190.7
+    },
+    "note": "http://chomikuj.pl/Image.aspx?id=<fileId> (preview URL the downloader recognises), without any cookie. Observed: 302 straight to a signed file-server URL (anonymous access to an own PNG)."
+}

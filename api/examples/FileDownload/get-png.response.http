@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+Cache-Control: private
+Content-Type: image/png
+Server: Microsoft-IIS/10.0
+Access-Control-Allow-Origin: http://chomikuj.pl
+Content-Disposition: attachment; filename="gradient.png"
+X-AspNet-Version: 4.0.30319
+X-Powered-By: ASP.NET
+Date: Sat, 24 Oct 2026 15:26:51 GMT
+Content-Length: 6363
+
+[body: 6363 bytes, sha256=ddcdf339ad3a1f1704d9542dd5a12e32c80fc8711935f896edc16bfc8801be98; first bytes: 89504e470d0a1a0a0000000d49484452000000400000003008020000002e29eb]

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><Download xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><sequence><stamp>1002</stamp><part>0</part><count>1</count></sequence><disposition>download</disposition><list><DownloadReqEntry><id>/{{USERNAME}}/_chomikbox_api_test_capture_20261024_152525/hello.txt</id></DownloadReqEntry></list></Download></s:Body></s:Envelope>

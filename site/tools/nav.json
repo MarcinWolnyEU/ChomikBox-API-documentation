@@ -1,0 +1,39 @@
+{
+  "_comment": "Single source of truth for the site navigation and footer. After editing, run: node site/tools/sync-chrome.mjs  (rewrites the marked header/nav/footer blocks in every page). 'href' is relative to site/. 'status' (optional) shows a small badge, e.g. draft.",
+  "brand": {
+    "name": "Chomik<b>Box</b> 2.0.8.2",
+    "sub": "Technical overview",
+    "icon": "assets/img/app-icon.png"
+  },
+  "footer": {
+    "text": "Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site.",
+    "date": "2026-10-25"
+  },
+  "groups": [
+    {
+      "label": "Start",
+      "pages": [
+        { "href": "index.html", "label": "Overview" }
+      ]
+    },
+    {
+      "label": "Application",
+      "pages": [
+        { "href": "architecture.html", "label": "Architecture" },
+        { "href": "components.html", "label": "Components" },
+        { "href": "windows-integration.html", "label": "Windows integration" },
+        { "href": "configuration.html", "label": "Configuration" },
+        { "href": "security.html", "label": "Security & privacy" }
+      ]
+    },
+    {
+      "label": "Network & API",
+      "pages": [
+        { "href": "protocol.html", "label": "Protocol" },
+        { "href": "flows.html", "label": "Flows" },
+        { "href": "api/index.html", "label": "API reference" },
+        { "href": "testing.html", "label": "PHP client & tests" }
+      ]
+    }
+  ]
+}

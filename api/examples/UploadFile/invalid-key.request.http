@@ -1,0 +1,43 @@
+POST /file/ HTTP/1.1
+Host: s9586.chomikuj.pl:8084
+Content-Type: multipart/mixed; boundary=!CHB{{STAMP}}
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+
+--!CHB{{STAMP}}
+name="chomik_id"
+Content-Type: text/plain
+
+25798223
+--!CHB{{STAMP}}
+name="folder_id"
+Content-Type: text/plain
+
+614
+--!CHB{{STAMP}}
+name="key"
+Content-Type: text/plain
+
+ffffffffffffffffffffffffffffffff
+--!CHB{{STAMP}}
+name="time"
+Content-Type: text/plain
+
+{{STAMP}}
+--!CHB{{STAMP}}
+name="client"
+Content-Type: text/plain
+
+ChomikBox-2.0.8.2
+--!CHB{{STAMP}}
+name="locale"
+Content-Type: text/plain
+
+PL
+--!CHB{{STAMP}}
+name="file"; filename="invalid-key.txt"
+
+x
+
+--!CHB{{STAMP}}--

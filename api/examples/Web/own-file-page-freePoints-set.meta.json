@@ -1,0 +1,131 @@
+{
+    "operation": "Web",
+    "case": "own-file-page-freePoints-set",
+    "timestamp": "2026-10-25T06:13:11Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/{{USERNAME}}/_chomikbox_api_test_followup_20261025_061244/price-probe/probe,10833170446.txt",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:13:11 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "10144"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:13:10 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Mon, 25-Oct-2027 05:13:10 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Wed, 25-Oct-2028 05:13:10 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Mon, 25-Oct-2027 05:13:10 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "__RequestVerificationToken_Lw__={{COOKIE}}; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4ff12e71cdd278c-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "guid",
+            "rcid",
+            "__RequestVerificationToken_Lw__",
+            "ChomikSession"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 10144,
+        "bodyBytesDecoded": 36891,
+        "bodySha256": "c2a36f3d2d2eb5aecbe0800b4a88fd6fdd97fe6253813037217f5fcdb313cd95",
+        "elapsedMs": 290.5
+    },
+    "note": "Anonymous GET of the public page of a tiny own file while only freePoints=100 is set on its sandbox folder. Body not stored; meta counts the HTML tokens that differ from the page before the change and classifies them (page noise only).",
+    "diffAgainstBaseline": {
+        "onlyBeforeTokenCount": 33,
+        "onlyAfterTokenCount": 33,
+        "classification": "page noise only: the same token count (33) differs between two fetches of the unchanged page. The differing tokens are the per-request __RequestVerificationToken inputs, a signed ChomikImage.aspx avatar URL and a rotating block of other files of the account (names of pre-existing files, elided by the recorder). No token mentions the field, its value, free transfer or points.",
+        "tokensElided": true
+    }
+}

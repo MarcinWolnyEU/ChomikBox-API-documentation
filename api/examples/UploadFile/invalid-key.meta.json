@@ -1,0 +1,62 @@
+{
+    "operation": "UploadFile",
+    "case": "invalid-key",
+    "timestamp": "2026-10-24T15:26:29Z",
+    "request": {
+        "method": "POST",
+        "url": "http://s9586.chomikuj.pl:8084/file/",
+        "headers": [
+            [
+                "Content-Type",
+                "multipart/mixed; boundary=!CHB{{STAMP}}"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 608,
+        "bodyBytesUncompressed": 608
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "82"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Server",
+                "Microsoft-HTTPAPI/2.0"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:27 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-HTTPAPI/2.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 82,
+        "bodyBytesDecoded": 82,
+        "bodySha256": null,
+        "elapsedMs": 106.9
+    },
+    "note": "Upload with a key the server never issued (stamp/folder valid). Observed: <resp res=\"-42\" errorMessage=\"Bad token\"/>."
+}

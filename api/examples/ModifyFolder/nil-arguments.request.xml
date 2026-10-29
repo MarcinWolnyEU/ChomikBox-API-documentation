@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><ModifyFolder xmlns="http://chomikuj.pl/" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><token>{{TOKEN}}</token><folderId>616</folderId><name i:nil="true"/><password i:nil="true"/><hidden>1</hidden><adult i:nil="true"/><freePoints i:nil="true"/><freeTransfer i:nil="true"/><publicUpload i:nil="true"/><description i:nil="true"/><view i:nil="true"/></ModifyFolder></s:Body></s:Envelope>

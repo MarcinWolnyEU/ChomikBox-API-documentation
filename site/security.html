@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Security &amp; privacy · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="Security, privacy and robustness findings for ChomikBox 2.0.8.2 and the chomikuj.pl service: client findings C-01 to C-12 and live service behaviour S-01 to S-14.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html" aria-current="page">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/rating-default.png" alt="" width="32" height="32">
+        <h1><b>Security &amp; privacy</b> - findings register</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Security &amp; privacy</span></li>
+          </ol>
+        </nav>
+        <p class="lead">Every security-, privacy- and robustness-relevant finding of the project, in two parts: the shipped ChomikBox 2.0.8.2 client (<a href="#client">C-01 to C-12</a>) and the behaviour of the live chomikuj.pl service (<a href="#service">S-01 to S-14</a>). This page presents the full list with the evidence behind each entry.</p>
+        <h3>Scope</h3>
+        <ul>
+          <li>The client findings come from examining the installed client and read-only inspection of one machine. No crash report and no update request were sent.</li>
+          <li>The service findings come from a small number of requests against the project owner's <strong>own account</strong>, inside throw-away sandbox folders. They describe what was observed; they are not the result of exhaustive testing, and no attempt was made to access other users' data.</li>
+          <li>A <strong>fault</strong> here means an unhandled exception while processing one request: the service answers that request with HTTP 500 and a WCF <code>a:InternalServiceFault</code> and keeps serving others. It does not mean the server went down.</li>
+        </ul>
+        <h3>Ratings and basis</h3>
+        <dl class="facts">
+          <dt><span class="rating rating-high">High</span></dt><dd>Exposes credentials or control of the account.</dd>
+          <dt><span class="rating rating-medium">Medium</span></dt><dd>Exposes private data, or can silently damage data.</dd>
+          <dt><span class="rating rating-low">Low</span></dt><dd>Information disclosure or a hardening gap.</dd>
+          <dt><span class="rating rating-info">Info</span></dt><dd>Behaviour worth knowing.</dd>
+          <dt>Basis</dt><dd><span class="ev ev-obs">Observed</span> in the client or in traffic, <span class="ev ev-live">Live</span> against the service, <span class="ev ev-inf">Inferred</span> from observed facts, <span class="ev ev-unk">Unknown</span> where not determined.</dd>
+        </dl>
+        <p class="muted">Ratings are a coarse guide for readers of this documentation, not a formal assessment.</p>
+        <section class="table-wrap" aria-labelledby="tbl-sum-c-cap" tabindex="0">
+          <table>
+            <caption id="tbl-sum-c-cap">Client findings (ChomikBox 2.0.8.2)</caption>
+            <thead>
+              <tr><th scope="col">ID</th><th scope="col">Finding</th><th scope="col">Rating</th><th scope="col">Basis</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><a href="#c-01">C-01</a></td><td>All traffic uses plain HTTP</td><td><span class="rating rating-high">High</span></td><td><span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#c-02">C-02</a></td><td>The password-equivalent credential is an unsalted MD5</td><td><span class="rating rating-high">High</span></td><td><span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#c-03">C-03</a></td><td>The same hash, and proxy credentials, stored in plain text in <code>conf.ini</code></td><td><span class="rating rating-medium">Medium</span></td><td><span class="ev ev-obs">Observed</span></td></tr>
+              <tr><td><a href="#c-04">C-04</a></td><td>Crash reports upload <code>conf.ini</code>, logs, queues and account ids over HTTP</td><td><span class="rating rating-high">High</span></td><td><span class="ev ev-obs">Observed</span> <span class="ev ev-inf">Inferred</span></td></tr>
+              <tr><td><a href="#c-05">C-05</a></td><td>Verbose logging by default</td><td><span class="rating rating-low">Low</span></td><td><span class="ev ev-obs">Observed</span></td></tr>
+              <tr><td><a href="#c-06">C-06</a></td><td>The session token travels in the clear, also as a URL parameter</td><td><span class="rating rating-medium">Medium</span></td><td><span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#c-07">C-07</a></td><td>Updates over HTTP, checked only by an unkeyed SHA-1 from the same channel, applied by an elevated updater</td><td><span class="rating rating-high">High</span> (needs a network position)</td><td><span class="ev ev-obs">Observed</span></td></tr>
+              <tr><td><a href="#c-08">C-08</a></td><td>Local command surface: named pipe and <code>chomik://</code>, including <code>--file-server</code></td><td><span class="rating rating-low">Low</span></td><td><span class="ev ev-obs">Observed</span> <span class="ev ev-inf">Inferred</span> effect of <code>--file-server</code></td></tr>
+              <tr><td><a href="#c-09">C-09</a></td><td>Usage data: <code>stats</code> with every <code>CheckEvents</code> poll and fixed <code>BoxEvents</code> events</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-obs">Observed</span></td></tr>
+              <tr><td><a href="#c-10">C-10</a></td><td>Integrity checks that authenticate nothing</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-obs">Observed</span></td></tr>
+              <tr><td><a href="#c-11">C-11</a></td><td>Internal addresses in the client</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-obs">Observed</span></td></tr>
+              <tr><td><a href="#c-12">C-12</a></td><td>Obsolete NPAPI browser plug-in</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-obs">Observed</span></td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="table-wrap" aria-labelledby="tbl-sum-s-cap" tabindex="0">
+          <table>
+            <caption id="tbl-sum-s-cap">Service behaviour observed live</caption>
+            <thead>
+              <tr><th scope="col">ID</th><th scope="col">Finding</th><th scope="col">Rating</th><th scope="col">Basis</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><a href="#s-01">S-01</a></td><td>Account enumeration via <code>Forbidden</code> vs <code>PermissionError</code></td><td><span class="rating rating-medium">Medium</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-02">S-02</a></td><td>Folder passwords returned in plain text</td><td><span class="rating rating-medium">Medium</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-03">S-03</a></td><td>A <code>MoveFolder</code> fault that does not roll back</td><td><span class="rating rating-medium">Medium</span> (integrity)</td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-04">S-04</a></td><td><code>RemoveFolder force=false</code> deletes folders that hold only subfolders</td><td><span class="rating rating-medium">Medium</span> (data loss)</td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-05">S-05</a></td><td>Silent fallbacks to the root folder instead of errors</td><td><span class="rating rating-low-medium">Low-Medium</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-06">S-06</a></td><td>Dropped parameters and unhandled faults, including the client's own &quot;download folder&quot; id</td><td><span class="rating rating-low">Low</span></td><td><span class="ev ev-live">Live</span> <span class="ev ev-inf">Inferred</span> client impact</td></tr>
+              <tr><td><a href="#s-07">S-07</a></td><td>Contract disclosure through faults and headers</td><td><span class="rating rating-low">Low</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-08">S-08</a></td><td>Reusable bearer download URLs</td><td><span class="rating rating-low">Low</span></td><td><span class="ev ev-live">Live</span> <span class="ev ev-unk">Unknown</span> lifetime</td></tr>
+              <tr><td><a href="#s-09">S-09</a></td><td>Anonymous image access by numeric id</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-10">S-10</a></td><td>Session model: concurrent sessions, no observed expiry</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-11">S-11</a></td><td>The client's identity is not enforced</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-12">S-12</a></td><td>An obsolete session host still configured in the client</td><td><span class="rating rating-low">Low</span></td><td><span class="ev ev-live">Live</span> <span class="ev ev-inf">Inferred</span> risk</td></tr>
+              <tr><td><a href="#s-13">S-13</a></td><td>Sequenced <code>Download</code> state is kept per session, not per request</td><td><span class="rating rating-low">Low</span> (correctness)</td><td><span class="ev ev-live">Live</span></td></tr>
+              <tr><td><a href="#s-14">S-14</a></td><td><code>ModifyFolder</code> accepts <code>description</code>, <code>freePoints</code> and <code>freeTransfer</code> and ignores them</td><td><span class="rating rating-info">Info</span></td><td><span class="ev ev-live">Live</span></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <section class="window" id="client">
+      <header class="titlebar">
+        <img src="assets/img/rating-default.png" alt="" width="32" height="32">
+        <h2><b>Client</b> - ChomikBox 2.0.8.2</h2>
+      </header>
+      <div class="pane">
+        <p>Findings C-01 to C-12 concern the shipped client: how it handles credentials, tokens and user data, and what it sends where. This is a 2017 client looked at in 2026, so most points describe its design rather than a live risk.</p>
+      </div>
+    </section>
+
+    <section class="window" id="c-01">
+      <header class="titlebar">
+        <img src="assets/img/rating-high.png" alt="" width="32" height="32">
+        <h2><b>C-01</b> All traffic uses plain HTTP</h2>
+        <span class="rating rating-high">High</span>
+      </header>
+      <div class="pane">
+        <p>Every URL template in the client and its default config starts with <code>http://</code>: the SOAP service <code>http://%1/services/ChomikBoxService.svc</code>, the upload server <code>http://&lt;server&gt;/file/</code> and resume check, signed download URLs, the web login hand-off, the session server, the crash collector <code>http://bts.box.chomikuj.pl:8088/crash</code> and the update repository. <span class="ev ev-obs">Observed</span> </p>
+        <p>The SOAP service sits behind Cloudflare and also answers over HTTPS, but the client never uses it. <span class="ev ev-live">Live</span> </p>
+        <p><strong>Why it matters.</strong> Anyone on the network path can read and change the password hash in <code>Auth</code> (C-02), the session token in every later request (C-06), folder passwords (S-02), file names, folder structure and uploaded content.</p>
+        <p><strong>Open.</strong> The install ships gnutls, and <code>https://</code> URLs are accepted as download arguments; whether the client uses TLS anywhere, and whether certificates are checked, is not known. <span class="ev ev-unk">Unknown</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="c-02">
+      <header class="titlebar">
+        <img src="assets/img/rating-high.png" alt="" width="32" height="32">
+        <h2><b>C-02</b> The credential is an unsalted MD5</h2>
+        <span class="rating rating-high">High</span>
+      </header>
+      <div class="pane">
+        <p><code>Auth</code> sends <code>&lt;passHash&gt;</code> next to the user name. The client computes it as <code>QCryptographicHash::hash(password.toUtf8(), Md5).toHex()</code>: lower-case hex MD5 with no salt. <span class="ev ev-obs">Observed</span> The service accepts it. <span class="ev ev-live">Live</span> The client keeps the hash and sends <code>Auth</code> again at start-up, after the system resumes and on every relogin. <span class="ev ev-obs">Observed</span> </p>
+        <pre><code>&lt;Auth xmlns="http://chomikuj.pl/"&gt;&lt;name&gt;{{USERNAME}}&lt;/name&gt;&lt;passHash&gt;{{PASS_HASH}}&lt;/passHash&gt;&lt;ver&gt;4&lt;/ver&gt;
+  &lt;client&gt;&lt;name&gt;chomikbox&lt;/name&gt;&lt;version&gt;2.0.8.2&lt;/version&gt;&lt;/client&gt;&lt;/Auth&gt;</code></pre>
+        <p><strong>Why it matters.</strong> For this API the hash is the password: whoever captures it can log in without knowing the password. <span class="ev ev-inf">Inferred</span> from the accepted <code>Auth</code>. Unsalted MD5 can be computed very quickly, so a leaked hash is open to offline guessing, and accounts with the same password share the same hash. C-01, C-03 and C-04 describe three ways the hash leaves the user's control. Operation page: <a href="api/auth.html">Auth</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="c-03">
+      <header class="titlebar">
+        <img src="assets/img/rating-medium.png" alt="" width="32" height="32">
+        <h2><b>C-03</b> Stored credentials in <code>conf.ini</code></h2>
+        <span class="rating rating-medium">Medium</span>
+      </header>
+      <div class="pane">
+        <p><code>%LOCALAPPDATA%\ChomikBox\conf.ini</code> is a plain-text INI file. It holds <code>[userinfo] login</code>, <code>password-hash</code> and <code>password-len</code>, a section per saved account with the same keys plus <code>password-remember</code>, and <code>[proxy] username</code> and <code>password</code>. The hash is written when <q>remember me</q> is ticked. The live file has a <code>userinfo</code> section with these keys; the values were deliberately not copied. <span class="ev ev-obs">Observed</span> </p>
+        <p><code>password-len</code> records the length of the password, probably so the login form can show the right number of masking dots. <span class="ev ev-inf">Inferred</span></p>
+        <p><strong>Why it matters.</strong> Any program running as the user, any backup of the profile and every crash report (C-04) carries a working credential for the account and, if one is configured, the proxy password.</p>
+      </div>
+    </section>
+
+    <section class="window" id="c-04">
+      <header class="titlebar">
+        <img src="assets/img/rating-high.png" alt="" width="32" height="32">
+        <h2><b>C-04</b> What crash reports contain</h2>
+        <span class="rating rating-high">High</span>
+      </header>
+      <div class="pane">
+        <p>After a crash, <code>crashsender.exe</code> posts a multipart form to <code>http://bts.box.chomikuj.pl:8088/crash</code> with the minidump and these files: <code>message.log</code>, <code>conf.ini</code>, the upload and download queues (local paths and file names) and the playlist, plus the text fields <code>chomikId</code> and <code>chomikName</code>. The only integrity value is the MD5 of <code>&lt;project&gt;-&lt;version&gt;.&lt;arch&gt;</code>. <span class="ev ev-obs">Observed</span> argument list and field names; that <code>conf.ini</code> then contains the hash is <span class="ev ev-inf">Inferred</span> from the default configuration. <a class="src" href="components.html#crashsender">format</a> <a class="src" href="api/sendCrashReport.html">API page</a></p>
+        <ul>
+          <li>In GUI mode the user is asked first, but the question (<q>It is possible to send debugging information back to developer team…</q>) does not say that settings, credentials or file lists are included.</li>
+          <li>With <code>--no-gui</code>, which <code>chomikbox.exe</code> passes when an internal flag is set, the report goes out without asking. What sets that flag is <span class="ev ev-unk">Unknown</span>.</li>
+          <li><code>message.log</code> can be very large (134&nbsp;MB on the inspected machine) and is uploaded whole if present (C-05).</li>
+        </ul>
+        <p><strong>Status.</strong> No report was sent during this project. On 2026-10-24 port 8088 accepted connections but gave an empty reply to <code>HEAD</code>; whether reports are still accepted or read is <span class="ev ev-unk">Unknown</span>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="c-05">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>C-05</b> Verbose logging by default</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <p>The default config value is <code>[debug] level = 6</code>, on a scale the config file explains as <q>0 - none, 1 - most important … 5 - a lot … 9 - garbage, dumps</q>. On the inspected machine <code>message.log</code> had grown to 134&nbsp;MB, with rotated copies in <code>backup\</code>. The SOAP layer logs lines such as <code>message SENT (try N relogs M). ID: x (method)</code>; <code>soap-debug</code> and <code>network-debug</code> are off by default. <span class="ev ev-obs">Observed</span></p>
+        <p><strong>Open.</strong> Whether tokens, hashes or request bodies reach the log was not analysed. <span class="ev ev-unk">Unknown</span> The log matters because it travels with crash reports (C-04).</p>
+      </div>
+    </section>
+
+    <section class="window" id="c-06">
+      <header class="titlebar">
+        <img src="assets/img/rating-medium.png" alt="" width="32" height="32">
+        <h2><b>C-06</b> The session token in the clear</h2>
+        <span class="rating rating-medium">Medium</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li>The token returned by <code>Auth</code> is the first child of every later request except <code>SessionBegin</code>, sent over plain HTTP (C-01). The serializer has a SOAP-header <code>&lt;Token&gt;</code> branch, but nothing enables it. <span class="ev ev-obs">Observed</span> </li>
+          <li>The web hand-off opens <code>http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&amp;returnUrl=/</code> in the browser. With a valid token the site answers with a redirect that sets a web session cookie (<code>ChomikSession</code>); <code>t</code> is the raw <code>Auth</code> token. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span> <a class="src" href="api/loginFromBox.html">LoginFromBox</a></li>
+        </ul>
+        <p><strong>Why it matters.</strong> A token in a URL can end up in browser history, proxy logs and server access logs, and a captured token stays usable for at least as long as tokens were observed to live (<a href="#s-10">S-10</a>). <span class="ev ev-inf">Inferred</span> An earlier note called <code>t</code> a one-time token; that is unverified. <span class="ev ev-unk">Unknown</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="c-07">
+      <header class="titlebar">
+        <img src="assets/img/rating-high.png" alt="" width="32" height="32">
+        <h2><b>C-07</b> Updates over HTTP, checked by an unkeyed hash, applied elevated</h2>
+        <span class="rating rating-high">High</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>UUpdater</code> fetches <code>packages.xml</code> and packages over plain HTTP from <code>bts.box.&lt;domain&gt;</code> or <code>download.box.&lt;domain&gt;</code> and follows redirects. <code>packages.xml</code> is parsed with no hash and no signature check. <span class="ev ev-obs">Observed</span> </li>
+          <li>Each downloaded file (for <code>.gz</code> files, the decompressed content) is hashed with SHA-1 and compared with the <code>sha1</code> attribute of that same <code>packages.xml</code>. A mismatch is the message <q>Signature error</q>, but there is no signature and no embedded key: the only cryptographic API the client imports is <code>QCryptographicHash</code>. The expected hash arrives over the same unauthenticated channel as the file, so the check detects corruption and truncated downloads, not an attacker who controls that channel. <span class="ev ev-obs">Observed</span> </li>
+          <li><code>installer.exe</code> has a <code>requireAdministrator</code> manifest and is started through <code>BProcess::runAsAdministrator</code>, which uses the <code>runas</code> verb when the target's manifest asks for administrator rights. It copies files, runs the commands listed in the package (<q>Executing command</q>) and writes HKLM keys, and it runs those commands <strong>without any prior check</strong> of the package. Its own post-copy SHA-1 of the installed files only decides whether a package gets the <code>installed</code> mark: no error, no rollback. <span class="ev ev-obs">Observed</span> </li>
+          <li>An optional SHA-1 check of existing files is off by default (<code>check-hash-for-exiting-files = false</code>). <span class="ev ev-obs">Observed</span></li>
+        </ul>
+        <p><strong>Why it matters.</strong> Anyone who can alter the traffic (a hostile network, DNS, a proxy) can supply a matching <code>packages.xml</code> and package, and the package's commands then run elevated. A network attacker does not need the real server. That is why the finding is rated High, on the condition that it needs a position on the network path. <span class="ev ev-inf">Inferred</span></p>
+        <p><strong>Status.</strong> The repository answered 404 and 403 on 2026-10-24, so the path is dormant on current installs. <span class="ev ev-inf">Inferred</span>  Which updater executable a real repository would nominate is data in <code>packages.xml</code> and cannot be determined from the client. <span class="ev ev-unk">Unknown</span> </p>
+      </div>
+    </section>
+
+    <section class="window" id="c-08">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>C-08</b> Local command surface</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li>The named pipe <code>\\.\pipe\qtsingleapp-Chomik-739b-&lt;sessionId&gt;</code> has a predictable name and accepts the same commands as the Explorer verbs: upload a path (<code>-u</code>), download a URL (<code>-d</code>), add to the playlist (<code>-p</code>) and folder operations including <code>--folders remove --force</code>. <span class="ev ev-obs">Observed</span></li>
+          <li>The <code>chomik://</code> protocol hands text chosen by a web page to the same parser, <code>Application::executeRemoteCommand</code>, which accepts <code>chomik://file:</code>, <code>chomik://folder:</code> and <code>chomik://files/</code> forms. <span class="ev ev-obs">Observed</span> <a class="src" href="windows-integration.html#remote">Windows integration</a></li>
+          <li>The pipe also accepts <code>--file-server &lt;host&gt;</code>, which makes the running client send <strong>all uploads and resume checks, upload keys included, to that host</strong> instead of the server chosen by the service. That the verb is accepted over the pipe is <span class="ev ev-obs">Observed</span>; that the value reaches the upload code is <span class="ev ev-inf">Inferred</span> (the link to the upload path was not fully confirmed).</li>
+        </ul>
+        <p><strong>Open.</strong> The pipe's access control, how the parser treats unexpected input, and which commands a <code>chomik://</code> URL can actually trigger were not analysed. <span class="ev ev-unk">Unknown</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="c-09">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>C-09</b> Usage data with event polls</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li>Every <code>CheckEvents</code> call (every 300&nbsp;s when idle, every 60&nbsp;s while uploading, every 15&nbsp;s while a folder view is open) carries <code>stats{isUploading, isPlaying, isDownloading, panelSelectedTab, animation}</code>. <span class="ev ev-obs">Observed</span> <a class="src" href="api/checkEvents.html">CheckEvents</a></li>
+          <li><code>BoxEvents</code> sends <code>Event{name, value}</code> pairs, kept in <code>[proto-box] box-events</code> while the client is logged out. It is <strong>not</strong> GUI click statistics and it is <strong>not off by default</strong>: nothing gates it. A small fixed set of events is sent whenever its trigger occurs: <code>shutdown</code> (<code>poweroff</code>, <code>suspend</code> or <code>quit</code>, after the user chose an action for when transfers finish), <code>detected.defaultplayer</code>, <code>settings.defaultplayer</code> and <code>settings.autostart</code>. The client sends no other event names. <span class="ev ev-obs">Observed</span> The service accepts real event names with status <code>Ok</code>; whether it stores them is <span class="ev ev-unk">Unknown</span>. <span class="ev ev-live">Live</span> <a href="api/boxEvents.html">BoxEvents</a></li>
+          <li>When the session server is enabled, <code>SessionBegin</code> also sends the user name, the password hash and an OS description; that is off by default (<a href="#s-12">S-12</a>). <span class="ev ev-obs">Observed</span></li>
+          <li>On the server side, <code>Download</code> results that contain files set a <code>guid</code> cookie with a two-year expiry; whether the Qt client keeps cookies was not analysed. <span class="ev ev-live">Live</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="c-10">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>C-10</b> Integrity checks, not authentication</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>base.ini [main] key</code> is a checksum over the <code>[main]</code> section of <code>base.ini</code>, verified at start-up; on a mismatch the client stops with <code>qFatal("HACKING! base.ini/main corrupted.")</code>. <span class="ev ev-obs">Observed</span> </li>
+          <li>The crash report's <code>checkSum</code> is the MD5 of <code>&lt;project&gt;-&lt;version&gt;.&lt;arch&gt;</code>, a constant per build, with no key. <span class="ev ev-obs">Observed</span></li>
+        </ul>
+        <p>Neither proves who sent or edited something: they stop casual edits and accidental junk, not a deliberate actor. <span class="ev ev-inf">Inferred</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="c-11">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>C-11</b> Internal addresses in the client</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>chomikbox1conf.exe</code> contains the private address <code>192.168.10.30</code>. <span class="ev ev-obs">Observed</span> </li>
+          <li>The default config shows an application default of <code>192.168.10.49</code> for <code>[proto-webox] webservice-host</code>, and the client has a built-in main address <code>208.43.39.225</code>. <code>webservice-main</code> is used only when <code>webservice-redirect = true</code>, a development setting that is off in the default config. <span class="ev ev-obs">Observed</span> </li>
+        </ul>
+        <p>These look like development and test leftovers; none of the addresses were probed. <span class="ev ev-inf">Inferred</span></p>
+      </div>
+    </section>
+
+    <section class="window" id="c-12">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>C-12</b> Obsolete browser plug-in</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <p><code>npcbplugin.dll</code> registers itself in NPAPI browsers for 31 MIME types, among them <code>application/x-msdownload</code>, <code>application/exe</code> and <code>application/x-msdos-program</code>, and forwards the URLs to ChomikBox. <span class="ev ev-obs">Observed</span> Current browsers dropped NPAPI years ago, so it no longer loads. <span class="ev ev-inf">Inferred</span> Its cold-start path reads an HKLM value that a plain MSI install never writes. <span class="ev ev-obs">Observed</span> <a class="src" href="components.html#npcbplugin">Components</a>, <a class="src" href="flows.html#click-catching">flow</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="service">
+      <header class="titlebar">
+        <img src="assets/img/rating-default.png" alt="" width="32" height="32">
+        <h2><b>Service behaviour</b> observed live</h2>
+      </header>
+      <div class="pane">
+        <p>Findings S-01 to S-14 describe how the chomikuj.pl service answered during the live verification of 2026-10-24 and 2026-10-25. Only the project owner's own account was used, write operations stayed inside sandbox folders that were removed afterwards, and each case is backed by a captured, redacted exchange under <code>api/examples/</code>, linked here through its API reference page. These are observations, not the result of exhaustive testing.</p>
+      </div>
+    </section>
+
+    <section class="window" id="s-01">
+      <header class="titlebar">
+        <img src="assets/img/rating-medium.png" alt="" width="32" height="32">
+        <h2><b>S-01</b> Account enumeration via Auth</h2>
+        <span class="rating rating-medium">Medium</span>
+      </header>
+      <div class="pane">
+        <p>An unknown user name gets <code>status = Forbidden</code>; a known user name with a wrong password gets <code>PermissionError</code>. In both cases <code>hamsterId</code> is 0 and every other member is nil. <span class="ev ev-live">Live</span>, with one deliberate wrong-password attempt.</p>
+        <p><strong>Why it matters.</strong> The difference tells anyone whether an account name exists. The client itself shows the same credentials dialog for both.</p>
+        <p class="ex-files">Evidence: <code>api/examples/Auth/unknown-user.*</code>, <code>api/examples/Auth/wrong-password.*</code>; see <a href="api/auth.html#ex-res-200-unknown-user">unknown user</a> and <a href="api/auth.html#ex-res-200-wrong-password">wrong password</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-02">
+      <header class="titlebar">
+        <img src="assets/img/rating-medium.png" alt="" width="32" height="32">
+        <h2><b>S-02</b> Folder passwords in plain text</h2>
+        <span class="rating rating-medium">Medium</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>ModifyFolder</code> echoes a newly set folder password in <code>&lt;password&gt;</code> (and sets <code>passwd</code> to true).</li>
+          <li><code>Folders</code> lists each folder's <code>password</code>. Confirmed by the reviewer's read-only full-tree listing of the account: 1 of 586 folders has <code>passwd = true</code>, and its password came back non-empty in plain text. The value was neither printed nor stored. <span class="ev ev-live">Live</span> </li>
+          <li>The folder that <code>SavePlaylist</code> creates gets a server-generated password while <code>passwd</code> stays false.</li>
+        </ul>
+        <p>All of this travels over plain HTTP (C-01). <span class="ev ev-live">Live</span> In the captured examples these values are redacted to <code>{{FOLDER_PASSWORD}}</code>, except the password the capture tool itself set on a throw-away sandbox folder.</p>
+        <p class="ex-files">Evidence: <code>api/examples/ModifyFolder/set-password.*</code>, <code>api/examples/Folders/playlist-folder.*</code>; see <a href="api/modifyFolder.html#ex-res-200-set-password">ModifyFolder set-password</a> and <a href="api/folders.html#ex-res-200-playlist-folder">Folders playlist-folder</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-03">
+      <header class="titlebar">
+        <img src="assets/img/rating-medium.png" alt="" width="32" height="32">
+        <h2><b>S-03</b> A MoveFolder fault that does not roll back</h2>
+        <span class="rating rating-medium">Medium</span>
+      </header>
+      <div class="pane">
+        <p><code>MoveFolder</code> with <code>newFolderId = folderId</code> (a folder into itself) returns HTTP 500 with <code>a:InternalServiceFault</code>, an unhandled exception for that request, yet the folder has still been moved to the account root. <span class="ev ev-live">Live</span> During testing the sandbox folder was found at the root and moved back.</p>
+        <p><strong>Why it matters.</strong> A client that treats the fault as "nothing happened" ends up with a folder in an unexpected place. Integrity rather than confidentiality.</p>
+        <p class="ex-files">Evidence: <code>api/examples/MoveFolder/into-itself.*</code>, <code>api/examples/MoveFolder/recover-from-root.*</code>; see <a href="api/moveFolder.html#ex-res-500-into-itself">into-itself</a> and <a href="api/moveFolder.html#ex-res-200-recover-from-root">recover-from-root</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-04">
+      <header class="titlebar">
+        <img src="assets/img/rating-medium.png" alt="" width="32" height="32">
+        <h2><b>S-04</b> RemoveFolder with force=false</h2>
+        <span class="rating rating-medium">Medium</span>
+      </header>
+      <div class="pane">
+        <p><code>force=false</code> only protects folders that contain files: such a folder gives <code>NotEmptyOrNotExistsFolder</code> and nothing is removed. A folder that holds only subfolders is deleted together with all of them, with <code>status = Ok</code>. <span class="ev ev-live">Live</span></p>
+        <p><strong>Why it matters.</strong> Anyone using the API who reads <code>force=false</code> as "only if empty" can lose a whole folder tree.</p>
+        <p class="ex-files">Evidence: <code>api/examples/RemoveFolder/not-empty-without-force.*</code>, <code>api/examples/RemoveFolder/with-files-without-force.*</code>; see <a href="api/removeFolder.html#ex-res-200-not-empty-without-force">not-empty-without-force</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-05">
+      <header class="titlebar">
+        <img src="assets/img/rating-low-medium.png" alt="" width="32" height="32">
+        <h2><b>S-05</b> Silent fallbacks to the root folder</h2>
+        <span class="rating rating-low-medium">Low-Medium</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>Folders</code> with an unknown <code>folderId</code> returns the root folder with <code>status = Ok</code>.</li>
+          <li><code>MoveFolder</code> to an unknown parent moves the folder to the root, with <code>status = Ok</code>.</li>
+          <li><code>UploadToken</code> with an unknown <code>folderId</code> still issues a full upload ticket.</li>
+        </ul>
+        <p><span class="ev ev-live">Live</span> A client should validate ids itself and check the id it gets back.</p>
+        <p class="ex-files">Evidence: <code>api/examples/Folders/nonexistent-folder.*</code>, <code>api/examples/MoveFolder/nonexistent-target.*</code>, <code>api/examples/UploadToken/nonexistent-folder.*</code>; see <a href="api/folders.html#ex-res-200-nonexistent-folder">Folders</a>, <a href="api/moveFolder.html#ex-res-200-nonexistent-target">MoveFolder</a>, <a href="api/uploadToken.html#ex-res-200-nonexistent-folder">UploadToken</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-06">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>S-06</b> Dropped parameters and unhandled faults</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li>WCF reads parameters forward only: an out-of-order parameter, or one in the wrong namespace, is silently treated as null or 0 instead of being rejected.</li>
+          <li>Some malformed requests end in an unhandled <code>a:InternalServiceFault</code> (HTTP 500): an operation element in <code>http://chomikuj.pl</code> without the trailing slash, the <code>&lt;hamsterId&gt;/&lt;folderId&gt;</code> form of a <code>Download</code> id, and an empty <code>Auth</code> body.</li>
+          <li>The client's own <q>download folder</q> action builds exactly that <code>&lt;hamsterId&gt;/&lt;folderId&gt;</code> id (<code>%1/%2</code>, hamster id first), and its id builder prefers it over the folder path, which does work. That feature therefore presumably fails against today's server. <span class="ev ev-obs">Observed</span> in the client, <span class="ev ev-inf">Inferred</span> as to the outcome.</li>
+        </ul>
+        <p><span class="ev ev-live">Live</span> </p>
+        <p class="ex-files">Evidence: <code>api/examples/Download/id-hamster-slash-folder.*</code>, <code>api/examples/Auth/empty-request.*</code>, <code>api/examples/Service/wrong-operation-namespace.*</code>; see <a href="api/download.html#ex-res-500-id-hamster-slash-folder">Download</a>, <a href="api/auth.html#ex-res-500-empty-request">Auth</a>, <a href="api/soapEndpoint.html">SOAP endpoint behaviour</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-07">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>S-07</b> Contract disclosure through faults and headers</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>a:DeserializationFailed</code> names the expected parameter and its CLR type, for example <code>TeamSolutions.Chomik…</code> types. This reveals the exact parameter names, types and order without a WSDL.</li>
+          <li><code>a:DestinationUnreachable</code>, returned for an operation name appended to the URL path, leaks internal origin host names such as <code>vmain50.hwsl.local:8080</code> and <code>vmain53.hwsl.local:8080</code>.</li>
+          <li>Responses carry <code>x-powered-by: ASP.NET</code>, <code>x-aspnet-version: 4.0.30319</code> and <code>x-server: m50</code>, <code>m52</code>, ….</li>
+        </ul>
+        <p><span class="ev ev-live">Live</span> On the other side, WCF metadata publishing is disabled (no WSDL), and the generic faults carry no exception detail.</p>
+        <p class="ex-files">Evidence: <code>api/examples/Service/deserialization-failed.*</code>, <code>api/examples/Service/rest-style-path.*</code>; see <a href="api/soapEndpoint.html">SOAP endpoint behaviour</a> and <a href="api/soapRestStylePath.html">path-style URL</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-08">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>S-08</b> Bearer download URLs</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <p>Signed download URLs (<code>http://sNNNN.chomikuj.pl/File.aspx?e=…&amp;pv=…</code>) work for whoever holds them: a repeated <code>GET</code> and a <code>Range</code> request both succeeded. The <code>expire</code> field was always empty, so how long a URL stays valid is <span class="ev ev-unk">Unknown</span>. <span class="ev ev-live">Live</span></p>
+        <p class="ex-files">Evidence: <code>api/examples/FileDownload/*</code>; see <a href="api/downloadFile.html">GET /File.aspx</a> and <a href="api/refreshFileUrl.html">RefreshFileUrl</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-09">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>S-09</b> Anonymous image access by id</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <p><code>http://chomikuj.pl/Image.aspx?id=&lt;fileId&gt;</code> answers with a 302 redirect to a signed file URL without any session. This was observed for the owner's PNG in a folder without a password; password-protected folders were not tested. <span class="ev ev-live">Live</span> File ids are numeric and sequential, and public hosting is the purpose of the service, so this is rated Info.</p>
+        <p class="ex-files">Evidence: <code>api/examples/Web/image-aspx.*</code>; see <a href="api/imageRedirect.html">GET /Image.aspx</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-10">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>S-10</b> Session model</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <p>Several sessions of one account are valid at the same time; a new <code>Auth</code> does not invalidate earlier tokens. <code>Logout</code> invalidates only its own token. No expiry was observed within the longest test window of about 45 minutes; longer lifetimes were not measured. <span class="ev ev-live">Live</span></p>
+        <p class="ex-files">Evidence: <code>api/examples/CheckEvents/concurrent-session-first-token.*</code>, <code>api/examples/CheckEvents/first-session-after-other-logout.*</code>; see <a href="api/checkEvents.html#ex-res-200-concurrent-session-first-token">concurrent session</a> and <a href="api/logout.html">Logout</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-11">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>S-11</b> Client identity not enforced</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <p><code>Auth</code> accepts any <code>ver</code> and works without the <code>client</code> element, so any program can present itself as ChomikBox. <span class="ev ev-live">Live</span></p>
+        <p class="ex-files">Evidence: <code>api/examples/Auth/protocol-version-1.*</code>, <code>api/examples/Auth/without-client-element.*</code>; see <a href="api/auth.html#ex-req-protocol-version-1">protocol-version-1</a> and <a href="api/auth.html#ex-req-without-client-element">without-client-element</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-12">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>S-12</b> An obsolete session host in the client</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <p>The client's optional session server, <code>session.box.chomikuj.pl</code> (<code>SessionBegin</code>), no longer resolves in DNS. <span class="ev ev-live">Live</span> If someone registered that name, an old client with <code>[proto-webox] session-enabled = true</code> would send it the user name and password hash. That setting is off by default. <span class="ev ev-inf">Inferred</span> risk. No credentials were sent to any session host during this project.</p>
+        <p class="ex-files">Evidence: <code>api/examples/SessionBegin/main-endpoint-not-supported.*</code>, <code>api/examples/Web/session-server.*</code>; see <a href="api/sessionBegin.html">SessionBegin</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-13">
+      <header class="titlebar">
+        <img src="assets/img/rating-low.png" alt="" width="32" height="32">
+        <h2><b>S-13</b> Sequenced Download state is per session</h2>
+        <span class="rating rating-low">Low</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li>A <code>Download</code> request can be split into parts (<code>messageSequence</code>). The service stores the entries of each non-final part <strong>per session token</strong>, not per <code>stamp</code>, and does not clear them when the final part arrives. A new part 0 replaces what was stored.</li>
+          <li>A final part with nothing stored in the session returns <code>status = Error</code> with no error message. If the combined entries span two folders, it returns <code>status = Ok</code> with an empty list, not even its own entry. A stale part from another folder empties a later final part in the same way.</li>
+          <li>Agreements count only in the final message. The single-message form (<code>count = 1</code>) ignores stored parts.</li>
+        </ul>
+        <p><span class="ev ev-live">Live</span> (26 sequenced exchanges in four sessions; the storage mechanism itself is <span class="ev ev-inf">Inferred</span>.) <strong>Why it matters.</strong> A client that reuses a session for two sequenced requests can get wrong or empty results without any error, so this is a correctness rating. The real client sends single messages unless a request holds more than 2000 entries, so normal use is unaffected. <span class="ev ev-inf">Inferred</span></p>
+        <p class="ex-files">Evidence: <code>api/examples/Download/sequence-*</code>, <code>seq1c-*</code>, <code>seq1d-*</code>; see <a href="api/download.html">Download</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="s-14">
+      <header class="titlebar">
+        <img src="assets/img/rating-info.png" alt="" width="32" height="32">
+        <h2><b>S-14</b> ModifyFolder ignores description and price fields</h2>
+        <span class="rating rating-info">Info</span>
+      </header>
+      <div class="pane">
+        <ul>
+          <li><code>ModifyFolder</code> accepts <code>description</code>, <code>freePoints</code> and <code>freeTransfer</code>: any in-range value, including -1, 2147483647 and a 10,000-character description, returns <code>status = Ok</code> and moves <code>modifyTime</code>. Nothing is echoed, <code>Folders</code> never returns a value, and no effect was visible in the download offer, the public pages or the balance. <span class="ev ev-live">Live</span></li>
+          <li>Out-of-range or non-numeric values (overflow, <code>abc</code>, an empty element) fault during deserialization with <code>a:DeserializationFailed</code>. <span class="ev ev-live">Live</span></li>
+          <li>The client never sends these fields: its folder dialog has widgets for them but hides them. <span class="ev ev-obs">Observed</span></li>
+        </ul>
+        <p>A caller that sets a folder price or description through the API gets a success status and no effect, which is easy to mistake for a stored setting. Whether the service writes the values somewhere it never exposes is <span class="ev ev-unk">Unknown</span>.</p>
+        <p class="ex-files">Evidence: <code>api/examples/ModifyFolder/set-*</code>, <code>description-*</code>, <code>free-*</code>, <code>full-form-*</code>; see <a href="api/modifyFolder.html">ModifyFolder</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="handling">
+      <header class="titlebar">
+        <img src="assets/img/rating-default.png" alt="" width="32" height="32">
+        <h2><b>Handling</b> and mitigating observations</h2>
+      </header>
+      <div class="pane">
+        <h3>How the project handled the account</h3>
+        <ul>
+          <li>Credentials were read only at run time. Every captured artefact is redacted with placeholders, and independent leak scans found no credential values in project files.</li>
+          <li>Live writes were confined to <code>_chomikbox_api_test*</code> sandboxes and checked against a full-tree snapshot. Two server behaviours (S-03, S-05) briefly moved a sandbox folder to the root; it was moved back and deleted each time.</li>
+        </ul>
+        <h3>On the other side</h3>
+        <ul>
+          <li>The WCF service publishes no metadata (no WSDL), and its generic faults carry no exception detail. <span class="ev ev-live">Live</span></li>
+          <li>In GUI mode the crash reporter asks before sending. <span class="ev ev-obs">Observed</span></li>
+          <li>Downloads that cost transfer or points open an agreement window that shows the cost first; links outside chomikuj.pl get one too. <span class="ev ev-obs">Observed</span></li>
+          <li>The optional session server is off by default. <span class="ev ev-obs">Observed</span></li>
+        </ul>
+        <div class="callout callout-unknown">
+          <img src="assets/img/msgbox-question.png" alt="" width="64" height="64">
+          <p class="callout-title">Unknowns that matter most</p>
+          <ul>
+            <li>Any use of TLS in the client (gnutls is shipped) and certificate checking.</li>
+            <li>Access control on the named pipe; how <code>executeRemoteCommand</code> handles hostile input and what a <code>chomik://</code> URL can reach.</li>
+            <li>Whether logs contain tokens or hashes.</li>
+            <li>Which updater executable and package commands a real repository would nominate (the update check itself is described in C-07).</li>
+            <li>Token and signed-URL lifetimes; the server-side state of the crash collector.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

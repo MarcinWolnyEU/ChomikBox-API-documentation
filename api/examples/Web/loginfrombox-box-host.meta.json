@@ -1,0 +1,82 @@
+{
+    "operation": "Web",
+    "case": "loginfrombox-box-host",
+    "timestamp": "2026-10-24T15:27:05Z",
+    "request": {
+        "method": "GET",
+        "url": "http://box.chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 307,
+        "reason": "Temporary Redirect",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:04 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=UTF-8"
+            ],
+            [
+                "Content-Length",
+                "226"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "location",
+                "http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa00e35882278c-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=UTF-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": "http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/",
+        "bodyBytesOnWire": 226,
+        "bodyBytesDecoded": 226,
+        "bodySha256": "619f279d9df7810519e69369fd34ced2b3de33b62b080abcc2e7aa666d7254ea",
+        "elapsedMs": 152.5
+    },
+    "note": "box.chomikuj.pl/chomik/chomikbox/LoginFromBox: 307 to the same path on chomikuj.pl."
+}

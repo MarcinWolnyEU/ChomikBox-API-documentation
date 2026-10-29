@@ -1,0 +1,58 @@
+{
+    "operation": "ResumeCheck",
+    "case": "after-upload",
+    "timestamp": "2026-10-24T15:26:18Z",
+    "request": {
+        "method": "GET",
+        "url": "http://s9530.chomikuj.pl:8084/resume/check/?key={{UPLOAD_TOKEN}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "94"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Server",
+                "Microsoft-HTTPAPI/2.0"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:17 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-HTTPAPI/2.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 94,
+        "bodyBytesDecoded": 94,
+        "bodySha256": null,
+        "elapsedMs": 67.3
+    },
+    "note": "Resume check after the upload completed: file_size = bytes stored, skipThumbnails, res=1."
+}

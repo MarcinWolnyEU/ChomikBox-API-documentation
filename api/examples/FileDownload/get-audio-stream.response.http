@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+Cache-Control: private
+Content-Type: audio/mpeg
+Server: Microsoft-IIS/10.0
+Access-Control-Allow-Origin: http://chomikuj.pl
+Content-Disposition: attachment; filename="silence.mp3"
+X-AspNet-Version: 4.0.30319
+X-Powered-By: ASP.NET
+Date: Sat, 24 Oct 2026 15:33:26 GMT
+Content-Length: 1248
+
+[body: 1248 bytes, sha256=c6a44168fc31e9ff52b94716ebe7fb29ed22562379f7bc299fc30044f0023602; first bytes: fff370c0000000000000000000496e666f0000000f00000029000004e0002a2a]

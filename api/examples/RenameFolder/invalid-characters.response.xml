@@ -1,0 +1,1 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><RenameFolderResponse xmlns="http://chomikuj.pl/"><RenameFolderResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:status>Error</a:status><a:errorMessage>InvalidCharacters</a:errorMessage></RenameFolderResult></RenameFolderResponse></s:Body></s:Envelope>

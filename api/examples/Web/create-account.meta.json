@@ -1,0 +1,78 @@
+{
+    "operation": "Web",
+    "case": "create-account",
+    "timestamp": "2026-10-24T15:27:16Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/Create.aspx",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 301,
+        "reason": "Moved Permanently",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:15 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=UTF-8"
+            ],
+            [
+                "Content-Length",
+                "168"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "location",
+                "http://chomikuj.pl/action/Registration/Create"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa01280efbf976-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=UTF-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": "http://chomikuj.pl/action/Registration/Create",
+        "bodyBytesOnWire": 168,
+        "bodyBytesDecoded": 168,
+        "bodySha256": "bab614c3a8f69293c5ada6cd32eb6de154f84de25de65e3ec890fba2f1ab4d49",
+        "elapsedMs": 160.3
+    },
+    "note": "http://chomikuj.pl/Create.aspx (registration link)."
+}

@@ -1,0 +1,28 @@
+# Secrets: API keys live in local text files and must never be committed.
+*key*.txt
+testing*.txt
+.env
+.env.*
+*.pem
+*.key
+credentials*
+
+# Scratch work and research artefacts
+.tmp/
+
+# Dependencies (restore with npm install / composer install)
+node_modules/
+vendor/
+
+# Screenshot of the real client UI: shows Chomikuj's copyrighted mascot, never published
+Chomikuj-app.png
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# AI
+.pi/
+.claude/

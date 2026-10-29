@@ -1,0 +1,65 @@
+{
+    "operation": "UploadFile",
+    "case": "success-png-with-thumbnails",
+    "timestamp": "2026-10-24T15:26:24Z",
+    "request": {
+        "method": "POST",
+        "url": "http://s8548.chomikuj.pl:8084/file/",
+        "headers": [
+            [
+                "Content-Type",
+                "multipart/mixed; boundary=!CHB{{STAMP}}"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 7518,
+        "bodyBytesUncompressed": 7518
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "76"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Server",
+                "Microsoft-HTTPAPI/2.0"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:23 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-HTTPAPI/2.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 76,
+        "bodyBytesDecoded": 76,
+        "bodySha256": null,
+        "elapsedMs": 572.9
+    },
+    "note": "PNG with the client-side thumbnail parts the real client adds for images: width, height, th_width, th_height and thumb (Content-Type: image/jpeg). medthumb is only sent when the image is larger than the medium thumbnail.",
+    "uploadedBytes": 6363,
+    "uploadedSha256": "ddcdf339ad3a1f1704d9542dd5a12e32c80fc8711935f896edc16bfc8801be98",
+    "thumbBytes": 179
+}

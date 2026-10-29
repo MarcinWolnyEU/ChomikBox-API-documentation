@@ -1,0 +1,79 @@
+{
+    "operation": "FileDownload",
+    "case": "get-refreshed-url",
+    "timestamp": "2026-10-24T15:26:48Z",
+    "request": {
+        "method": "GET",
+        "url": "{{SIGNED_URL}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Cache-Control",
+                "private"
+            ],
+            [
+                "Content-Type",
+                "text/plain"
+            ],
+            [
+                "Server",
+                "Microsoft-IIS/10.0"
+            ],
+            [
+                "Access-Control-Allow-Origin",
+                "http://chomikuj.pl"
+            ],
+            [
+                "Content-Disposition",
+                "attachment; filename=\"hello.txt\""
+            ],
+            [
+                "X-AspNet-Version",
+                "4.0.30319"
+            ],
+            [
+                "X-Powered-By",
+                "ASP.NET"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:47 GMT"
+            ],
+            [
+                "Content-Length",
+                "1033"
+            ]
+        ],
+        "contentType": "text/plain",
+        "contentEncoding": null,
+        "server": "Microsoft-IIS/10.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 1033,
+        "bodyBytesDecoded": 1033,
+        "bodySha256": "5b4a0b4f2f872115534cf8d9e637b3c6bbf4644fce53acc4e82db30b4f3b9b32",
+        "elapsedMs": 137
+    },
+    "note": "GET on the URL returned by RefreshFileUrl.",
+    "expectedSha256": "5b4a0b4f2f872115534cf8d9e637b3c6bbf4644fce53acc4e82db30b4f3b9b32"
+}

@@ -1,0 +1,93 @@
+{
+    "operation": "Web",
+    "case": "musicfile-own-file",
+    "timestamp": "2026-10-24T15:27:13Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/MusicFile.aspx?chomik_id=25798223&sess_id={{SESSION_ID}}&seed={{SEED}}&id=10832648145&ext=.txt",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:12 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "161"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "location",
+                "/Error404.aspx?aspxerrorpath=/MusicFile.aspx"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:12 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:12 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m50"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa01157bb4bd61-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid"
+        ],
+        "location": "/Error404.aspx?aspxerrorpath=/MusicFile.aspx",
+        "bodyBytesOnWire": 161,
+        "bodyBytesDecoded": 161,
+        "bodySha256": "9896dde5675f868479872c671d9001cbfd3e02f64220d228a477264e3f056535",
+        "elapsedMs": 148.5
+    },
+    "note": "MusicFile.aspx?chomik_id=&sess_id=<token>&seed=&id=<fileId>&ext=.txt. The 2.0.8.2 client never requests this template (it is only a 1.x cache identifier; streams use the player.audio url). music.chomikuj.pl:80 timed out on connect, so the path is requested on chomikuj.pl. Observed: 302 to Error404.aspx."
+}

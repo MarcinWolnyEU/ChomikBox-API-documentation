@@ -1,0 +1,58 @@
+{
+    "operation": "ResumeCheck",
+    "case": "before-upload",
+    "timestamp": "2026-10-24T15:26:16Z",
+    "request": {
+        "method": "GET",
+        "url": "http://s9530.chomikuj.pl:8084/resume/check/?key={{UPLOAD_TOKEN}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "57"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Server",
+                "Microsoft-HTTPAPI/2.0"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:15 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-HTTPAPI/2.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 57,
+        "bodyBytesDecoded": 57,
+        "bodySha256": null,
+        "elapsedMs": 196.5
+    },
+    "note": "GET /resume/check/?key={{UPLOAD_TOKEN}} on the upload server before any byte was sent: res=-31 (nothing to resume). Served as text/html by Microsoft-HTTPAPI/2.0."
+}

@@ -1,0 +1,1 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><LogoutResponse xmlns="http://chomikuj.pl/"><LogoutResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:status>BadToken</a:status><a:errorMessage i:nil="true"/></LogoutResult></LogoutResponse></s:Body></s:Envelope>

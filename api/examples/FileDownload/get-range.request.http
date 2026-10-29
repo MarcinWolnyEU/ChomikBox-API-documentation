@@ -1,0 +1,7 @@
+GET /File.aspx?e={{SIGNED_E}}&pv={{SIGNED_PV}} HTTP/1.1
+Host: s9530.chomikuj.pl
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+Range: bytes=0-15
+

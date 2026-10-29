@@ -1,0 +1,1 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><RemoveFolderResponse xmlns="http://chomikuj.pl/"><RemoveFolderResult xmlns:a="http://chomikuj.pl" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:status>NotEmptyOrNotExistsFolder</a:status><a:errorMessage i:nil="true"/></RemoveFolderResult></RemoveFolderResponse></s:Body></s:Envelope>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flows · ChomikBox 2.0.8.2 technical overview</title>
+<meta name="description" content="Sequence diagrams of ChomikBox 2.0.8.2: login and keep-alive, folder management, upload with resume, download with agreements, music streaming, SavePlaylist and browser click-catching.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html" aria-current="page">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>Flows</b> - sequence diagrams</h1>
+      </header>
+      <div class="pane">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">Overview</a></li>
+            <li><span aria-current="page">Flows</span></li>
+          </ol>
+        </nav>
+        <p class="lead">How the ChomikBox modules, the protocol layer and the servers work together for the main tasks. Each diagram shows what the 2.0.8.2 client does, with the server's answers as verified live. Where the two differ, the notes under the diagram say so, and live behaviour wins.</p>
+        <p>Solid arrows are requests or calls; dashed arrows are replies or Qt signals. Labels give the SOAP operation and its children in wire order; details are on each operation's <a href="api/index.html">API reference</a> page. IDs such as <a href="security.html#s-03">S-03</a> point to the <a href="security.html">security findings</a>.</p>
+        <nav class="toc" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#session">Login and session keep-alive</a></li>
+            <li><a href="#folders">Folder browsing and management</a></li>
+            <li><a href="#upload">Upload with resume</a></li>
+            <li><a href="#download">Download with agreements</a></li>
+            <li><a href="#music">Music player</a></li>
+            <li><a href="#playlist">SavePlaylist</a></li>
+            <li><a href="#click-catching">Browser click-catching</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="session">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Login</b> and session keep-alive</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:session -->
+<section class="figure-scroll" aria-labelledby="dg-session-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 807" role="img" aria-labelledby="dg-session-title dg-session-desc">
+<title id="dg-session-title">Login and session keep-alive</title>
+<desc id="dg-session-desc">The application triggers login; NetProtoBox sends Auth and receives a token, then sends CheckEvents and Folders with that token. CheckEvents repeats on a timer. A BadToken status triggers one relogin per message. Logout ends only this token.</desc>
+<defs><marker id="ah-session" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip-green" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Application, UI</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">signals and slots</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="801"/>
+<rect class="chip-green" x="395" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="500" y="34" text-anchor="middle">NetProtoBox</text>
+<text class="t-s" x="500" y="52" text-anchor="middle">+ NetModule message pool</text>
+<line class="lifeline" x1="500" y1="62" x2="500" y2="801"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="801"/>
+<text class="msg halo" x="130" y="94">login()</text>
+<text class="t-s halo" x="130" y="110">start-up, after resume, relogin</text>
+<path class="arrow" d="M120,120 H498" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="150">Auth(name, passHash, ver=4, client)</text>
+<path class="arrow" d="M500,160 H878" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="190">status=Ok, hamsterId, name, token</text>
+<path class="arrow-dash" d="M880,200 H502" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="130" y="230">logged</text>
+<path class="arrow-dash" d="M500,240 H122" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="270">CheckEvents(token, stats{…})</text>
+<path class="arrow" d="M500,280 H878" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="310">Folders(token, hamsterId, folderId=0, depth=0)</text>
+<path class="arrow" d="M500,320 H878" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="350">folder tree, folderModifyTime</text>
+<path class="arrow-dash" d="M880,360 H502" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="130" y="390">foldersAvailable</text>
+<path class="arrow-dash" d="M500,400 H122" marker-end="url(#ah-session)"/>
+<rect class="loop" x="440" y="418" width="500" height="144" rx="4"/>
+<text class="t-s" x="450" y="435">loop: shortest active period: 300 s idle, 60 s uploading, 15 s folder view</text>
+<text class="msg halo" x="510" y="458">CheckEvents(token, stats{…})</text>
+<path class="arrow" d="M500,468 H878" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="498">accountBalance, settings, changes{folderModifyTime}</text>
+<path class="arrow-dash" d="M880,508 H502" marker-end="url(#ah-session)"/>
+<path class="arrow" d="M500,530 H532 V548 H504" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="542" y="543">newer folderModifyTime: Folders(0, 0) again</text>
+<text class="msg halo" x="510" y="586">any reply: status=BadToken</text>
+<path class="arrow-dash" d="M880,596 H502" marker-end="url(#ah-session)"/>
+<path class="arrow" d="M500,618 H532 V636 H504" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="542" y="631">relogin: Auth again, once per message</text>
+<text class="t-s halo" x="542" y="647">kept messages resent with the new token; session-bound ones dropped</text>
+<text class="msg halo" x="130" y="673">logout()</text>
+<text class="t-s halo" x="130" y="689">quit or system suspend</text>
+<path class="arrow" d="M120,699 H498" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="729">Logout(token)</text>
+<path class="arrow" d="M500,739 H878" marker-end="url(#ah-session)"/>
+<text class="msg halo" x="510" y="769">status=Ok; this token now gets BadToken, others stay valid</text>
+<path class="arrow-dash" d="M880,779 H502" marker-end="url(#ah-session)"/>
+</svg>
+</section>
+<!-- /seq:session -->
+          <figcaption id="dg-session-cap">Session lifecycle. Client side <span class="ev ev-obs">Observed</span> in <code>NetProtoBox</code> and <code>NetModule</code>; server answers <span class="ev ev-live">Live</span>.</figcaption>
+        </figure>
+        <ul>
+          <li><code>Auth</code> returns the token that every later request carries as its first child. Right after it the client sends <code>CheckEvents</code>, starts the poll timer (the shortest active period wins: 300&nbsp;s idle, 60&nbsp;s while uploading, 15&nbsp;s while a folder view is open), asks for <code>Folders(0, 0)</code>, sends <code>SessionBegin</code> only if enabled (off by default) and flushes queued <code>BoxEvents</code>.</li>
+          <li><code>CheckEvents</code> has no event list. Its only "event" is <code>changes/folderModifyTime</code>, a .NET tick count that moves after every folder change; a newer value makes the client reload the tree. The client reads only <code>accountBalance</code>, <code>settings</code> and <code>changes</code> and ignores <code>new</code>, which was nil in every live probe. <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span> <a href="protocol.html#events">Polling, settings and events</a></li>
+          <li>The client never sends <code>GetSettings</code>; it sends <code>SetSettings(downloadByBox)</code> at start-up and on configuration changes. <code>BoxEvents</code> carries a few fixed events (<code>shutdown</code>, default-player and autostart changes) and is not off by default (<a href="security.html#c-09">C-09</a>). <span class="ev ev-obs">Observed</span></li>
+          <li>More than three consecutive failed <code>CheckEvents</code> polls force a relogin (<code>check-events-repeat-count = 3</code>). A failed poll is not resent; the next timer tick sends a new one. <code>Logout</code> and <code>CheckEvents</code> are never retransmitted.</li>
+          <li>Live, several tokens of one account work at the same time, <code>Logout</code> ends only its own, and no expiry was seen within about 45 minutes (<a href="security.html#s-10">S-10</a>). The password hash and the token travel in the clear (<a href="security.html#c-02">C-02</a>, <a href="security.html#c-06">C-06</a>); <code>Forbidden</code> and <code>PermissionError</code> reveal whether a user exists (<a href="security.html#s-01">S-01</a>).</li>
+        </ul>
+        <p class="muted">Operations: <a href="api/auth.html">Auth</a>, <a href="api/checkEvents.html">CheckEvents</a>, <a href="api/folders.html">Folders</a>, <a href="api/logout.html">Logout</a>, <a href="api/boxEvents.html">BoxEvents</a>. Mechanics: <a href="protocol.html#session">Protocol</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="folders">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Folders</b> - browsing and management</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:folders -->
+<section class="figure-scroll" aria-labelledby="dg-folders-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 722" role="img" aria-labelledby="dg-folders-title dg-folders-desc">
+<title id="dg-folders-title">Folder browsing and management</title>
+<desc id="dg-folders-desc">The folder window asks NetProtoBox for the tree with Folders, then creates, renames, moves, modifies and removes folders with the matching operations; the server's replies and two unexpected behaviours are noted.</desc>
+<defs><marker id="ah-folders" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip-green" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Folder window</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">FolderModel</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="716"/>
+<rect class="chip-green" x="395" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="500" y="34" text-anchor="middle">NetProtoBox</text>
+<text class="t-s" x="500" y="52" text-anchor="middle">builders and handlers</text>
+<line class="lifeline" x1="500" y1="62" x2="500" y2="716"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="716"/>
+<text class="msg halo" x="130" y="94">show or refresh a folder</text>
+<path class="arrow" d="M120,104 H498" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="134">Folders(token, hamsterId, folderId, depth)</text>
+<text class="t-s halo" x="510" y="150">depth 0 = whole subtree, 1 = node only, 2 = node and children</text>
+<path class="arrow" d="M500,160 H878" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="190">FolderInfo tree, folderModifyTime</text>
+<text class="t-s halo" x="510" y="206">unknown folderId: the root, status Ok (S-05)</text>
+<path class="arrow-dash" d="M880,216 H502" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="130" y="246">new folder</text>
+<path class="arrow" d="M120,256 H498" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="286">AddFolder(token, newFolderId = parent, name)</text>
+<path class="arrow" d="M500,296 H878" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="326">folderId, or Error: NameExistsAtDestination, InvalidCharacters, …</text>
+<path class="arrow-dash" d="M880,336 H502" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="130" y="366">rename, drag to move, folder options</text>
+<path class="arrow" d="M120,376 H498" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="406">RenameFolder / MoveFolder / ModifyFolder</text>
+<path class="arrow" d="M500,416 H878" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="446">status; ModifyFolder also folderDetails and modify times</text>
+<path class="arrow-dash" d="M880,456 H502" marker-end="url(#ah-folders)"/>
+<rect class="note" x="430" y="474" width="520" height="48" rx="4"/>
+<text class="t-s" x="440" y="494">MoveFolder into itself: fault, yet moved to the root (S-03).</text>
+<text class="t-s" x="440" y="511">MoveFolder to an unknown parent: moved to the root, Ok (S-05).</text>
+<text class="msg halo" x="130" y="548">remove</text>
+<path class="arrow" d="M120,558 H498" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="588">RemoveFolder(token, folderId, force)</text>
+<path class="arrow" d="M500,598 H878" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="510" y="628">Ok, or NotEmptyOrNotExistsFolder if it holds files</text>
+<text class="t-s halo" x="510" y="644">force=false still deletes a folder that holds only subfolders (S-04)</text>
+<path class="arrow-dash" d="M880,654 H502" marker-end="url(#ah-folders)"/>
+<text class="msg halo" x="130" y="684">folderRemoved / folderMoved / folder updated</text>
+<path class="arrow-dash" d="M500,694 H122" marker-end="url(#ah-folders)"/>
+</svg>
+</section>
+<!-- /seq:folders -->
+          <figcaption id="dg-folders-cap">Folder operations. Client triggers <span class="ev ev-obs">Observed</span>; results and side effects <span class="ev ev-live">Live</span>.</figcaption>
+        </figure>
+        <p class="muted">The client's folder tree marks the flags carried by <code>FolderInfo</code>: <code>hidden</code>, <code>adult</code> (+18) and <code>passwd</code> (password-protected).</p>
+        <h3>Client vs live</h3>
+        <ul>
+          <li>The client reads <code>prevModifyTime</code>/<code>modifyTime</code> from every folder operation and refreshes when they disagree with its tree. Live, only <code>ModifyFolder</code> returns them; <code>RenameFolder</code>, <code>MoveFolder</code> and <code>RemoveFolder</code> return only <code>status</code>, and <code>AddFolder</code> only <code>folderId</code>. The tree is kept fresh through <code>CheckEvents</code> instead.</li>
+          <li>The client sends the public-upload flag as <code>&lt;public&gt;</code>; the server's parameter is <code>publicUpload</code> and it silently ignores <code>public</code>.</li>
+          <li><code>Folders</code> depth: 0 is the whole subtree (586 nodes on the test account), 1 the node only, 2 the node and its children.</li>
+          <li>Three server behaviours need care: <code>MoveFolder</code> into itself faults yet moves the folder to the root (<a href="security.html#s-03">S-03</a>); unknown ids fall back to the root (<a href="security.html#s-05">S-05</a>); <code>force=false</code> still deletes folders that hold only subfolders (<a href="security.html#s-04">S-04</a>). Folder passwords come back in plain text (<a href="security.html#s-02">S-02</a>).</li>
+        </ul>
+        <p class="muted">Operations: <a href="api/folders.html">Folders</a>, <a href="api/addFolder.html">AddFolder</a>, <a href="api/renameFolder.html">RenameFolder</a>, <a href="api/moveFolder.html">MoveFolder</a>, <a href="api/modifyFolder.html">ModifyFolder</a>, <a href="api/removeFolder.html">RemoveFolder</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="upload">
+      <header class="titlebar">
+        <img src="assets/img/uploader-logo.png" alt="" width="32" height="32">
+        <h2><b>Upload</b> with resume</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:upload -->
+<section class="figure-scroll" aria-labelledby="dg-upload-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 660" role="img" aria-labelledby="dg-upload-title dg-upload-desc">
+<title id="dg-upload-title">Upload with resume</title>
+<desc id="dg-upload-desc">The uploader gets a ticket with UploadToken, posts the file as a non-standard multipart body to the upload server named in the ticket, and after a network error asks the resume check how much was stored before posting the rest.</desc>
+<defs><marker id="ah-upload" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip-green" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Uploader window</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">upload queue</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="654"/>
+<rect class="chip-green" x="268" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="373" y="34" text-anchor="middle">NetProtoBox</text>
+<text class="t-s" x="373" y="52" text-anchor="middle">DirectNetworkReply</text>
+<line class="lifeline" x1="373" y1="62" x2="373" y2="654"/>
+<rect class="chip-srv" x="522" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="627" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="627" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="627" y1="62" x2="627" y2="654"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">upload server</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">sNNNN.chomikuj.pl:8084</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="654"/>
+<text class="msg halo" x="130" y="94">file queued (folderId, fileName)</text>
+<path class="arrow" d="M120,104 H371" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="134">UploadToken(token, folderId, fileName)</text>
+<path class="arrow" d="M373,144 H625" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="174">key, stamp, server, locale</text>
+<path class="arrow-dash" d="M627,184 H375" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="214">POST /file/  multipart/mixed; boundary=!CHB&lt;stamp&gt;</text>
+<text class="t-s halo" x="383" y="230">chomik_id, folder_id, key, time, [thumbnails], client, locale, file</text>
+<path class="arrow" d="M373,240 H878" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="270">&lt;resp res=&quot;1&quot; fileid=&quot;…&quot;/&gt;</text>
+<text class="t-s halo" x="383" y="286">forged key: res=&quot;-42&quot; errorMessage=&quot;Bad token&quot;</text>
+<path class="arrow-dash" d="M880,296 H375" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="130" y="326">uploaded: fileid</text>
+<path class="arrow-dash" d="M373,336 H122" marker-end="url(#ah-upload)"/>
+<rect class="loop" x="313" y="354" width="627" height="222" rx="4"/>
+<text class="t-s" x="323" y="371">opt: after a network error</text>
+<text class="msg halo" x="383" y="394">GET /resume/check/?key=&lt;key&gt;</text>
+<path class="arrow" d="M373,404 H878" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="434">&lt;resp res=&quot;1&quot; file_size=&quot;N&quot; skipThumbnails=&quot;true&quot;/&gt;</text>
+<text class="t-s halo" x="383" y="450">nothing stored for this key: res=&quot;-31&quot;</text>
+<path class="arrow-dash" d="M880,460 H375" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="490">POST /file/ with resume_from = N</text>
+<text class="t-s halo" x="383" y="506">the file part carries only the remaining bytes</text>
+<path class="arrow" d="M373,516 H878" marker-end="url(#ah-upload)"/>
+<text class="msg halo" x="383" y="546">&lt;resp res=&quot;1&quot; fileid=&quot;…&quot;/&gt;</text>
+<path class="arrow-dash" d="M880,556 H375" marker-end="url(#ah-upload)"/>
+<rect class="note" x="303" y="588" width="647" height="48" rx="4"/>
+<text class="t-s" x="313" y="608">Error reply or unknown key: start again with a new UploadToken.</text>
+<text class="t-s" x="313" y="625">Retries: 5 quick, up to 17 in total, 15 s apart.</text>
+</svg>
+</section>
+<!-- /seq:upload -->
+          <figcaption id="dg-upload-cap">Upload. Request building <span class="ev ev-obs">Observed</span>; byte-exact round trips of text, PNG and MP3 files <span class="ev ev-live">Live</span>.</figcaption>
+        </figure>
+        <ul>
+          <li>The upload server is whatever <code>UploadToken</code> names (<code>sNNNN.chomikuj.pl:8084</code>, a different one per ticket). The client builds a URL with <code>key</code>, <code>stamp</code>, <code>folderId</code> and <code>fileName</code> in the query, then posts to the path alone. By default it uses <code>DirectNetworkReply</code>, a raw socket speaking HTTP/1.0.</li>
+          <li>The multipart framing is non-standard: each part starts with a bare <code>name="…"</code> line, there is no <code>Content-Disposition</code>, and the file part must have no <code>Content-Type</code> line. The server parses parts by position, so any deviation corrupts the stored file. <span class="ev ev-live">Live</span></li>
+          <li>The client reads <code>filename</code> and <code>folderid</code> from the reply; live, the server sends only <code>res</code> and <code>fileid</code>.</li>
+          <li>Thumbnails are generated when <code>force-generate-thumbnails</code> is set or the server asks for an image size; uploads with and without them were accepted. <code>UploadToken</code> does not validate the folder id (<a href="security.html#s-05">S-05</a>), and everything travels over plain HTTP (<a href="security.html#c-01">C-01</a>).</li>
+        </ul>
+        <p class="muted">Operations: <a href="api/uploadToken.html">UploadToken</a>, <a href="api/uploadFile.html">POST /file/</a>, <a href="api/resumeCheck.html">GET /resume/check/</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="download">
+      <header class="titlebar">
+        <img src="assets/img/downloader-logo.png" alt="" width="32" height="32">
+        <h2><b>Download</b> with agreements</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:download -->
+<section class="figure-scroll" aria-labelledby="dg-download-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 725" role="img" aria-labelledby="dg-download-title dg-download-desc">
+<title id="dg-download-title">Download with agreements</title>
+<desc id="dg-download-desc">The downloader asks Download for the files, receives the agreement offers without a URL (own, small or transfer, one per file), shows the cost, sends the accepted agreement and gets a signed URL, which it fetches from the file server. An expired URL is renewed with RefreshFileUrl.</desc>
+<defs><marker id="ah-download" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip-green" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Downloader window</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">agreement window</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="719"/>
+<rect class="chip-green" x="268" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="373" y="34" text-anchor="middle">NetProtoBox</text>
+<text class="t-s" x="373" y="52" text-anchor="middle">NetFile</text>
+<line class="lifeline" x1="373" y1="62" x2="373" y2="719"/>
+<rect class="chip-srv" x="522" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="627" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="627" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="627" y1="62" x2="627" y2="719"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">file server</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">sNNNN.chomikuj.pl</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="719"/>
+<text class="msg halo" x="130" y="94">add files: ids, paths or links</text>
+<path class="arrow" d="M120,104 H371" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="134">Download(token, [sequence], disposition=download, list{id})</text>
+<text class="t-s halo" x="383" y="150">up to 2000 entries per part; non-final parts get an empty Ok</text>
+<path class="arrow" d="M373,160 H625" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="190">files with agreementInfo offers, url = nil; accountBalance</text>
+<text class="t-s halo" x="383" y="206">own and small: cost 0; transfer: cost in kB (foreign file over 1 MB)</text>
+<path class="arrow-dash" d="M627,216 H375" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="130" y="246">show cost per file</text>
+<path class="arrow-dash" d="M373,256 H122" marker-end="url(#ah-download)"/>
+<path class="arrow" d="M120,278 H152 V296 H124" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="162" y="291">user accepts</text>
+<text class="t-s halo" x="162" y="307">free offers may auto-accept; a cost above 0 always asks</text>
+<text class="msg halo" x="130" y="333">accepted agreements</text>
+<path class="arrow" d="M120,343 H371" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="373">Download(…, DownloadReqEntry{id, agreementInfo{name, [cost]}})</text>
+<text class="t-s halo" x="383" y="389">in a sequence only the final message's agreements count</text>
+<path class="arrow" d="M373,399 H625" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="429">signed url: File.aspx?e=…&amp;pv=…</text>
+<path class="arrow-dash" d="M627,439 H375" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="469">GET /File.aspx?e=…&amp;pv=…  Range: bytes=N-</text>
+<path class="arrow" d="M373,479 H878" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="509">200 or 206, Content-Disposition: attachment</text>
+<path class="arrow-dash" d="M880,519 H375" marker-end="url(#ah-download)"/>
+<rect class="loop" x="313" y="537" width="627" height="166" rx="4"/>
+<text class="t-s" x="323" y="554">opt: link expired</text>
+<text class="msg halo" x="383" y="577">RefreshFileUrl(token, id, realId, disposition=download)</text>
+<path class="arrow" d="M373,587 H625" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="617">id, realId, url, expire (nil live)</text>
+<text class="t-s halo" x="383" y="633">the client parses only yyyy-MM-dd HH:mm:ss</text>
+<path class="arrow-dash" d="M627,643 H375" marker-end="url(#ah-download)"/>
+<text class="msg halo" x="383" y="673">GET the new url</text>
+<path class="arrow" d="M373,683 H878" marker-end="url(#ah-download)"/>
+</svg>
+</section>
+<!-- /seq:download -->
+          <figcaption id="dg-download-cap">Download. Live accepts used only the owner's own files and the free <code>own</code> agreement; foreign files were only offered, and the account balance was unchanged afterwards.</figcaption>
+        </figure>
+        <ul>
+          <li>An entry id can be a numeric file id, a file path <code>/&lt;user&gt;/&lt;folder&gt;/&lt;file&gt;</code>, or a folder path, which returns the folder with all its files and so works as a file listing, for other users' folders too. The <code>&lt;hamsterId&gt;/&lt;folderId&gt;</code> form, which the client builds for its own <q>download folder</q> action, makes the service fault, so that action presumably fails today (<a href="security.html#s-06">S-06</a>). <span class="ev ev-live">Live</span> <code>.&lt;realId&gt;</code> is accepted (status <code>Ok</code>) but has never been shown to resolve a file, because only an unknown realId was tested. <span class="ev ev-unk">Unknown</span></li>
+          <li>The <code>sequence</code> element is optional. The client splits requests into parts of up to 2000 entries and collects all parts before it acts. A non-final part is acknowledged with <code>Ok</code> and only <code>messageSequence</code>; the <strong>final part carries the data</strong>, including the earlier parts' entries. <span class="ev ev-live">Live</span> This works only under conditions: the parts are stored per session (not per stamp) and never cleared, a final part with nothing stored gives <code>Error</code>, entries from two folders give an empty list, and only the final message's agreements count. Details in <a href="protocol.html#retry">Protocol</a> and <a href="security.html#s-13">S-13</a>. Normal requests are single messages and unaffected.</li>
+          <li><code>size</code> is approximate (512-byte granularity). Three agreement names were seen live. <code>own</code> (cost 0) is offered for your own files and was the only one accepted. <code>small</code> (cost 0) is offered for foreign files under 1&nbsp;MB. <code>transfer</code> is offered for larger foreign files, with the cost in <strong>kB</strong> (floor of size/1024: a 1,694,208-byte file cost 1654); the account's <code>transfer</code> balance has the same unit. Each file got exactly one agreement. <span class="ev ev-live">Live</span> No foreign agreement was accepted and nothing was spent: only the offers were read. <code>free</code>, <code>edu</code>, <code>points</code> and <code>access</code> could not be triggered and stay <span class="ev ev-unk">Unknown</span> live (<a href="protocol.html#events">names and units</a>).</li>
+          <li><code>RefreshFileUrl</code> was the only call that could carry <code>expire</code>, and it was always empty live. The client accepts only <code>yyyy-MM-dd HH:mm:ss</code> (local time) and uses it solely for the pause warning, with <code>warn-before-expire</code> in seconds. <span class="ev ev-obs">Observed</span></li>
+          <li>Signed URLs are reusable bearer URLs whose lifetime is unknown (<a href="security.html#s-08">S-08</a>).</li>
+        </ul>
+        <p class="muted">The downloader knows ten cost types, numbered 1 <code>own</code>, 2 <code>small</code>, 3 <code>free</code>, 4 <code>edu</code>, 5 <code>access</code>, 6 <code>transfer</code>, 7 <code>points</code>, 8 <code>hdd</code>, 9 <code>queued</code> and 10 <code>mixed</code>; <code>AgreementInfo</code> entries are sent for types 1 to 7.</p>
+        <p class="muted">Operations: <a href="api/download.html">Download</a>, <a href="api/refreshFileUrl.html">RefreshFileUrl</a>, <a href="api/downloadFile.html">GET /File.aspx</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="music">
+      <header class="titlebar">
+        <img src="assets/img/player-logo.png" alt="" width="32" height="32">
+        <h2><b>Music player</b> - list and stream</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:music -->
+<section class="figure-scroll" aria-labelledby="dg-music-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 534" role="img" aria-labelledby="dg-music-title dg-music-desc">
+<title id="dg-music-title">Music player</title>
+<desc id="dg-music-desc">The player lists audio files with FolderFiles and the player.audio disposition, gets a signed URL from Download with the same disposition, and streams it with a GET that carries the player's headers.</desc>
+<defs><marker id="ah-music" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip-green" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Player window</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">PlaylistModel, PlayerCache</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="528"/>
+<rect class="chip-green" x="268" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="373" y="34" text-anchor="middle">NetProtoBox</text>
+<text class="t-s" x="373" y="52" text-anchor="middle">builders and handlers</text>
+<line class="lifeline" x1="373" y1="62" x2="373" y2="528"/>
+<rect class="chip-srv" x="522" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="627" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="627" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="627" y1="62" x2="627" y2="528"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">file server</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">sNNNN.chomikuj.pl</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="528"/>
+<text class="msg halo" x="130" y="94">add music from chomikuj.pl</text>
+<path class="arrow" d="M120,104 H371" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="383" y="134">FolderFiles(token, hamsterId, folderId, disposition=player.audio)</text>
+<path class="arrow" d="M373,144 H625" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="383" y="174">entryList{EntryInfo{id, name, type, size}}: audio files only</text>
+<text class="t-s halo" x="383" y="190">disposition=download here gives WrongDisposition</text>
+<path class="arrow-dash" d="M627,200 H375" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="130" y="230">play</text>
+<path class="arrow" d="M120,240 H371" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="383" y="270">Download(token, disposition=player.audio, list{id, [agreement]})</text>
+<text class="t-s halo" x="383" y="286">like a download: offer first, then a url with the accepted agreement</text>
+<path class="arrow" d="M373,296 H625" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="383" y="326">signed url</text>
+<path class="arrow-dash" d="M627,336 H375" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="383" y="366">GET url  Icy-MetaData: 1, Accept-Encoding: (one space)</text>
+<path class="arrow" d="M373,376 H878" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="383" y="406">200 audio/mpeg</text>
+<text class="t-s halo" x="383" y="422">accepted only with a 2xx, Content-Length &gt; 0 and no x-nofile header</text>
+<path class="arrow-dash" d="M880,432 H375" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="130" y="462">stream</text>
+<path class="arrow-dash" d="M373,472 H122" marker-end="url(#ah-music)"/>
+<path class="arrow" d="M120,494 H152 V512 H124" marker-end="url(#ah-music)"/>
+<text class="msg halo" x="162" y="507">decode (GStreamer 0.10), cache in cache\player\</text>
+</svg>
+</section>
+<!-- /seq:music -->
+          <figcaption id="dg-music-cap">Music. Verified live with a one-second silent MP3 uploaded for the purpose; the streamed bytes matched by SHA-256.</figcaption>
+        </figure>
+        <ul>
+          <li><code>FolderFiles</code> lists audio files only, and only with <code>disposition=player.audio</code>: <code>download</code> gives <code>WrongDisposition</code>, other values <code>Error</code>. Folders without audio return an empty list. Items are <code>&lt;EntryInfo&gt;</code> with <code>id, name, type, size</code>.</li>
+          <li>For an MP3, <code>Download</code> with <code>player.audio</code> behaves like a normal download: agreement offer first, then a signed URL. <code>RefreshFileUrl</code> with <code>player.audio</code> also returns a URL.</li>
+          <li>The <code>MusicFile.aspx</code> template is never requested by the client; it is a 1.x cache identifier, and live it is gone (<a href="api/musicFileLegacy.html">GET /MusicFile.aspx</a>).</li>
+        </ul>
+        <p class="muted">Operations: <a href="api/folderFiles.html">FolderFiles</a>, <a href="api/download.html">Download</a>, <a href="api/downloadFile.html">GET /File.aspx</a>. Player internals: <a href="architecture.html#media">Architecture</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="playlist">
+      <header class="titlebar">
+        <img src="assets/img/player-logo.png" alt="" width="32" height="32">
+        <h2><b>SavePlaylist</b> - a playlist becomes a folder</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:playlist -->
+<section class="figure-scroll" aria-labelledby="dg-playlist-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 466" role="img" aria-labelledby="dg-playlist-title dg-playlist-desc">
+<title id="dg-playlist-title">SavePlaylist</title>
+<desc id="dg-playlist-desc">The player sends SavePlaylist with a name and the list of files. The server creates a folder named after the playlist inside a top-level folder Playlisty, reusing or creating Playlisty, and copies the files into it under new file ids. A duplicate playlist name becomes name(1).</desc>
+<defs><marker id="ah-playlist" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip-green" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Player window</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">save to the account</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="460"/>
+<rect class="chip-green" x="268" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="373" y="34" text-anchor="middle">NetProtoBox</text>
+<text class="t-s" x="373" y="52" text-anchor="middle">builders and handlers</text>
+<line class="lifeline" x1="373" y1="62" x2="373" y2="460"/>
+<rect class="chip-srv" x="522" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="627" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="627" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="627" y1="62" x2="627" y2="460"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">account folders</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">server side</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="460"/>
+<text class="msg halo" x="130" y="94">save playlist as &lt;name&gt;</text>
+<path class="arrow" d="M120,104 H371" marker-end="url(#ah-playlist)"/>
+<text class="msg halo" x="383" y="134">SavePlaylist(token, name, list{PlayListItem{id, realId=-1}})</text>
+<path class="arrow" d="M373,144 H625" marker-end="url(#ah-playlist)"/>
+<text class="msg halo" x="637" y="174">create Playlisty at the root</text>
+<text class="t-s halo" x="637" y="190">only if it does not exist; otherwise it is reused</text>
+<path class="arrow" d="M627,200 H878" marker-end="url(#ah-playlist)"/>
+<text class="msg halo" x="637" y="230">create folder &lt;name&gt; inside Playlisty</text>
+<text class="t-s halo" x="637" y="246">a duplicate name becomes &lt;name&gt;(1), status Ok</text>
+<path class="arrow" d="M627,256 H878" marker-end="url(#ah-playlist)"/>
+<text class="msg halo" x="637" y="286">copy each file (new file ids)</text>
+<path class="arrow" d="M627,296 H878" marker-end="url(#ah-playlist)"/>
+<text class="msg halo" x="383" y="326">folderId, folderName, parentId</text>
+<path class="arrow-dash" d="M627,336 H375" marker-end="url(#ah-playlist)"/>
+<text class="msg halo" x="130" y="366">playlist folder created</text>
+<path class="arrow-dash" d="M373,376 H122" marker-end="url(#ah-playlist)"/>
+<rect class="note" x="557" y="394" width="393" height="48" rx="4"/>
+<text class="t-s" x="567" y="414">The new folder carries a server-generated password</text>
+<text class="t-s" x="567" y="431">while passwd is false (S-02).</text>
+</svg>
+</section>
+<!-- /seq:playlist -->
+          <figcaption id="dg-playlist-cap">SavePlaylist, from guarded live calls. Full-tree snapshots showed exactly the new folders (<code>Playlisty</code> and the playlist folders), which were then removed.</figcaption>
+        </figure>
+        <ul>
+          <li>The client only expects that a playlist folder is created or updated. Live, a playlist is an ordinary folder named after the playlist, inside a top-level folder <code>Playlisty</code>, and the items are <strong>copied</strong>: the folder holds the file under a new file id. <span class="ev ev-live">Live</span></li>
+          <li>The client sends <code>token, name, list</code>, with the unused id of each <code>PlayListItem</code> set to <code>-1</code>. The server also accepts an optional <code>sequence</code>.</li>
+          <li><code>Playlisty</code> is <strong>reused</strong> when it exists. A second call with the same name gives <code>status = Ok</code> and a new folder named <code>&lt;name&gt;(1)</code> (no space) with a fresh copy of the file under another file id. <span class="ev ev-live">Live</span> <code>Playlisty</code> itself has <code>passwd = true</code> and a server-generated password; the playlist folders have <code>passwd = false</code> and also a generated one.</li>
+          <li><code>FolderFiles</code> on a playlist folder lists the copy as <code>type = file</code>. <span class="ev ev-live">Live</span></li>
+        </ul>
+        <p class="muted">Operation: <a href="api/savePlaylist.html">SavePlaylist</a>. Finding: <a href="security.html#s-02">S-02</a>.</p>
+      </div>
+    </section>
+
+    <section class="window" id="click-catching">
+      <header class="titlebar">
+        <img src="assets/img/feature-click-catcher.png" alt="" width="32" height="32">
+        <h2><b>Browser click-catching</b> - NPAPI to named pipe</h2>
+      </header>
+      <div class="pane">
+        <figure class="figure">
+<!-- seq:click-catching -->
+<section class="figure-scroll" aria-labelledby="dg-click-catching-cap" tabindex="0">
+<svg class="dg dg-mid" viewBox="0 0 1000 545" role="img" aria-labelledby="dg-click-catching-title dg-click-catching-desc">
+<title id="dg-click-catching-title">Browser click-catching</title>
+<desc id="dg-click-catching-desc">When a browser would download a file of a claimed MIME type, the NPAPI plug-in takes the stream URL, checks the ChomikBox2 mutex and either writes -d plus the URL into the running instance's named pipe or cold-starts ChomikBox with ShellExecute. The application turns the URL into a download.</desc>
+<defs><marker id="ah-click-catching" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker></defs>
+<rect class="chip" x="15" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="120" y="34" text-anchor="middle">Web browser</text>
+<text class="t-s" x="120" y="52" text-anchor="middle">NPAPI host</text>
+<line class="lifeline" x1="120" y1="62" x2="120" y2="539"/>
+<rect class="chip-green" x="268" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="373" y="34" text-anchor="middle">npcbplugin.dll</text>
+<text class="t-s" x="373" y="52" text-anchor="middle">worker thread</text>
+<line class="lifeline" x1="373" y1="62" x2="373" y2="539"/>
+<rect class="chip-green" x="522" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="627" y="34" text-anchor="middle">chomikbox.exe</text>
+<text class="t-s" x="627" y="52" text-anchor="middle">executeRemoteCommand</text>
+<line class="lifeline" x1="627" y1="62" x2="627" y2="539"/>
+<rect class="chip-srv" x="775" y="14" width="210" height="48" rx="6"/>
+<text class="t-b" x="880" y="34" text-anchor="middle">box.chomikuj.pl</text>
+<text class="t-s" x="880" y="52" text-anchor="middle">ChomikBoxService.svc</text>
+<line class="lifeline" x1="880" y1="62" x2="880" y2="539"/>
+<text class="msg halo" x="130" y="94">NPP_NewStream: a claimed download MIME type</text>
+<path class="arrow" d="M120,104 H371" marker-end="url(#ah-click-catching)"/>
+<path class="arrow" d="M373,126 H405 V144 H377" marker-end="url(#ah-click-catching)"/>
+<text class="msg halo" x="415" y="139">copy the stream URL, start a worker thread</text>
+<path class="arrow" d="M373,160 H405 V178 H377" marker-end="url(#ah-click-catching)"/>
+<text class="msg halo" x="415" y="173">CreateMutexA(&quot;ChomikBox2&quot;): already exists?</text>
+<rect class="loop" x="313" y="190" width="425" height="86" rx="4"/>
+<text class="t-s" x="323" y="207">alt: yes: ChomikBox is running</text>
+<text class="msg halo" x="383" y="230">write to \\.\pipe\qtsingleapp-Chomik-739b-&lt;sid&gt;</text>
+<text class="t-s halo" x="383" y="246">QDataStream frame: length, then -d + URL + NUL</text>
+<path class="arrow" d="M373,256 H625" marker-end="url(#ah-click-catching)"/>
+<rect class="loop" x="313" y="288" width="498" height="86" rx="4"/>
+<text class="t-s" x="323" y="305">alt: no: cold start</text>
+<text class="msg halo" x="383" y="328">ShellExecute(exe from HKLM\Software\ChomikBox, &quot;-d&lt;url&gt;&quot;)</text>
+<text class="t-s halo" x="383" y="344">fails on a plain MSI install: that registry value is missing</text>
+<path class="arrow" d="M373,354 H625" marker-end="url(#ah-click-catching)"/>
+<path class="arrow" d="M627,390 H659 V408 H631" marker-end="url(#ah-click-catching)"/>
+<text class="msg halo" x="669" y="403">-d&lt;url&gt;: the link becomes a download</text>
+<text class="t-s halo" x="669" y="419">Image.aspx / ShowVideo.aspx links: chomik://files/…</text>
+<text class="msg halo" x="627" y="445">Download(…), agreement window, GET (Download flow)</text>
+<path class="arrow" d="M627,455 H878" marker-end="url(#ah-click-catching)"/>
+<rect class="note" x="50" y="473" width="393" height="48" rx="4"/>
+<text class="t-s" x="60" y="493">Current browsers no longer load NPAPI plug-ins:</text>
+<text class="t-s" x="60" y="510">this path is historical (C-12).</text>
+</svg>
+</section>
+<!-- /seq:click-catching -->
+          <figcaption id="dg-click-catching-cap">Click-catching. Plug-in side <span class="ev ev-obs">Observed</span> in <code>npcbplugin.dll</code>; not verified live.</figcaption>
+        </figure>
+        <ul>
+          <li>The plug-in claims 31 MIME types of downloadable files. The pipe and the mutex names come from QtSingleApplication's naming scheme for the app id <code>ChomikBox2</code>.</li>
+          <li>The same pipe also receives commands from a second <code>chomikbox.exe</code> launch, for example after an Explorer verb or a <code>chomik://</code> link (<a href="security.html#c-08">C-08</a>).</li>
+        </ul>
+        <p class="muted">Details: <a href="components.html#npcbplugin">npcbplugin.dll</a>, <a href="windows-integration.html#remote">remote commands</a>. Finding: <a href="security.html#c-12">C-12</a>.</p>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChomikBox 2.0.8.2 · technical overview</title>
+<meta name="description" content="Technical overview of ChomikBox 2.0.8.2, the Windows desktop client of chomikuj.pl: features, architecture, components and server communication.">
+<link rel="icon" href="assets/img/app-icon.png">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js"></script>
+</head>
+<body id="top">
+<!-- chrome:header -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/app-icon.png" alt="" width="48" height="48">
+      <span class="brand-text">
+        <span class="brand-name">Chomik<b>Box</b> 2.0.8.2</span>
+        <span class="brand-sub">Technical overview</span>
+      </span>
+    </a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false"><span class="nav-toggle-bars" aria-hidden="true"></span> Menu</button>
+  </div>
+</header>
+<!-- /chrome:header -->
+<div class="layout">
+<!-- chrome:nav -->
+<nav id="site-nav" class="site-nav" aria-label="Site">
+  <p class="panel-caption">Chomik<b>Box</b></p>
+  <p class="nav-group" id="nav-group-1">Start</p>
+  <ul aria-labelledby="nav-group-1">
+    <li><a href="index.html" aria-current="page">Overview</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-2">Application</p>
+  <ul aria-labelledby="nav-group-2">
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="components.html">Components</a></li>
+    <li><a href="windows-integration.html">Windows integration</a></li>
+    <li><a href="configuration.html">Configuration</a></li>
+    <li><a href="security.html">Security &amp; privacy</a></li>
+  </ul>
+  <p class="nav-group" id="nav-group-3">Network &amp; API</p>
+  <ul aria-labelledby="nav-group-3">
+    <li><a href="protocol.html">Protocol</a></li>
+    <li><a href="flows.html">Flows</a></li>
+    <li><a href="api/index.html">API reference</a></li>
+    <li><a href="testing.html">PHP client &amp; tests</a></li>
+  </ul>
+</nav>
+<!-- /chrome:nav -->
+<main id="main">
+  <article>
+    <section class="window">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h1><b>ChomikBox</b> 2.0.8.2 - technical overview</h1>
+      </header>
+      <div class="pane">
+        <figure class="float-art">
+          <img src="assets/img/welcome-card.png" alt="A hamster sitting on a cloud, surrounded by a music file, a photo, a video and an archive icon." width="465" height="465">
+          <figcaption>Here is the hamster for the documentation, 100% copyright-free.</figcaption>
+        </figure>
+        <p class="lead">ChomikBox is the Windows desktop client of <strong>chomikuj.pl</strong>, a Polish file-hosting service in which every account is a <span lang="pl"><i>chomik</i></span> (hamster) holding a tree of folders; the API calls the account id <code>hamsterId</code>. Version 2.0.8.2, released 2017-10-21, is a 32-bit Qt&nbsp;4 / C++ application built with MSVC.</p>
+        <p>This site explains what the application is, how it is built, what each shipped component does and how it talks to the servers. It is the readable companion to two other outputs of the same project: an <strong>OpenAPI 3.2.1</strong> description of the API and a <strong>PHP client with a PHPUnit test suite</strong>. Everything here comes from observing the installed application plus a small amount of careful live probing, and each claim is labelled with how it is known. Who know, maybe someone will be brave enough to create some new integrations of chomikuj.pl or... maybe even... a new chomikbox, one that we all deserve ;).</p>
+        <p>Start with the <a href="#glance">architecture at a glance</a>, or jump to a topic in the <a href="#contents">contents</a>.</p>
+        <nav class="toc clear" aria-label="On this page">
+          <p class="toc-title">On this page</p>
+          <ol>
+            <li><a href="#features">What ChomikBox does</a></li>
+            <li><a href="#glance">Architecture at a glance</a></li>
+            <li><a href="#facts">Key facts</a></li>
+            <li><a href="#servers">Servers and endpoints</a></li>
+            <li><a href="#contents">Contents</a></li>
+            <li><a href="#sources">Sources and conventions</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <section class="window" id="features">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Features</b> - what the application does</h2>
+      </header>
+      <div class="pane">
+        <p>ChomikBox sits in the system tray and can show a small side panel (the dock in the <a href="#glance">diagram</a>; hidden at start by default) with three module tiles: upload, download and music. They label the first three cards below.</p>
+        <ul class="features">
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-upload.png" alt="Hamster in profile looking up, holding a document toward an orange up-arrow" width="60" height="96"></span>
+            <h3>Upload <span class="muted">(<span lang="pl">Dodawanie</span>)</span></h3>
+            <p>Drag files onto the uploader window or onto the desktop hamster, or use the Explorer verb <span lang="pl"><i>Zachomikuj</i></span>. Uploads are queued and resumable, JPEG photos can be scaled down, and the upload format carries thumbnails.</p>
+            <p><span class="ev ev-obs">Observed</span> <code>UploadToken</code>, multipart <code>!CHB</code> upload, <code>[uploader]</code> keys.</p>
+          </li>
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-download.png" alt="Hamster looking down at a document with a cyan down-arrow above it" width="72" height="96"></span>
+            <h3>Download <span class="muted">(<span lang="pl">Pobieranie</span>)</span></h3>
+            <p>A download manager with five parallel slots by default and a persistent queue. A new download opens an agreement window that explains each file's cost type (own file, small, free, education, transfer, points, already on disk) and how much transfer or how many points it will use.</p>
+            <p><span class="ev ev-obs">Observed</span> <code>Download</code>, <code>AgreementInfo</code>, <code>[downloader]</code>.</p>
+          </li>
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-music.png" alt="Hamster in headphones swaying with half-closed eyes, musical notes beside it" width="70" height="96"></span>
+            <h3>Music player <span class="muted">(<span lang="pl">Muzyka</span>)</span></h3>
+            <p>Plays local files and files streamed from the service, keeps playlists on the account and a local cache (10&nbsp;GiB default limit), reacts to media keys and can register itself as the default music player. Built on GStreamer 0.10 and ffmpeg.</p>
+            <p><span class="ev ev-obs">Observed</span> <code>SavePlaylist</code>, <code>player.audio</code>, <code>[player]</code>.</p>
+          </li>
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-folders.png" alt="Hamster looking back over its shoulder, carrying a yellow folder and a grey one" width="76" height="96"></span>
+            <h3>Folders</h3>
+            <p>Browse the account's folder tree and manage it: create, rename, move by drag and drop, remove (optionally with contents) and change folder options such as password, hidden, adult and public.</p>
+            <p><span class="ev ev-obs">Observed</span> <code>Folders</code>, <code>AddFolder</code>, <code>MoveFolder</code>, <code>ModifyFolder</code>.</p>
+          </li>
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-screenshots.png" alt="Hamster pointing a camera straight at the viewer" width="74" height="96"></span>
+            <h3>Screenshots</h3>
+            <p>The uploader toolbar captures the whole desktop or a screen area and queues it for upload as JPG or PNG; the default quality is <code>good</code>. There is also a clipboard upload button.</p>
+            <p><span class="ev ev-obs">Observed</span> UI strings <span lang="pl">«Pulpit»</span> / <span lang="pl">«Obszar ekranu»</span>, <code>screenshot-format</code>.</p>
+          </li>
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-click-catcher.png" alt="Hamster lunging with a butterfly net after a mouse pointer" width="96" height="96"></span>
+            <h3>Browser click-catching</h3>
+            <p>The <em>Click Catcher</em> NPAPI plug-in claims the MIME types of downloadable files and hands the URL to ChomikBox (<code>-d&lt;url&gt;</code>) instead of letting the browser download it. Current browsers no longer load NPAPI plug-ins; <code>chomik://</code> links still work.</p>
+            <p><span class="ev ev-obs">Observed</span> <code>npcbplugin.dll</code> <span class="ev ev-inf">Inferred</span> obsolete.</p>
+          </li>
+          <li class="feature">
+            <span class="feature-img"><img src="assets/img/feature-companion.png" alt="Hamster leaning over the top of a monitor and looking down" width="84" height="96"></span>
+            <h3>Desktop companion</h3>
+            <p>An animated hamster lives on the desktop and reacts to dragged files, music, screenshots and typing. Around it are the side panel, an animated tray icon, notification balloons and a first-run tutorial in seven language variants.</p>
+            <p><span class="ev ev-obs">Observed</span> 21 animation packages, 2,103 frames.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="glance">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Architecture</b> at a glance</h2>
+      </header>
+      <div class="pane">
+        <p>One long-running GUI process, <code>chomikbox.exe</code>, does all the user-facing work and almost all the network traffic. Small helper executables take care of crash reporting, updates, offline settings and the one-off 1.x import. The Windows shell and the browser reach the running instance through a named pipe.</p>
+        <figure class="figure">
+          <section class="figure-scroll" aria-labelledby="dg-glance-cap" tabindex="0">
+            <svg class="dg dg-wide" viewBox="0 48 960 552" role="img" aria-labelledby="dg-glance-title dg-glance-desc">
+              <title id="dg-glance-title">ChomikBox component map</title>
+              <desc id="dg-glance-desc">Windows shell entry points on the left send commands to chomikbox.exe in the middle. chomikbox.exe talks to the chomikuj.pl servers on the right over HTTP, starts installer.exe and crashsender.exe below it, and stores its data in the user data folder. crashsender.exe posts crash reports to the crash collector.</desc>
+              <defs>
+                <marker id="ah-glance" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d7373"/></marker>
+              </defs>
+              <!-- Group A: Windows shell -->
+              <rect class="frame" x="16" y="60" width="230" height="270" rx="8"/>
+              <rect class="frame-pane" x="19" y="88" width="224" height="239" rx="4"/>
+              <text class="head" x="28" y="79">Windows shell &amp; browser</text>
+              <rect class="chip" x="28" y="100" width="206" height="46" rx="5"/>
+              <text class="t-b" x="40" y="119">Explorer verbs</text>
+              <text class="t-s" x="40" y="136">upload · add to playlist</text>
+              <rect class="chip" x="28" y="156" width="206" height="46" rx="5"/>
+              <text class="t-b" x="40" y="175">chomik:// links</text>
+              <text class="t-s" x="40" y="192">URL protocol handler</text>
+              <rect class="chip" x="28" y="212" width="206" height="46" rx="5"/>
+              <text class="t-b" x="40" y="231">Browser plug-in</text>
+              <text class="t-s" x="40" y="248">npcbplugin.dll · NPAPI</text>
+              <rect class="chip" x="28" y="268" width="206" height="46" rx="5"/>
+              <text class="t-b" x="40" y="287">Shortcuts, autostart</text>
+              <text class="t-s" x="40" y="304">Start menu · Run key</text>
+
+              <!-- Group B: chomikbox.exe -->
+              <rect class="frame" x="300" y="60" width="360" height="368" rx="8"/>
+              <rect class="frame-pane" x="303" y="88" width="354" height="337" rx="4"/>
+              <text class="head" x="312" y="79">chomikbox.exe (main process)</text>
+              <rect class="chip-green" x="316" y="103" width="328" height="40" rx="5"/>
+              <text class="t-b" x="328" y="119">SOAP client stack</text>
+              <text class="t-s" x="328" y="135">NetProtoBox · NetModuleSoap · BSoapManager</text>
+              <rect class="chip" x="316" y="159" width="160" height="40" rx="5"/>
+              <text class="t-b" x="328" y="175">Uploader</text>
+              <text class="t-s" x="328" y="191">Dodawanie</text>
+              <rect class="chip" x="484" y="159" width="160" height="40" rx="5"/>
+              <text class="t-b" x="496" y="175">Downloader</text>
+              <text class="t-s" x="496" y="191">Pobieranie</text>
+              <rect class="chip" x="316" y="215" width="160" height="40" rx="5"/>
+              <text class="t-b" x="328" y="231">Music player</text>
+              <text class="t-s" x="328" y="247">Muzyka · GStreamer</text>
+              <rect class="chip" x="484" y="215" width="160" height="40" rx="5"/>
+              <text class="t-b" x="496" y="231">Folder window</text>
+              <text class="t-s" x="496" y="247">browse · manage</text>
+              <rect class="chip" x="316" y="271" width="160" height="40" rx="5"/>
+              <text class="t-b" x="328" y="287">UUpdater</text>
+              <text class="t-s" x="328" y="303">update client</text>
+              <rect class="chip" x="484" y="271" width="160" height="40" rx="5"/>
+              <text class="t-b" x="496" y="287">Breakpad</text>
+              <text class="t-s" x="496" y="303">crash handler</text>
+              <rect class="chip" x="316" y="327" width="160" height="40" rx="5"/>
+              <text class="t-b" x="328" y="343">Panel · hamster</text>
+              <text class="t-s" x="328" y="359">dock, desktop widget</text>
+              <rect class="chip" x="484" y="327" width="160" height="40" rx="5"/>
+              <text class="t-b" x="496" y="343">Tray · balloons</text>
+              <text class="t-s" x="496" y="359">notification hints</text>
+              <rect class="chip-green" x="316" y="375" width="328" height="40" rx="5"/>
+              <text class="t-b" x="328" y="391">chomikbox_win7.tsp</text>
+              <text class="t-s" x="328" y="407">Windows 7 taskbar plug-in, loaded in-process</text>
+
+              <!-- Group C: servers -->
+              <rect class="frame" x="724" y="60" width="220" height="326" rx="8"/>
+              <rect class="frame-pane" x="727" y="88" width="214" height="295" rx="4"/>
+              <text class="head" x="736" y="79">chomikuj.pl servers</text>
+              <rect class="chip-srv" x="736" y="100" width="196" height="46" rx="5"/>
+              <text class="t-b" x="748" y="119">box.chomikuj.pl</text>
+              <text class="t-s" x="748" y="136">SOAP API · 18 operations</text>
+              <rect class="chip-srv" x="736" y="156" width="196" height="46" rx="5"/>
+              <text class="t-b" x="748" y="175">File servers</text>
+              <text class="t-s" x="748" y="192">upload · download · music</text>
+              <rect class="chip-srv" x="736" y="212" width="196" height="46" rx="5"/>
+              <text class="t-b" x="748" y="231">chomikuj.pl web</text>
+              <text class="t-s" x="748" y="248">auto-login, top-ups</text>
+              <rect class="chip-off" x="736" y="268" width="196" height="46" rx="5"/>
+              <text class="t-b t-off" x="748" y="287">Update repo (offline)</text>
+              <text class="t-s" x="748" y="304">bts.box · download.box</text>
+              <rect class="chip-srv" x="736" y="324" width="196" height="46" rx="5"/>
+              <text class="t-b" x="748" y="343">Crash collector</text>
+              <text class="t-s" x="748" y="360">bts.box.chomikuj.pl:8088</text>
+
+              <!-- Group D: user data -->
+              <rect class="frame" x="16" y="470" width="230" height="120" rx="8"/>
+              <rect class="frame-pane" x="19" y="498" width="224" height="89" rx="4"/>
+              <text class="head" x="28" y="489">User data</text>
+              <text class="t-m" x="30" y="518">%LOCALAPPDATA%\ChomikBox\</text>
+              <text class="t-m" x="30" y="538">conf.ini · queue-*.ini</text>
+              <text class="t-m" x="30" y="558">message.log · playlist</text>
+              <text class="t-m" x="30" y="578">cache\player\ · backup\</text>
+
+              <!-- Group E: helpers -->
+              <rect class="frame" x="300" y="470" width="360" height="120" rx="8"/>
+              <rect class="frame-pane" x="303" y="498" width="354" height="89" rx="4"/>
+              <text class="head" x="312" y="489">Helper executables</text>
+              <rect class="chip" x="316" y="506" width="160" height="36" rx="5"/>
+              <text class="t-b" x="328" y="521">installer.exe</text>
+              <text class="t-s" x="328" y="536">updater · elevated</text>
+              <rect class="chip" x="484" y="506" width="160" height="36" rx="5"/>
+              <text class="t-b" x="496" y="521">crashsender.exe</text>
+              <text class="t-s" x="496" y="536">crash upload</text>
+              <rect class="chip" x="316" y="548" width="160" height="36" rx="5"/>
+              <text class="t-b" x="328" y="563">configurator.exe</text>
+              <text class="t-s" x="328" y="578">offline settings</text>
+              <rect class="chip" x="484" y="548" width="160" height="36" rx="5"/>
+              <text class="t-b" x="496" y="563">chomikbox1conf.exe</text>
+              <text class="t-s" x="496" y="578">1.x importer</text>
+
+              <!-- Group F: install folder -->
+              <rect class="frame" x="724" y="470" width="220" height="120" rx="8"/>
+              <rect class="frame-pane" x="727" y="498" width="214" height="89" rx="4"/>
+              <text class="head" x="736" y="489">Install folder</text>
+              <text class="t-m" x="738" y="518">base.ini · locale\</text>
+              <text class="t-m" x="738" y="538">skins\ · files\anim\</text>
+              <text class="t-m" x="738" y="558">gplugins\ (GStreamer)</text>
+              <text class="t-m" x="738" y="578">tsplugins\integration\</text>
+
+              <!-- Arrows -->
+              <path class="arrow" d="M234,123 H298" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M234,179 H298" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M234,235 H298" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M234,291 H298" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M660,123 H734" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M660,179 H734" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M660,235 H734" marker-end="url(#ah-glance)"/>
+              <path class="arrow-grey" d="M660,291 H734" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M380,428 V504" marker-end="url(#ah-glance)"/>
+              <path class="arrow-dash" d="M412,506 V430" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M564,428 V504" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M644,524 H690 V347 H734" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M300,400 H131 V468" marker-start="url(#ah-glance)" marker-end="url(#ah-glance)"/>
+              <path class="arrow" d="M300,566 H248" marker-end="url(#ah-glance)"/>
+
+              <!-- Badges -->
+              <circle class="badge" cx="272" cy="207" r="10"/><text class="badge-t" x="272" y="211.5" text-anchor="middle">1</text>
+              <circle class="badge" cx="697" cy="123" r="10"/><text class="badge-t" x="697" y="127.5" text-anchor="middle">2</text>
+              <circle class="badge" cx="697" cy="179" r="10"/><text class="badge-t" x="697" y="183.5" text-anchor="middle">3</text>
+              <circle class="badge" cx="697" cy="235" r="10"/><text class="badge-t" x="697" y="239.5" text-anchor="middle">4</text>
+              <circle class="badge" cx="697" cy="291" r="10"/><text class="badge-t" x="697" y="295.5" text-anchor="middle">5</text>
+              <circle class="badge" cx="396" cy="462" r="10"/><text class="badge-t" x="396" y="466.5" text-anchor="middle">5</text>
+              <circle class="badge" cx="564" cy="462" r="10"/><text class="badge-t" x="564" y="466.5" text-anchor="middle">6</text>
+              <circle class="badge" cx="690" cy="440" r="10"/><text class="badge-t" x="690" y="444.5" text-anchor="middle">6</text>
+              <circle class="badge" cx="215" cy="400" r="10"/><text class="badge-t" x="215" y="404.5" text-anchor="middle">7</text>
+              <circle class="badge" cx="274" cy="566" r="10"/><text class="badge-t" x="274" y="570.5" text-anchor="middle">7</text>
+            </svg>
+          </section>
+          <figcaption id="dg-glance-cap">Component map of ChomikBox 2.0.8.2. Green frames are local components, teal chips are servers, the grey dashed chip is the update channel, which no longer answers. Numbers refer to the list below.</figcaption>
+        </figure>
+        <ol class="legend">
+          <li><span class="legend-num">1</span><span>Shell entry points (Explorer verbs <code>-u</code> / <code>-p</code>, <code>chomik://</code> URLs, the browser plug-in's <code>-d&lt;url&gt;</code>, a second launch) reach a running instance over the named pipe <code>\\.\pipe\qtsingleapp-Chomik-739b-&lt;session&gt;</code>; with no instance running they simply start <code>chomikbox.exe</code> with that command line.</span></li>
+          <li><span class="legend-num">2</span><span>SOAP 1.1 over plain HTTP to the WCF service <code>http://box.chomikuj.pl/services/ChomikBoxService.svc</code>: 18 operations, with the session token as the first element of nearly every request.</span></li>
+          <li><span class="legend-num">3</span><span>File transfers over HTTP to file servers named by the API: multipart uploads to <code>http://&lt;server&gt;/file/</code> (<code>multipart/mixed; boundary=!CHB&lt;stamp&gt;</code>), the resume check <code>/resume/check/?key=</code>, and <code>GET</code> downloads with <code>Range</code>; the music player streams from the same kind of URL.</span></li>
+          <li><span class="legend-num">4</span><span>Web pages opened in the browser: auto-login <code>LoginFromBox?t=…</code>, buying transfer or points, feedback, registration, lost password.</span></li>
+          <li><span class="legend-num">5</span><span>Updates: <code>UUpdater</code> fetches <code>packages.xml</code> from <code>bts.box.chomikuj.pl/repo/dists</code>, stages the packages and starts <code>installer.exe</code> elevated, which restarts ChomikBox with <code>--update=success|failed</code>. The repository answered 404/403 on 2026-10-24.</span></li>
+          <li><span class="legend-num">6</span><span>Crashes: the Breakpad handler writes a minidump and starts <code>crashsender.exe</code>, which POSTs the dump, logs and configuration to <code>http://bts.box.chomikuj.pl:8088/crash</code>.</span></li>
+          <li><span class="legend-num">7</span><span>Settings, transfer queues, logs and the player cache live in <code>%LOCALAPPDATA%\ChomikBox\</code>; <code>configurator.exe</code> and <code>chomikbox1conf.exe</code> edit the same folder while ChomikBox is not running.</span></li>
+        </ol>
+        <p>More detail: <a href="architecture.html">Architecture</a> (processes, layers, IPC) and <a href="components.html">Components</a> (one section per executable and resource pack).</p>
+      </div>
+    </section>
+
+    <section class="window" id="facts">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Key facts</b> - stack and versions</h2>
+      </header>
+      <div class="pane">
+        <dl class="facts">
+          <dt>Product</dt>
+          <dd>ChomikBox 2.0.8.2 by Chomikuj.pl (registry <code>InstallVersion</code> = <code>2.0.8.2</code>; the SOAP client identifies itself as <code>chomikbox</code> / <code>2.0.8.2</code>). <span class="ev ev-obs">Observed</span></dd>
+          <dt>Build</dt>
+          <dd>32-bit PE executables built with MSVC, dated 2017-10-21. The MSI was built with MakeMSI on the same day and carries the MSVC90 CRT side-by-side merge modules. <span class="ev ev-obs">Observed</span></dd>
+          <dt>UI and runtime</dt>
+          <dd>Qt&nbsp;4 (<code>QtCore4</code>, <code>QtGui4</code>, <code>QtNetwork4</code>, <code>QtXml4</code>), QtSingleApplication for single-instance handling, Qt style sheets inside binary skin files. <span class="ev ev-obs">Observed</span></dd>
+          <dt>Media</dt>
+          <dd>GStreamer 0.10 (plug-ins in <code>gplugins\</code>) and ffmpeg for the music player. <span class="ev ev-obs">Observed</span></dd>
+          <dt>Other libraries</dt>
+          <dd>Google Breakpad (minidumps), dbghelp (stack walking in every framework-based executable), libneon and gnutls (shipped; their use is not documented). <span class="ev ev-obs">Observed</span></dd>
+          <dt>Main API</dt>
+          <dd>SOAP 1.1 over HTTP to a WCF service with metadata publishing disabled (no WSDL); 18 operations; 17 verified against the live service (SessionBegin targets a host with no DNS record). <span class="ev ev-obs">Observed</span> <span class="ev ev-live">Live</span></dd>
+          <dt>API document</dt>
+          <dd>Two content-equivalent OpenAPI 3.2.1 documents generated from one source. The canonical one is strictly conformant: 19 operations, with SOAP as a single <code>POST</code> carrying a <code>SOAPAction</code> enum of the 17 main-service actions. The per-operation view has 38 operations, one path item per SOAP operation, and declares its one deviation (a <code>?op=</code> server URL). Repository contains 142 captured cases, embedded as examples. <a href="api/index.html">API reference</a></dd>
+          <dt>Security</dt>
+          <dd>12 client findings (C-01 to C-12) and 14 service observations (S-01 to S-14). The most serious: plain HTTP everywhere, an unsalted MD5 as the credential, crash reports that carry <code>conf.ini</code>, and updates fetched over HTTP, checked only by an unkeyed SHA-1 from the same channel and run elevated (C-07, High, needs a network position). <a href="security.html">Security &amp; privacy</a></dd>
+          <dt>Install</dt>
+          <dd>Per-machine MSI into <code>C:\Program Files (x86)\ChomikBox\</code>; user data in <code>%LOCALAPPDATA%\ChomikBox\</code>. <span class="ev ev-obs">Observed</span></dd>
+          <dt>Languages</dt>
+          <dd>Source strings are English; <code>pl.qm</code> carries 656 messages, <code>en.qm</code> 670. Skins and the tutorial also have Italian, Spanish, Russian, Portuguese and Brazilian Portuguese variants. <span class="ev ev-obs">Observed</span></dd>
+          <dt>Brands</dt>
+          <dd>One executable, several brands: <code>base.ini</code> selects the domain. Overlays for <code>chomikuj.pl</code>, <code>minhateca.com.br</code> and <code>lolabits.es</code> are embedded, and the balloon skins name further white-label partners (Abelhas.pt, Toutbox, Tuttobox, Abra Sesamo). <span class="ev ev-obs">Observed</span></dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="window" id="servers">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Servers</b> - hosts and endpoints</h2>
+      </header>
+      <div class="pane">
+        <p>Endpoints used by the client and listed in its default config. <code>%1</code> stands for a value substituted at run time. All templates use plain <code>http://</code>.</p>
+        <section class="table-wrap" aria-labelledby="tbl-servers-cap" tabindex="0">
+          <table>
+            <caption id="tbl-servers-cap">Servers contacted by ChomikBox 2.0.8.2</caption>
+            <thead>
+              <tr><th scope="col">Host / URL template</th><th scope="col">Purpose</th><th scope="col">Used by</th><th scope="col">Status (2026-10-24)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="wrap"><code>http://box.chomikuj.pl/services/ChomikBoxService.svc</code></td><td>Main SOAP API (<code>IChomikBoxService</code>)</td><td><code>chomikbox.exe</code></td><td>Up, behind Cloudflare, also answers over HTTPS; 17 of 18 operations verified <span class="ev ev-live">Live</span></td></tr>
+              <tr><td class="wrap"><code>http://%1/session</code> on <code>session.box.&lt;domain&gt;</code></td><td>Optional session server (<code>SessionBegin</code>), used only when <code>[proto-webox] session-enabled = true</code> (default false)</td><td><code>chomikbox.exe</code></td><td>Host has no DNS record <span class="ev ev-live">Live</span></td></tr>
+              <tr><td class="wrap"><code>http://&lt;server&gt;/file/</code>, <code>http://&lt;server&gt;/resume/check/?key=&lt;key&gt;</code></td><td>File upload and resume check; <code>&lt;server&gt;</code> comes from <code>UploadToken</code></td><td><code>chomikbox.exe</code></td><td>Verified on upload servers <code>sNNNN.chomikuj.pl:8084</code> <span class="ev ev-live">Live</span></td></tr>
+              <tr><td class="wrap"><code>http://sNNNN.chomikuj.pl/File.aspx?e=…&amp;pv=…</code></td><td>Signed download and music-stream URLs returned by <code>Download</code>, <code>FolderFiles</code> and <code>RefreshFileUrl</code></td><td><code>chomikbox.exe</code></td><td>Verified, <code>Range</code> supported <span class="ev ev-live">Live</span></td></tr>
+              <tr><td class="wrap"><code>http://music.%1/MusicFile.aspx?chomik_id={chomikid}&amp;sess_id={sessid}&amp;seed={seed}&amp;id=%1&amp;ext=.%2</code></td><td>Not a request: an identifier written to the player cache for 1.x compatibility; the placeholders are never filled in</td><td>(none)</td><td>Gone: 404, <code>music.</code> host unreachable <span class="ev ev-live">Live</span></td></tr>
+              <tr><td class="wrap"><code>http://%1/chomik/chomikbox/LoginFromBox?t=%2&amp;returnUrl=/</code> plus <code>DodatkowyTransfer.aspx</code>, <code>DodatkowePunkty.aspx</code>, <code>ChomikBoxOpinia.aspx</code>, <code>http://www.%1/Create.aspx</code>, <code>http://www.%1/LostPassword.aspx</code></td><td>Web pages opened in the browser: auto-login with the session token, buying transfer or points, feedback, registration, lost password</td><td>browser, from <code>chomikbox.exe</code></td><td><code>http://chomikuj.pl/chomik/chomikbox/LoginFromBox</code> works and starts a web session <span class="ev ev-live">Live</span></td></tr>
+              <tr><td class="wrap"><code>http://bts.box.chomikuj.pl:8088/crash</code></td><td>Crash report upload</td><td><code>crashsender.exe</code></td><td>TCP open, empty reply to HEAD</td></tr>
+              <tr><td class="wrap"><code>http://bts.box.%1/repo/dists</code>, <code>http://bts.box.%1/repo/beta/</code>, <code>http://download.box.%1/updates</code></td><td>Update repository and beta download link</td><td><code>chomikbox.exe</code> (<code>UUpdater</code>)</td><td>404 / 403: offline</td></tr>
+              <tr><td class="wrap"><code>http://Chomikuj.pl/chomik/chomikbox/AppUninstalled</code></td><td>Page opened after uninstall</td><td>MSI custom action</td><td>Not probed</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <p>The SOAP host is built as <code>webservice-main-prefix</code> (<code>box.</code>) plus the brand domain from <code>base.ini</code>, so a white-label build talks to <code>box.&lt;its domain&gt;</code>. <span class="ev ev-obs">Observed</span> <a class="src" href="configuration.html#brands">Brand overlays</a></p>
+      </div>
+    </section>
+
+    <section class="window" id="contents">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Contents</b> - all pages</h2>
+      </header>
+      <div class="pane">
+        <ul class="tiles">
+          <li><a class="tile" href="architecture.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-architecture.png" alt="" width="77" height="80"></span><span class="tile-name">Architecture</span></span><span class="tile-desc">Processes, Qt&nbsp;4 application structure, the SOAP networking stack, the media stack, single-instance IPC, timers and the configuration system.</span></a></li>
+          <li><a class="tile" href="components.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-components.png" alt="" width="57" height="80"></span><span class="tile-name">Components</span></span><span class="tile-desc">Every executable, plug-in and resource pack: purpose, how it is launched, inputs and outputs, interactions, evidence.</span></a></li>
+          <li><a class="tile" href="windows-integration.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-windows-integration.png" alt="" width="80" height="68"></span><span class="tile-name">Windows integration</span></span><span class="tile-desc">Registry, the <code>chomik://</code> scheme, Explorer verbs, music file associations, named pipe, data folders, autostart, browser plug-in.</span></a></li>
+          <li><a class="tile" href="configuration.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-configuration.png" alt="" width="79" height="80"></span><span class="tile-name">Configuration</span></span><span class="tile-desc">Config files, the default config, the network, upload and download keys, brand overlays and <code>base.ini</code>.</span></a></li>
+          <li><a class="tile" href="security.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-security.png" alt="" width="55" height="80"></span><span class="tile-name">Security &amp; privacy</span></span><span class="tile-desc">The findings register: 12 client findings and 12 observations of the live service, each with a rating and evidence.</span></a></li>
+          <li><a class="tile" href="protocol.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-protocol.png" alt="" width="64" height="80"></span><span class="tile-name">Protocol</span></span><span class="tile-desc">SOAPAction dispatch, envelopes and namespaces, gzip, the session lifecycle, status values, faults, retry, and the file-server endpoints, client vs live.</span></a></li>
+          <li><a class="tile" href="flows.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-flows.png" alt="" width="80" height="80"></span><span class="tile-name">Flows</span></span><span class="tile-desc">Sequence diagrams: login and keep-alive, folders, upload with resume, download with agreements, music, SavePlaylist, click-catching.</span></a></li>
+          <li><a class="tile" href="api/index.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-api-reference.png" alt="" width="72" height="80"></span><span class="tile-name">API reference</span></span><span class="tile-desc">All 36 operations of the per-operation OpenAPI view: schemas as XML trees, every captured example, verification and security notes.</span></a></li>
+          <li><a class="tile" href="testing.html"><span class="tile-art"><span class="tile-img"><img src="assets/img/tile-testing.png" alt="" width="65" height="80"></span><span class="tile-name">PHP client &amp; tests</span></span><span class="tile-desc">The PHP 8.3 client, its Offline, Contract and Live suites, the live-test safety model and spec validation.</span></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="window" id="sources">
+      <header class="titlebar">
+        <img src="assets/img/hamster-logo.png" alt="" width="32" height="28">
+        <h2><b>Sources</b> and conventions</h2>
+      </header>
+      <div class="pane">
+        <h3>Evidence labels</h3>
+        <p>Each claim on these pages is labelled with how it is known:</p>
+        <dl class="facts">
+          <dt><span class="ev ev-obs">Observed</span></dt>
+          <dd>Read directly from the application, a resource, a registry key or an installer table, or seen in the behaviour of the client.</dd>
+          <dt><span class="ev ev-live">Live</span></dt>
+          <dd>Seen in traffic with the real service during the gentle, sandboxed probing of 2026-10-24.</dd>
+          <dt><span class="ev ev-inf">Inferred</span></dt>
+          <dd>Reasoned from observed facts but not confirmed directly.</dd>
+          <dt><span class="ev ev-unk">Unknown</span></dt>
+          <dd>Not determined. Listed so nobody mistakes a gap for a fact.</dd>
+        </dl>
+        <h3>Project files</h3>
+        <ul>
+          <li><a href="../api/chomikbox.openapi.yaml"><code>api/chomikbox.openapi.yaml</code></a> and <a href="../api/README.md"><code>api/README.md</code></a>: the OpenAPI 3.2.1 document and its conventions; <a href="../php/README.md"><code>php/README.md</code></a>: the PHP client and tests.</li>
+          <li>The images used on this site are mapped in <a href="assets/img/README.md"><code>site/assets/img/README.md</code></a>.</li>
+        </ul>
+        <h3>Rules followed on these pages</h3>
+        <ul>
+          <li>No secrets: user names, e-mail addresses, password hashes, session or upload tokens and signed URLs never appear. Examples use placeholders such as <code>{{USERNAME}}</code>, <code>{{PASS_HASH}}</code> and <code>{{TOKEN}}</code>.</li>
+          <li>Polish UI terms are kept where they help, with an English gloss: <span lang="pl">Dodawanie</span> (Upload), <span lang="pl">Pobieranie</span> (Download), <span lang="pl">Muzyka</span> (Music), <span lang="pl">Ustawienia</span> (Settings).</li>
+        </ul>
+      </div>
+    </section>
+  </article>
+</main>
+</div>
+<!-- chrome:footer -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p>Documentation of ChomikBox 2.0.8.2 (Chomikuj.pl, 2017), written for interoperability and education. Not affiliated with or endorsed by Chomikuj.pl; the hamster illustrations are original artwork made for this site. Last updated <time datetime="2026-10-25">2026-10-25</time>.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="index.html#sources">Sources and conventions</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+</footer>
+<!-- /chrome:footer -->
+</body>
+</html>

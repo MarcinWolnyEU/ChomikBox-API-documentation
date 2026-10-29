@@ -1,0 +1,6 @@
+GET /MusicFile.aspx?chomik_id=25798223&sess_id={{SESSION_ID}}&seed={{SEED}}&id=10832648145&ext=.txt HTTP/1.1
+Host: chomikuj.pl
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+

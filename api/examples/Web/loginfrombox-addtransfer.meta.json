@@ -1,0 +1,106 @@
+{
+    "operation": "Web",
+    "case": "loginfrombox-addtransfer",
+    "timestamp": "2026-10-24T15:27:10Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/AddTransfer.aspx",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:09 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "134"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "location",
+                "/AddTransfer.aspx"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:09 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:09 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m52"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa01031bf5bd61-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "ChomikSession"
+        ],
+        "location": "/AddTransfer.aspx",
+        "bodyBytesOnWire": 134,
+        "bodyBytesDecoded": 134,
+        "bodySha256": "014914a82f9424a51daabe36de85c4348345d2d79028539674c35fa43212e0ae",
+        "elapsedMs": 207.8
+    },
+    "note": "web-box-add-transfer-url; only the redirect is recorded."
+}

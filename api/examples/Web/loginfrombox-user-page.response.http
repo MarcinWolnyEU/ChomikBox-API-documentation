@@ -1,0 +1,18 @@
+HTTP/1.1 302 Found
+Date: Sat, 24 Oct 2026 15:27:06 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 126
+Connection: keep-alive
+cache-control: no-cache
+pragma: no-cache
+expires: -1
+location: /{{USERNAME}}
+server: cloudflare
+set-cookie: guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:06 GMT; path=/; HttpOnly; SameSite=Lax
+set-cookie: rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:06 GMT; path=/; SameSite=Lax
+set-cookie: ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax
+x-server: m51
+cf-cache-status: DYNAMIC
+CF-RAY: a4fa00ef7df7bd61-PRG
+
+[body: 126 bytes, sha256=2121bf5154f8087976e87f741877eddec3e1aa9ef4b076725a1f1540b9319f07; first bytes: "<html><head><title>Object moved</title></head><body>\r\n<h2>Object moved to <a href=\"/{{USERNAME}}\">here</a>.</h2>\r\n</body></html>\r\n"]

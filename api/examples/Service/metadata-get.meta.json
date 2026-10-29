@@ -1,0 +1,94 @@
+{
+    "operation": "Service",
+    "case": "metadata-get",
+    "timestamp": "2026-10-24T15:25:02Z",
+    "request": {
+        "method": "GET",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:25:02 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=UTF-8"
+            ],
+            [
+                "Content-Length",
+                "1713"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4f9fde5cfc4278c-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=UTF-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 1713,
+        "bodyBytesDecoded": 6437,
+        "bodySha256": "855bb50e73e6b2d1c6d6d69ee436c9dfcc5b390a49d50119f8f2eea677bcaefd",
+        "elapsedMs": 400
+    },
+    "note": "GET on the .svc: WCF \"metadata publishing disabled\" HTML page (?wsdl and ?singleWsdl return the same page)."
+}

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><CheckEvents xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><stats><isUploading>true</isUploading><isPlaying>false</isPlaying><isDownloading>false</isDownloading><panelSelectedTab>1</panelSelectedTab><animation>0</animation></stats></CheckEvents></s:Body></s:Envelope>

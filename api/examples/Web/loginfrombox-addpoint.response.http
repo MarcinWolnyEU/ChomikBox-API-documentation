@@ -1,0 +1,18 @@
+HTTP/1.1 302 Found
+Date: Sat, 24 Oct 2026 15:27:08 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 131
+Connection: keep-alive
+cache-control: no-cache
+pragma: no-cache
+expires: -1
+location: /AddPoint.aspx
+server: cloudflare
+set-cookie: guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:08 GMT; path=/; HttpOnly; SameSite=Lax
+set-cookie: rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:08 GMT; path=/; SameSite=Lax
+set-cookie: ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax
+x-server: m51
+cf-cache-status: DYNAMIC
+CF-RAY: a4fa00fd0e42f976-PRG
+
+[body: 131 bytes, sha256=479011c18ac01411d39759b9f1e41ca66a48a34070272fa7acfe0fe4d8b64daa; first bytes: "<html><head><title>Object moved</title></head><body>\r\n<h2>Object moved to <a href=\"/AddPoint.aspx\">here</a>.</h2>\r\n</body></html>\r\n"]

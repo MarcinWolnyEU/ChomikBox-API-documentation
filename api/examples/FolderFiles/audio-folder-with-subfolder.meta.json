@@ -1,0 +1,116 @@
+{
+    "operation": "FolderFiles",
+    "case": "audio-folder-with-subfolder",
+    "timestamp": "2026-10-25T06:17:33Z",
+    "request": {
+        "method": "POST",
+        "url": "http://box.chomikuj.pl/services/ChomikBoxService.svc",
+        "headers": [
+            [
+                "Content-Type",
+                "text/xml;charset=utf-8"
+            ],
+            [
+                "SOAPAction",
+                "http://chomikuj.pl/IChomikBoxService/FolderFiles"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Language",
+                "en,*"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 260,
+        "bodyBytesUncompressed": 393
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sun, 25 Oct 2026 06:17:33 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/xml; charset=utf-8"
+            ],
+            [
+                "Transfer-Encoding",
+                "chunked"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "private"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-aspnet-version",
+                "4.0.30319"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m52"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "Content-Encoding",
+                "gzip"
+            ],
+            [
+                "CF-RAY",
+                "a4ff194e0a95bd61-PRG"
+            ]
+        ],
+        "contentType": "text/xml; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 342,
+        "bodyBytesDecoded": 971,
+        "bodySha256": null,
+        "elapsedMs": 175.4
+    },
+    "note": "FolderFiles(player.audio) on a folder holding a subfolder, a 1 s silent MP3 and other tiny files (list.m3u, silence.flac, silence.m4a, silence.ogg, silence.wav, silence.wma): which entries and type values are listed.",
+    "subfolderId": 658,
+    "uploaded": {
+        "silence.mp3": "10833170734",
+        "list.m3u": "10833170739",
+        "silence.flac": "10833170743",
+        "silence.m4a": "10833170746",
+        "silence.ogg": "10833170750",
+        "silence.wav": "10833170755",
+        "silence.wma": "10833170762"
+    }
+}

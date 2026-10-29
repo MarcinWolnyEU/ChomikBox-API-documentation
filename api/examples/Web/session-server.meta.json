@@ -1,0 +1,82 @@
+{
+    "operation": "Web",
+    "case": "session-server",
+    "timestamp": "2026-10-24T15:27:17Z",
+    "request": {
+        "method": "GET",
+        "url": "http://box.chomikuj.pl/session",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:27:16 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "160"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "location",
+                "/Error404.aspx?aspxerrorpath=/Error404.aspx"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "x-powered-by",
+                "ASP.NET"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fa012e1ce6278c-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "cloudflare",
+        "setCookieNames": [],
+        "location": "/Error404.aspx?aspxerrorpath=/Error404.aspx",
+        "bodyBytesOnWire": 160,
+        "bodyBytesDecoded": 160,
+        "bodySha256": "fc323aa790b026988136f5723fc38e787ae943a92a770f0f364ed1e76c60fb22",
+        "elapsedMs": 156.1
+    },
+    "note": "GET http://box.chomikuj.pl/session (the real session host session.box.chomikuj.pl does not resolve). Observed: 302 to /Error404.aspx."
+}

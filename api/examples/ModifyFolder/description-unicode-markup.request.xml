@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><ModifyFolder xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><folderId>651</folderId><description>Opis testowy zażółć gęślą jaźń &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;q&quot; apifollowup09d677d8902</description></ModifyFolder></s:Body></s:Envelope>

@@ -1,0 +1,62 @@
+{
+    "operation": "FileDownload",
+    "case": "head",
+    "timestamp": "2026-10-24T15:26:46Z",
+    "request": {
+        "method": "HEAD",
+        "url": "{{SIGNED_URL}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 302,
+        "reason": "Found",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "156"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Location",
+                "/Error404.aspx?aspxerrorpath=/File.aspx"
+            ],
+            [
+                "Server",
+                "Microsoft-IIS/10.0"
+            ],
+            [
+                "Access-Control-Allow-Origin",
+                "http://chomikuj.pl"
+            ],
+            [
+                "X-Powered-By",
+                "ASP.NET"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:45 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-IIS/10.0",
+        "setCookieNames": [],
+        "location": "/Error404.aspx?aspxerrorpath=/File.aspx",
+        "bodyBytesOnWire": 0,
+        "bodyBytesDecoded": 0,
+        "bodySha256": null,
+        "elapsedMs": 155.5
+    },
+    "note": "HEAD on the signed URL."
+}

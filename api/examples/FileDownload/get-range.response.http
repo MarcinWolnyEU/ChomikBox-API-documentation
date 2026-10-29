@@ -1,0 +1,12 @@
+HTTP/1.1 206 Partial Content
+Cache-Control: private
+Content-Type: text/html
+Content-Range: bytes 0-15/1033
+Server: Microsoft-IIS/10.0
+Access-Control-Allow-Origin: http://chomikuj.pl
+X-AspNet-Version: 4.0.30319
+X-Powered-By: ASP.NET
+Date: Sat, 24 Oct 2026 15:26:44 GMT
+Content-Length: 16
+
+[body: 16 bytes, sha256=2fa7439f6a303e384352ea638d6bb9fbd80f2c8cb60e15297d77af90641e7841; first bytes: "ChomikBox API te"]

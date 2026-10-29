@@ -1,0 +1,15 @@
+HTTP/1.1 302 Found
+Date: Sat, 24 Oct 2026 15:27:13 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 313
+Connection: keep-alive
+cache-control: private
+location: http://s9580.chomikuj.pl/File.aspx?e={{SIGNED_E}}&pv={{SIGNED_PV}}
+server: cloudflare
+set-cookie: guid={{COOKIE}}; expires=Tue, 24-Oct-2028 15:27:13 GMT; path=/; HttpOnly; SameSite=Lax
+set-cookie: rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 15:27:13 GMT; path=/; SameSite=Lax
+x-server: m52
+cf-cache-status: DYNAMIC
+CF-RAY: a4fa011b6a4bbd61-PRG
+
+[body: 313 bytes, sha256=5a1b8f4aedf5e701ae3865454ed51de3c47153c0cf96722a03e62caa9da5732d; first bytes: "<html><head><title>Object moved</title></head><body>\r\n<h2>Object moved to <a href=\"http://s9580.chomikuj.pl/File.aspx?e={{SIGNED_E}}"]

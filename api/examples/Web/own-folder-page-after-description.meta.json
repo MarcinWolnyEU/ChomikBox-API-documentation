@@ -1,0 +1,144 @@
+{
+    "operation": "Web",
+    "case": "own-folder-page-after-description",
+    "timestamp": "2026-10-24T20:04:48Z",
+    "request": {
+        "method": "GET",
+        "url": "http://chomikuj.pl/{{USERNAME}}/_chomikbox_api_test_followup_20261024_200419/modify-empty-full",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Date",
+                "Sat, 24 Oct 2026 20:04:47 GMT"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Content-Length",
+                "14728"
+            ],
+            [
+                "Connection",
+                "keep-alive"
+            ],
+            [
+                "cache-control",
+                "no-cache"
+            ],
+            [
+                "pragma",
+                "no-cache"
+            ],
+            [
+                "content-encoding",
+                "gzip"
+            ],
+            [
+                "expires",
+                "-1"
+            ],
+            [
+                "vary",
+                "Accept-Encoding"
+            ],
+            [
+                "server",
+                "cloudflare"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 20:04:47 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 20:04:47 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "guid={{COOKIE}}; expires=Tue, 24-Oct-2028 20:04:47 GMT; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "rcid={{COOKIE}}; expires=Sun, 24-Oct-2027 20:04:47 GMT; path=/; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "__RequestVerificationToken_Lw__={{COOKIE}}; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "set-cookie",
+                "ChomikSession={{COOKIE}}; domain=.chomikuj.pl; path=/; HttpOnly; SameSite=Lax"
+            ],
+            [
+                "x-server",
+                "m51"
+            ],
+            [
+                "cf-cache-status",
+                "DYNAMIC"
+            ],
+            [
+                "CF-RAY",
+                "a4fb97b36fe3278c-PRG"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": "gzip",
+        "server": "cloudflare",
+        "setCookieNames": [
+            "guid",
+            "rcid",
+            "guid",
+            "rcid",
+            "__RequestVerificationToken_Lw__",
+            "ChomikSession"
+        ],
+        "location": null,
+        "bodyBytesOnWire": 14728,
+        "bodyBytesDecoded": 53367,
+        "bodySha256": "6d3c1968e7ff3e6e5191030c8cd79c989c2b402c6bfae202a47002d92d8f4a6d",
+        "elapsedMs": 382.1
+    },
+    "note": "Anonymous GET of the public web page of the empty sandbox folder right after ModifyFolder set a unique description marker, freePoints 1 and freeTransfer 1. Body not stored; meta records whether the marker appears.",
+    "descriptionMarkerFoundInPage": false,
+    "pageBefore": {
+        "status": 200,
+        "bytes": 53365,
+        "markerFound": false,
+        "darmowCount": 0,
+        "transferCount": 0,
+        "punktCount": 0,
+        "opisCount": 0
+    },
+    "pageAfter": {
+        "status": 200,
+        "bytes": 53367,
+        "markerFound": false,
+        "darmowCount": 0,
+        "transferCount": 0,
+        "punktCount": 0,
+        "opisCount": 0
+    }
+}

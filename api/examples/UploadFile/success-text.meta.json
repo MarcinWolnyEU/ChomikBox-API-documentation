@@ -1,0 +1,64 @@
+{
+    "operation": "UploadFile",
+    "case": "success-text",
+    "timestamp": "2026-10-24T15:26:17Z",
+    "request": {
+        "method": "POST",
+        "url": "http://s9530.chomikuj.pl:8084/file/",
+        "headers": [
+            [
+                "Content-Type",
+                "multipart/mixed; boundary=!CHB{{STAMP}}"
+            ],
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ]
+        ],
+        "bodyBytesOnWire": 1633,
+        "bodyBytesUncompressed": 1633
+    },
+    "response": {
+        "status": 200,
+        "reason": "OK",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Content-Length",
+                "76"
+            ],
+            [
+                "Content-Type",
+                "text/html; charset=utf-8"
+            ],
+            [
+                "Server",
+                "Microsoft-HTTPAPI/2.0"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:16 GMT"
+            ]
+        ],
+        "contentType": "text/html; charset=utf-8",
+        "contentEncoding": null,
+        "server": "Microsoft-HTTPAPI/2.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 76,
+        "bodyBytesDecoded": 76,
+        "bodySha256": null,
+        "elapsedMs": 462.9
+    },
+    "note": "Multipart upload of a small text file exactly as the real client builds it: boundary !CHB<stamp> (stamp redacted), parts chomik_id, folder_id, key, time(=stamp), client, locale, file. No Content-Disposition; the file part has no Content-Type and is followed by the closing boundary. Answer: <resp res=\"1\" fileid=\"...\"/> (no filename/folderid attributes).",
+    "uploadedBytes": 1033,
+    "uploadedSha256": "5b4a0b4f2f872115534cf8d9e637b3c6bbf4644fce53acc4e82db30b4f3b9b32"
+}

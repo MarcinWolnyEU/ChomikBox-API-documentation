@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><Auth xmlns="http://chomikuj.pl/"><name>{{USERNAME}}</name><passHash>{{PASS_HASH}}</passHash><ver>4</ver><client><name>chomikbox</name><version>2.0.8.2</version></client></Auth></s:Body></s:Envelope>

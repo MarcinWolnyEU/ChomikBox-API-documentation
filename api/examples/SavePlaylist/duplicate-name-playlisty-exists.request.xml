@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><SavePlaylist xmlns="http://chomikuj.pl/"><token>{{TOKEN}}</token><name>api-followup-playlist-061647</name><list><PlayListItem><id>10833170734</id><realId>-1</realId></PlayListItem></list></SavePlaylist></s:Body></s:Envelope>

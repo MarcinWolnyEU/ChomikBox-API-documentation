@@ -1,0 +1,82 @@
+{
+    "operation": "FileDownload",
+    "case": "get-range",
+    "timestamp": "2026-10-24T15:26:45Z",
+    "request": {
+        "method": "GET",
+        "url": "{{SIGNED_URL}}",
+        "headers": [
+            [
+                "User-Agent",
+                "Mozilla/5.0"
+            ],
+            [
+                "Accept-Encoding",
+                "gzip"
+            ],
+            [
+                "Connection",
+                "Keep-Alive"
+            ],
+            [
+                "Range",
+                "bytes=0-15"
+            ]
+        ],
+        "bodyBytesOnWire": 0,
+        "bodyBytesUncompressed": 0
+    },
+    "response": {
+        "status": 206,
+        "reason": "Partial Content",
+        "protocol": "HTTP/1.1",
+        "headers": [
+            [
+                "Cache-Control",
+                "private"
+            ],
+            [
+                "Content-Type",
+                "text/html"
+            ],
+            [
+                "Content-Range",
+                "bytes 0-15/1033"
+            ],
+            [
+                "Server",
+                "Microsoft-IIS/10.0"
+            ],
+            [
+                "Access-Control-Allow-Origin",
+                "http://chomikuj.pl"
+            ],
+            [
+                "X-AspNet-Version",
+                "4.0.30319"
+            ],
+            [
+                "X-Powered-By",
+                "ASP.NET"
+            ],
+            [
+                "Date",
+                "Sat, 24 Oct 2026 15:26:44 GMT"
+            ],
+            [
+                "Content-Length",
+                "16"
+            ]
+        ],
+        "contentType": "text/html",
+        "contentEncoding": null,
+        "server": "Microsoft-IIS/10.0",
+        "setCookieNames": [],
+        "location": null,
+        "bodyBytesOnWire": 16,
+        "bodyBytesDecoded": 16,
+        "bodySha256": "2fa7439f6a303e384352ea638d6bb9fbd80f2c8cb60e15297d77af90641e7841",
+        "elapsedMs": 135.7
+    },
+    "note": "Range: bytes=0-15 on the signed URL."
+}

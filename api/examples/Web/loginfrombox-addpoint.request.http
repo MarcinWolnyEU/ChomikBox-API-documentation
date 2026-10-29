@@ -1,0 +1,6 @@
+GET /chomik/chomikbox/LoginFromBox?t={{TOKEN}}&returnUrl=/AddPoint.aspx HTTP/1.1
+Host: chomikuj.pl
+User-Agent: Mozilla/5.0
+Accept-Encoding: gzip
+Connection: Keep-Alive
+
